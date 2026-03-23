@@ -1,0 +1,30 @@
+<div class="app-shell">
+  <aside class="sidebar" [class.collapsed]="sidebarCollapsed">
+    <div class="sidebar-logo">
+      <span class="logo-icon">B2U</span>
+      <span class="logo-text" *ngIf="!sidebarCollapsed">HUB</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a routerLink="/app/dashboard"  routerLinkActive="active"><mat-icon>dashboard</mat-icon><span>Dashboard</span></a>
+      <a routerLink="/app/projects"   routerLinkActive="active"><mat-icon>work</mat-icon><span>Projects</span></a>
+      <a routerLink="/app/scoring"    routerLinkActive="active"><mat-icon>analytics</mat-icon><span>AI Score</span></a>
+      <a routerLink="/app/users/profile" routerLinkActive="active"><mat-icon>person</mat-icon><span>Profile</span></a>
+    </nav>
+  </aside>
+
+  <div class="main-area" [class.expanded]="sidebarCollapsed">
+    <header class="topbar">
+      <button class="menu-btn" (click)="sidebarCollapsed = !sidebarCollapsed">
+        <mat-icon>menu</mat-icon>
+      </button>
+      <span class="topbar-title">B2U-HUB</span>
+      <div class="topbar-right">
+        <button mat-icon-button><mat-icon>notifications</mat-icon></button>
+        <div class="avatar">ST</div>
+      </div>
+    </header>
+    <main class="page-content">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>

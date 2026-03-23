@@ -1,0 +1,55 @@
+<div class="dashboard">
+  <div class="dashboard-header">
+    <div>
+      <h1>Welcome back, {{ user?.firstName || 'Student' }} 👋</h1>
+      <p>Here's what's happening with your projects today.</p>
+    </div>
+    <button class="btn-primary" routerLink="/app/projects">
+      <mat-icon>search</mat-icon> Find Projects
+    </button>
+  </div>
+
+  <div class="stats-grid">
+    <b2u-stats-card
+      *ngFor="let s of stats"
+      [label]="s.label"
+      [value]="s.value"
+      [icon]="s.icon"
+      [change]="s.change"
+      [iconBg]="s.iconBg"
+      [iconColor]="s.iconColor">
+    </b2u-stats-card>
+  </div>
+
+  <div class="dashboard-body">
+    <div class="card activity-card">
+      <h3>Recent Activity</h3>
+      <div class="activity-list">
+        <div class="activity-item" *ngFor="let item of recentActivity">
+          <div class="activity-icon">
+            <mat-icon>{{ item.icon }}</mat-icon>
+          </div>
+          <div>
+            <p>{{ item.text }}</p>
+            <span>{{ item.time }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card score-card">
+      <h3>Your AI Score</h3>
+      <div class="score-ring">
+        <svg viewBox="0 0 120 120" width="120" height="120">
+          <circle cx="60" cy="60" r="50" fill="none" stroke="#E5E7EB" stroke-width="10"/>
+          <circle cx="60" cy="60" r="50" fill="none" stroke="#1A56DB" stroke-width="10"
+            stroke-dasharray="314" stroke-dashoffset="69"
+            stroke-linecap="round" transform="rotate(-90 60 60)"/>
+        </svg>
+        <div class="score-value">78</div>
+      </div>
+      <p class="score-rank">🥇 Gold Tier</p>
+      <a routerLink="/app/scoring" class="score-link">View full breakdown →</a>
+    </div>
+  </div>
+</div>

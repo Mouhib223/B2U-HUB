@@ -1,0 +1,36 @@
+<div class="projects-page">
+  <div class="page-header">
+    <h1>Browse Projects</h1>
+    <p>Find real-world missions that match your skills.</p>
+  </div>
+
+  <div class="search-bar">
+    <mat-icon>search</mat-icon>
+    <input [(ngModel)]="searchQuery" placeholder="Search by title or skill...">
+  </div>
+
+  <div class="projects-grid">
+    <div class="project-card" *ngFor="let p of filtered" [routerLink]="['/app/projects', p.id]">
+      <div class="card-top">
+        <div class="company-avatar">{{ p.companyName[0] }}</div>
+        <b2u-badge [label]="p.status" [type]="p.status === 'open' ? 'open' : 'closed'"></b2u-badge>
+      </div>
+      <h3>{{ p.title }}</h3>
+      <p>{{ p.companyName }}</p>
+      <p class="description">{{ p.description }}</p>
+      <div class="skills">
+        <span class="skill-chip" *ngFor="let s of p.requiredSkills">{{ s }}</span>
+      </div>
+      <div class="card-footer">
+        <span><mat-icon>group</mat-icon> {{ p.teamSize }} members</span>
+        <span><mat-icon>people</mat-icon> {{ p.applicantsCount }} applicants</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="empty-state" *ngIf="filtered.length === 0">
+    <mat-icon>search_off</mat-icon>
+    <h3>No projects found</h3>
+    <p>Try a different search term or skill.</p>
+  </div>
+</div>

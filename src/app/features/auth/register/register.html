@@ -1,0 +1,45 @@
+<div class="auth-page">
+  <div class="auth-brand">
+    <div class="brand-logo">B2U</div>
+    <h1>Join B2U-HUB</h1>
+    <p>Start collaborating on real-world projects with top companies.</p>
+  </div>
+  <div class="auth-form-wrap">
+    <div class="auth-card">
+      <h2>Create Account</h2>
+      <p class="auth-sub">Fill in your details to get started</p>
+      <div class="error-banner" *ngIf="error">{{ error }}</div>
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        <div class="name-row">
+          <mat-form-field appearance="outline">
+            <mat-label>First Name</mat-label>
+            <input matInput formControlName="firstName">
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Last Name</mat-label>
+            <input matInput formControlName="lastName">
+          </mat-form-field>
+        </div>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Email</mat-label>
+          <input matInput formControlName="email" type="email">
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Password</mat-label>
+          <input matInput formControlName="password" type="password">
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>I am a...</mat-label>
+          <mat-select formControlName="role">
+            <mat-option value="student">Student Freelancer</mat-option>
+            <mat-option value="company">Company</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <button class="btn-primary full-width" type="submit" [disabled]="loading">
+          {{ loading ? 'Creating account...' : 'Create Account' }}
+        </button>
+      </form>
+      <p class="auth-link">Already have an account? <a routerLink="/auth/login">Sign in</a></p>
+    </div>
+  </div>
+</div>
