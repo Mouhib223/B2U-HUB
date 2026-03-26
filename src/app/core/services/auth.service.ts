@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+/*import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { Router } from '@angular/router';
@@ -49,5 +49,63 @@ export class AuthService {
 
   getToken(): string | null {
     return localStorage.getItem('b2u_token');
+  }
+}*/
+import { Injectable } from '@angular/core';
+import { Observable, of, throwError } from 'rxjs';
+import { delay } from 'rxjs/operators';
+
+@Injectable({ providedIn: 'root' })
+export class AuthService {
+
+  private userKey = 'user';
+  private tokenKey = 'token';
+
+  // ✅ LOGIN
+  login(email: string, password: string): Observable<any> {
+    if (email === 'test@test.com' && password === '123456') {
+      const user = { email, role: 'student' };
+      const token = 'fake-jwt-token';
+
+      localStorage.setItem(this.userKey, JSON.stringify(user));
+      localStorage.setItem(this.tokenKey, token);
+
+      return of({ token, user }).pipe(delay(800));
+    } else {
+      return throwError(() => ({
+        error: { message: 'Invalid credentials' }
+      }));
+    }
+  }
+
+  // ✅ REGISTER
+  register(data: any): Observable<any> {
+    console.log('REGISTER DATA:', data);
+
+    return of({
+      message: 'User registered successfully'
+    }).pipe(delay(800));
+  }
+
+  // ✅ CHECK LOGIN
+  isLoggedIn(): boolean {
+    return !!localStorage.getItem(this.tokenKey);
+  }
+
+  // ✅ GET TOKEN
+  getToken(): string | null {
+    return localStorage.getItem(this.tokenKey);
+  }
+
+  // ✅ GET USER
+  getCurrentUser(): any {
+    const user = localStorage.getItem(this.userKey);
+    return user ? JSON.parse(user) : null;
+  }
+
+  // ✅ LOGOUT
+  logout(): void {
+    localStorage.removeItem(this.userKey);
+    localStorage.removeItem(this.tokenKey);
   }
 }
