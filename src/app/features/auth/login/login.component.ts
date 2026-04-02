@@ -33,7 +33,7 @@ export class LoginComponent {
     });
   }
 
-  submit() {
+  /*submit() {
     if (this.form.invalid) return;
     this.loading = true;
     this.error = '';
@@ -45,5 +45,27 @@ export class LoginComponent {
         this.loading = false;
       }
     });
-  }
+  }*/
+  submit() {
+  if (this.form.invalid) return;
+  this.loading = true;
+  this.error = '';
+  const { email, password } = this.form.value;
+
+  this.auth.login(email, password).subscribe({
+    next: () => {
+      const user = this.auth.getCurrentUser();
+      // Redirect based on role
+      if (user?.role === 'admin') {
+        this.router.navigate(['/admin/dashboard']);
+      } else {
+        this.router.navigate(['/app/dashboard/student']);
+      }
+    },
+    error: (err) => {
+      this.error = err.error?.message || 'Login failed. Please try again.';
+      this.loading = false;
+    }
+  });
+}
 }

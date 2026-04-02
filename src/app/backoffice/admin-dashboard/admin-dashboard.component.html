@@ -1,0 +1,70 @@
+<div class="admin-dashboard">
+
+  <div class="page-header">
+    <h1>Admin Dashboard</h1>
+    <p>Full platform overview and control panel</p>
+  </div>
+
+  <!-- Stats Grid -->
+  <div class="stats-grid">
+    <div class="stat-card" *ngFor="let s of stats">
+      <div class="stat-icon" [style.background]="s.bg">
+        <mat-icon [style.color]="s.color">{{ s.icon }}</mat-icon>
+      </div>
+      <div class="stat-body">
+        <div class="stat-value">{{ s.value }}</div>
+        <div class="stat-label">{{ s.label }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="section-title">Quick Actions</div>
+  <div class="quick-actions">
+    <a routerLink="/admin/users" class="action-card">
+      <mat-icon>person_add</mat-icon>
+      <span>Manage Users</span>
+    </a>
+    <a routerLink="/admin/projects" class="action-card">
+      <mat-icon>add_circle</mat-icon>
+      <span>Manage Projects</span>
+    </a>
+    <a routerLink="/admin/applications" class="action-card">
+      <mat-icon>fact_check</mat-icon>
+      <span>Review Applications</span>
+    </a>
+  </div>
+
+  <!-- Recent Users Table -->
+  <div class="section-title">Recent Registrations</div>
+  <div class="table-card">
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Joined</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let u of recentUsers">
+          <td>{{ u.name }}</td>
+          <td>{{ u.email }}</td>
+          <td><span class="role-badge" [ngClass]="u.role">{{ u.role }}</span></td>
+          <td>{{ u.date }}</td>
+          <td>
+            <button class="action-btn edit">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button class="action-btn delete">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>

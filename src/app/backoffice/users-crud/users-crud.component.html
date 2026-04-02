@@ -1,0 +1,84 @@
+<div class="users-page">
+
+  <div class="page-header">
+    <div>
+      <h1>User Management</h1>
+      <p>{{ users.length }} total users on the platform</p>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-bar">
+    <div class="search-box">
+      <mat-icon>search</mat-icon>
+      <input [(ngModel)]="searchQuery" placeholder="Search by name or email...">
+    </div>
+    <div class="role-filters">
+      <button [class.active]="filterRole === 'all'"     (click)="filterRole = 'all'">All</button>
+      <button [class.active]="filterRole === 'student'" (click)="filterRole = 'student'">Students</button>
+      <button [class.active]="filterRole === 'company'" (click)="filterRole = 'company'">Companies</button>
+      <button [class.active]="filterRole === 'admin'"   (click)="filterRole = 'admin'">Admins</button>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="table-card">
+    <table>
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Role</th>
+          <th>Status</th>
+          <th>Joined</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let u of filtered">
+          <td>
+            <div class="user-cell">
+              <div class="avatar">{{ u.name[0] }}</div>
+              <div>
+                <div class="user-name">{{ u.name }}</div>
+                <div class="user-email">{{ u.email }}</div>
+              </div>
+            </div>
+          </td>
+          <td><span class="role-badge" [ngClass]="u.role">{{ u.role }}</span></td>
+          <td>
+            <span class="status-badge" [ngClass]="u.status">{{ u.status }}</span>
+          </td>
+          <td>{{ u.joinedDate }}</td>
+          <td class="actions-cell">
+            <button class="action-btn toggle" (click)="toggleStatus(u)"
+              [title]="u.status === 'active' ? 'Deactivate' : 'Activate'">
+              <mat-icon>{{ u.status === 'active' ? 'block' : 'check_circle' }}</mat-icon>
+            </button>
+            <button class="action-btn delete" (click)="confirmDelete(u)" title="Delete">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="empty-state" *ngIf="filtered.length === 0">
+      <mat-icon>search_off</mat-icon>
+      <p>No users match your search.</p>
+    </div>
+  </div>
+
+  <!-- Delete Confirm Modal -->
+  <div class="modal-overlay" *ngIf="showDeleteConfirm" (click)="cancelDelete()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <mat-icon class="modal-icon">warning</mat-icon>
+      <h3>Delete User</h3>
+      <p>Are you sure you want to delete <strong>{{ selectedUser?.name }}</strong>? This cannot be undone.</p>
+      <div class="modal-actions">
+        <button class="btn-cancel" (click)="cancelDelete()">Cancel</button>
+        <button class="btn-delete" (click)="deleteUser()">Delete</button>
+      </div>
+    </div>
+  </div>
+
+</div>
