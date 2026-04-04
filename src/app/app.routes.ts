@@ -82,6 +82,11 @@ export const routes: Routes = [
         loadComponent: () => import('./backoffice/applications-overview/applications-overview.component')
           .then(m => m.ApplicationsOverviewComponent)
       },
+      {
+        path: 'companies',
+        loadComponent: () => import('./backoffice/companies-crud/companies-crud')
+          .then(m => m.CompaniesCrudComponent)
+      },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   },
