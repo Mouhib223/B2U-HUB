@@ -1,1 +1,50 @@
-<p>my-profile works!</p>
+<div class="profile-page" *ngIf="user">
+  <div class="profile-card">
+    <div class="profile-header">
+      <div class="avatar-lg">{{ user.firstName[0] }}{{ user.lastName[0] }}</div>
+      <div>
+        <h1>{{ user.firstName }} {{ user.lastName }}</h1>
+        <span class="role-badge" [ngClass]="user.role">{{ user.role }}</span>
+      </div>
+      <a routerLink="/app/edit-profile" class="btn-edit">
+        <mat-icon>edit</mat-icon> Modifier
+      </a>
+    </div>
+
+    <div class="profile-body">
+      <div class="info-row"><mat-icon>email</mat-icon><span>{{ user.email }}</span></div>
+
+      <!-- Student info -->
+      <ng-container *ngIf="user.role === 'student'">
+        <div class="info-row" *ngIf="user.university"><mat-icon>school</mat-icon><span>{{ user.university }}</span></div>
+        <div class="info-row" *ngIf="user.graduationYear"><mat-icon>calendar_today</mat-icon><span>Promotion {{ user.graduationYear }}</span></div>
+        <div class="info-row" *ngIf="user.aiScore"><mat-icon>analytics</mat-icon><span>AI Score : <strong>{{ user.aiScore }}</strong></span></div>
+        <div class="skills" *ngIf="user.skills?.length">
+          <p class="section-label">Compétences</p>
+          <div class="tags">
+            <span class="tag" *ngFor="let s of user.skills">{{ s }}</span>
+          </div>
+        </div>
+        <div class="quick-links">
+          <a routerLink="/app/candidatures" class="link-card">
+            <mat-icon>description</mat-icon> Mes Candidatures
+          </a>
+          <a routerLink="/app/projects" class="link-card">
+            <mat-icon>work</mat-icon> Voir les offres
+          </a>
+        </div>
+      </ng-container>
+
+      <!-- Company info -->
+      <ng-container *ngIf="user.role === 'company'">
+        <div class="info-row" *ngIf="user.companyName"><mat-icon>business</mat-icon><span>{{ user.companyName }}</span></div>
+        <div class="info-row" *ngIf="user.industry"><mat-icon>category</mat-icon><span>{{ user.industry }}</span></div>
+        <div class="quick-links">
+          <a routerLink="/company/candidatures" class="link-card">
+            <mat-icon>people</mat-icon> Candidatures reçues
+          </a>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+</div>
