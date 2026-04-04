@@ -47,25 +47,21 @@ export class LoginComponent {
     });
   }*/
   submit() {
-  if (this.form.invalid) return;
-  this.loading = true;
-  this.error = '';
-  const { email, password } = this.form.value;
-
-  this.auth.login(email, password).subscribe({
-    next: () => {
-      const user = this.auth.getCurrentUser();
-      // Redirect based on role
-      if (user?.role === 'admin') {
-        this.router.navigate(['/admin/dashboard']);
-      } else {
-        this.router.navigate(['/app/dashboard/student']);
+    if (this.form.invalid) return;
+    this.loading = true;
+    this.error = '';
+    const { email, password } = this.form.value;
+    this.auth.login(email, password).subscribe({
+      next: () => {
+        const user = this.auth.getCurrentUser();
+        if (user?.role === 'admin')   this.router.navigate(['/admin/dashboard']);
+        else if (user?.role === 'company') this.router.navigate(['/company/candidatures']);
+        else this.router.navigate(['/app/dashboard/student']);
+      },
+      error: (err: any) => {
+        this.error = err.error?.message || 'Login failed.';
+        this.loading = false;
       }
-    },
-    error: (err) => {
-      this.error = err.error?.message || 'Login failed. Please try again.';
-      this.loading = false;
-    }
-  });
-}
+    });
+  }
 }

@@ -1,13 +1,12 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { StatsCardComponent } from '../../../shared/components/stats-card/stats-card.component';
 
 @Component({
   selector: 'b2u-company-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, MatIconModule, StatsCardComponent],
+  imports: [CommonModule, MatIconModule, StatsCardComponent],
   template: `
     <div class="dashboard">
       <div class="dashboard-header">

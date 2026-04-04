@@ -1,0 +1,99 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1>Mes Candidatures</h1>
+      <p>Gérez vos candidatures soumises</p>
+    </div>
+    <button class="btn-primary" (click)="openCreate()">
+      <mat-icon>add</mat-icon> Nouvelle candidature
+    </button>
+  </div>
+
+  <div class="table-card">
+    <table>
+      <thead>
+        <tr>
+          <th>Nom</th><th>Email</th><th>Formation</th>
+          <th>Expérience</th><th>Date</th><th>Statut</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let c of candidatures">
+          <td>{{ c.prenomCandidat }} {{ c.nomCandidat }}</td>
+          <td>{{ c.email }}</td>
+          <td>{{ c.formationActuelle || '—' }}</td>
+          <td>{{ c.anneeExperience }} an(s)</td>
+          <td>{{ c.dateCandidature || '—' }}</td>
+          <td><span class="badge" [ngClass]="statusClass(c.statutCandidature)">{{ c.statutCandidature }}</span></td>
+        </tr>
+        <tr *ngIf="candidatures.length === 0">
+          <td colspan="6" class="empty">Aucune candidature</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" *ngIf="showModal" (click)="showModal=false">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Nouvelle candidature</h2>
+      <button class="close-btn" (click)="showModal=false"><mat-icon>close</mat-icon></button>
+    </div>
+    <form [formGroup]="form" (ngSubmit)="save()" novalidate class="modal-form">
+      <div class="form-grid">
+        <div class="field">
+          <label>Nom *</label>
+          <input formControlName="nomCandidat" />
+          <span class="err" *ngIf="submitted && f['nomCandidat'].errors?.['required']">Obligatoire</span>
+        </div>
+        <div class="field">
+          <label>Prénom *</label>
+          <input formControlName="prenomCandidat" />
+          <span class="err" *ngIf="submitted && f['prenomCandidat'].errors?.['required']">Obligatoire</span>
+        </div>
+        <div class="field">
+          <label>Téléphone *</label>
+          <input formControlName="telephone" />
+          <span class="err" *ngIf="submitted && f['telephone'].errors?.['required']">Obligatoire</span>
+        </div>
+        <div class="field">
+          <label>Adresse</label>
+          <input formControlName="adresse" />
+        </div>
+        <div class="field">
+          <label>Formation</label>
+          <select formControlName="formationActuelle">
+            <option value="">-- Choisir --</option>
+            <option *ngFor="let f of formations" [value]="f">{{ f }}</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Spécialité</label>
+          <input formControlName="specialite" />
+        </div>
+        <div class="field">
+          <label>Années d'expérience</label>
+          <input formControlName="anneeExperience" type="number" min="0" />
+        </div>
+        <div class="field">
+          <label>Compétences <small>(virgule)</small></label>
+          <input formControlName="competences" />
+        </div>
+        <div class="field full">
+          <label>Lien CV</label>
+          <input formControlName="cvLien" />
+        </div>
+        <div class="field full">
+          <label>Lettre de motivation</label>
+          <textarea formControlName="lettreMotivation" rows="3"></textarea>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" (click)="showModal=false">Annuler</button>
+        <button type="submit" class="btn-primary">Soumettre</button>
+      </div>
+    </form>
+  </div>
+</div>
