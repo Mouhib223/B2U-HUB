@@ -50,6 +50,7 @@ export class AdminShellComponent {
     { label: 'Users',        icon: 'people',     route: '/admin/users'        },
     { label: 'Projects',     icon: 'work',       route: '/admin/projects'     },
     { label: 'Applications', icon: 'assignment', route: '/admin/applications' },
+    { label: 'Équipes',      icon: 'groups', route: '/admin/equipes' },
   ];
 
   logout() {

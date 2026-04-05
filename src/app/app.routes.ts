@@ -82,6 +82,8 @@ export const routes: Routes = [
         loadComponent: () => import('./backoffice/applications-overview/applications-overview.component')
           .then(m => m.ApplicationsOverviewComponent)
       },
+          { path: 'equipes', loadComponent: () => import('./backoffice/equipe-crud/equipe-crud').then(m => m.EquipeCrudComponent) },  // <--- ici
+
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   },
