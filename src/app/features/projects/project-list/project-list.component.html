@@ -12,8 +12,7 @@
   <div class="projects-grid">
     <div class="project-card" *ngFor="let p of filtered" [routerLink]="['/app/projects', p.id]">
       <div class="card-top">
-        <div class="company-avatar">{{ p.companyName[0] }}</div>
-        <b2u-badge [label]="p.status" [type]="p.status === 'open' ? 'open' : 'closed'"></b2u-badge>
+        <div class="company-avatar">{{ p.companyName ? p.companyName[0] : '?' }}</div>        <b2u-badge [label]="p.status" [type]="p.status === 'open' ? 'open' : 'closed'"></b2u-badge>
       </div>
       <h3>{{ p.title }}</h3>
       <p>{{ p.companyName }}</p>
