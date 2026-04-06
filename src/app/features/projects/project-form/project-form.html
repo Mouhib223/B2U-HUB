@@ -1,0 +1,78 @@
+<div class="form-page">
+
+    <div class="form-header">
+      <a routerLink="/app/projects" class="back-link">
+        <mat-icon>arrow_back</mat-icon> Retour aux projets
+      </a>
+      <h1>{{ isEditMode ? 'Modifier le projet' : 'Créer un projet' }}</h1>
+    </div>
+  
+    <div class="form-card">
+  
+      <!-- Titre -->
+      <div class="form-group">
+        <label>Titre du projet</label>
+        <input type="text" [(ngModel)]="project.title" placeholder="Ex: Application Web B2U" />
+      </div>
+  
+      <!-- Description -->
+      <div class="form-group">
+        <label>Description</label>
+        <textarea [(ngModel)]="project.description" rows="4" placeholder="Décrivez le projet..."></textarea>
+      </div>
+  
+      <!-- Entreprise -->
+      <div class="form-group">
+        <label>Nom de l'entreprise</label>
+        <input type="text" [(ngModel)]="project.companyName" placeholder="Ex: ESPRIT" />
+      </div>
+  
+      <!-- Taille équipe -->
+      <div class="form-group">
+        <label>Taille de l'équipe</label>
+        <input type="number" [(ngModel)]="project.teamSize" min="1" />
+      </div>
+  
+      <!-- Deadline -->
+      <div class="form-group">
+        <label>Date limite</label>
+        <input type="date" [(ngModel)]="project.deadline" />
+      </div>
+  
+      <!-- Statut -->
+      <div class="form-group">
+        <label>Statut</label>
+        <select [(ngModel)]="project.status">
+          <option value="open">Open</option>
+          <option value="in-progress">In Progress</option>
+          <option value="closed">Closed</option>
+        </select>
+      </div>
+  
+      <!-- Compétences -->
+      <div class="form-group">
+        <label>Compétences requises</label>
+        <div class="skill-input">
+          <input type="text" [(ngModel)]="skillInput" placeholder="Ex: Angular" (keyup.enter)="addSkill()" />
+          <button type="button" (click)="addSkill()">
+            <mat-icon>add</mat-icon>
+          </button>
+        </div>
+        <div class="skills">
+          <span class="skill-chip" *ngFor="let s of project.requiredSkills">
+            {{ s }}
+            <mat-icon (click)="removeSkill(s)">close</mat-icon>
+          </span>
+        </div>
+      </div>
+  
+      <!-- Bouton submit -->
+      <div class="form-actions">
+        <a routerLink="/app/projects" class="btn-cancel">Annuler</a>
+        <button class="btn-submit" (click)="submit()">
+          {{ isEditMode ? 'Modifier' : 'Créer' }}
+        </button>
+      </div>
+  
+    </div>
+  </div>
