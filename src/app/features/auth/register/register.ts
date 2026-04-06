@@ -38,7 +38,7 @@ export class RegisterComponent {
     this.loading = true;
     this.auth.register(this.form.value).subscribe({
       next: () => this.router.navigate(['/auth/login']),
-      error: (err) => { this.error = err.error?.message || 'Registration failed.'; this.loading = false; }
+      error: (err) => { this.error = err.error?.message || 'Registration failed.Please Verifiy'; this.loading = false; }
     });
   }
 }
