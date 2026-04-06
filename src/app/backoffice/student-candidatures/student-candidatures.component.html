@@ -45,18 +45,18 @@
       <div class="form-grid">
         <div class="field">
           <label>Nom *</label>
-          <input formControlName="nomCandidat" />
-          <span class="err" *ngIf="submitted && f['nomCandidat'].errors?.['required']">Obligatoire</span>
+          <input formControlName="nomCandidat" [class.invalid]="submitted && f['nomCandidat'].invalid" />
+          <span class="err" *ngIf="submitted && f['nomCandidat'].errors?.['required']">Le nom est obligatoire</span>
         </div>
         <div class="field">
           <label>Prénom *</label>
-          <input formControlName="prenomCandidat" />
-          <span class="err" *ngIf="submitted && f['prenomCandidat'].errors?.['required']">Obligatoire</span>
+          <input formControlName="prenomCandidat" [class.invalid]="submitted && f['prenomCandidat'].invalid" />
+          <span class="err" *ngIf="submitted && f['prenomCandidat'].errors?.['required']">Le prénom est obligatoire</span>
         </div>
         <div class="field">
           <label>Téléphone *</label>
-          <input formControlName="telephone" />
-          <span class="err" *ngIf="submitted && f['telephone'].errors?.['required']">Obligatoire</span>
+          <input formControlName="telephone" [class.invalid]="submitted && f['telephone'].invalid" />
+          <span class="err" *ngIf="submitted && f['telephone'].errors?.['required']">Le téléphone est obligatoire</span>
         </div>
         <div class="field">
           <label>Adresse</label>
