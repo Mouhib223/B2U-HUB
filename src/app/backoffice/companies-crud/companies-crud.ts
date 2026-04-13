@@ -12,14 +12,15 @@ import { EntrepriseService, Entreprise } from '../../core/services/entreprise.se
   styleUrls: ['./companies-crud.scss']
 })
 export class CompaniesCrudComponent implements OnInit {
-
+  stats: any[] = [];
+  sectorBreakdown: { sector: string; count: number }[] = [];
   companies: Entreprise[] = [];
   searchQuery = '';
   showDeleteConfirm = false;
   showAddModal = false;
-  showEditModal = false;          // ✅ new flag for edit modal
+  showEditModal = false;
   selectedCompany: Entreprise | null = null;
-  editingCompany: Entreprise | null = null; // ✅ company being edited
+  editingCompany: Entreprise | null = null;
 
   newCompany = {
     name: '',
@@ -33,25 +34,67 @@ export class CompaniesCrudComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadCompanies();
+    this.loadStats();
   }
 
   loadCompanies(): void {
     this.entrepriseService.getAll().subscribe({
-      next: (data) => {
-        this.companies = data;
-      },
-      error: (err) => {
-        console.error('Failed to load companies', err);
-      }
+      next: (data) => (this.companies = data),
+      error: (err) => console.error('Failed to load companies', err)
     });
+  }
+
+  loadStats(): void {
+    Promise.all([
+      this.entrepriseService.getTotalCount().toPromise(),
+      this.entrepriseService.getCountBySector().toPromise()
+    ])
+      .then(([totalRes, sectorMap]) => {
+        const totalCompanies = totalRes?.total ?? 0;
+        const sectorCounts = sectorMap ?? {};
+        const numberOfSectors = Object.keys(sectorCounts).length;
+
+        // Stats cards (short labels)
+        this.stats = [
+          {
+            label: 'Total',
+            value: totalCompanies,
+            icon: 'business',
+            color: '#3B82F6',
+            bg: '#EFF6FF'
+          },
+          {
+            label: 'Sectors',
+            value: numberOfSectors,
+            icon: 'category',
+            color: '#10B981',
+            bg: '#ECFDF5'
+          }
+        ];
+
+        // Prepare sector breakdown table
+        this.sectorBreakdown = Object.entries(sectorCounts).map(([sector, count]) => ({
+          sector,
+          count
+        }));
+      })
+      .catch((err) => {
+        console.error('Failed to load stats', err);
+        this.stats = [
+          { label: 'Total', value: 0, icon: 'business', color: '#3B82F6', bg: '#EFF6FF' },
+          { label: 'Sectors', value: 0, icon: 'category', color: '#10B981', bg: '#ECFDF5' }
+        ];
+        this.sectorBreakdown = [];
+      });
   }
 
   get filteredCompanies(): Entreprise[] {
     if (!this.searchQuery.trim()) return this.companies;
     const query = this.searchQuery.toLowerCase();
-    return this.companies.filter(c =>
-      c.name?.toLowerCase().includes(query) ||
-      c.email?.toLowerCase().includes(query)
+    return this.companies.filter(
+      (c) =>
+        c.name?.toLowerCase().includes(query) ||
+        c.email?.toLowerCase().includes(query)
     );
   }
 
@@ -66,22 +109,21 @@ export class CompaniesCrudComponent implements OnInit {
   }
 
   addCompany(): void {
-  // Les validations sont déjà assurées par le formulaire template-driven
-  this.entrepriseService.add(this.newCompany).subscribe({
-    next: () => {
-      this.loadCompanies();
-      this.closeAddModal();
-    },
-    error: (err) => {
-      console.error('Add failed', err);
-      alert('Failed to add company');
-    }
-  });
-}
+    this.entrepriseService.add(this.newCompany).subscribe({
+      next: () => {
+        this.loadCompanies();
+        this.loadStats(); // refresh stats after add
+        this.closeAddModal();
+      },
+      error: (err) => {
+        console.error('Add failed', err);
+        alert('Failed to add company');
+      }
+    });
+  }
 
   // --- EDIT ---
   openEditModal(company: Entreprise): void {
-    // Create a copy to avoid mutating the original while editing
     this.editingCompany = { ...company };
     this.showEditModal = true;
   }
@@ -92,18 +134,19 @@ export class CompaniesCrudComponent implements OnInit {
   }
 
   updateCompany(): void {
-  if (!this.editingCompany) return;
-  this.entrepriseService.update(this.editingCompany.id, this.editingCompany).subscribe({
-    next: () => {
-      this.loadCompanies();
-      this.closeEditModal();
-    },
-    error: (err) => {
-      console.error('Update failed', err);
-      alert('Failed to update company');
-    }
-  });
-}
+    if (!this.editingCompany) return;
+    this.entrepriseService.update(this.editingCompany.id, this.editingCompany).subscribe({
+      next: () => {
+        this.loadCompanies();
+        this.loadStats(); // refresh stats after update
+        this.closeEditModal();
+      },
+      error: (err) => {
+        console.error('Update failed', err);
+        alert('Failed to update company');
+      }
+    });
+  }
 
   // --- DELETE ---
   confirmDelete(company: Entreprise): void {
@@ -115,7 +158,10 @@ export class CompaniesCrudComponent implements OnInit {
     if (this.selectedCompany) {
       this.entrepriseService.delete(this.selectedCompany.id).subscribe({
         next: () => {
-          this.companies = this.companies.filter(c => c.id !== this.selectedCompany!.id);
+          this.companies = this.companies.filter(
+            (c) => c.id !== this.selectedCompany!.id
+          );
+          this.loadStats(); // refresh stats after delete
           this.showDeleteConfirm = false;
           this.selectedCompany = null;
         },
@@ -132,37 +178,4 @@ export class CompaniesCrudComponent implements OnInit {
     this.showDeleteConfirm = false;
     this.selectedCompany = null;
   }
-
-  // Mock data: companies with projects
-companyProjects = [
-  {
-    companyName: 'TechCorp Tunisia',
-    projects: [
-      { name: 'Mobile App Development', team: ['Ali Ben Salah', 'Sarra Mansour'] },
-      { name: 'Cloud Migration', team: ['Mohamed Amine', 'Nour Jebali'] }
-    ]
-  },
-  {
-    companyName: 'StartupHub',
-    projects: [
-      { name: 'E-commerce Platform', team: ['Kais Ben Ahmed', 'Lina Ghorbel'] }
-    ]
-  },
-  {
-    companyName: 'DigitalSoft',
-    projects: [
-      { name: 'CRM Implementation', team: ['Oussema Hammami', 'Yosra Mhiri'] },
-      { name: 'Data Analytics Dashboard', team: ['Amine Bouali', 'Sirine Chebbi'] }
-    ]
-  }
-];
-
-// Flattened project list for easy display
-allProjectsWithTeam = [
-  { company: 'TechCorp Tunisia', project: 'Mobile App Development', team: 'Ali Ben Salah, Sarra Mansour' },
-  { company: 'TechCorp Tunisia', project: 'Cloud Migration', team: 'Mohamed Amine, Nour Jebali' },
-  { company: 'StartupHub', project: 'E-commerce Platform', team: 'Kais Ben Ahmed, Lina Ghorbel' },
-  { company: 'DigitalSoft', project: 'CRM Implementation', team: 'Oussema Hammami, Yosra Mhiri' },
-  { company: 'DigitalSoft', project: 'Data Analytics Dashboard', team: 'Amine Bouali, Sirine Chebbi' }
-];
 }

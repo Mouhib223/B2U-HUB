@@ -35,4 +35,12 @@ export class EntrepriseService {
   update(id: string, company: any): Observable<any> {
     return this.http.put(`http://localhost:8080/api/entreprise/update/${id}`, company);
   }
+
+  getTotalCount(): Observable<{ total: number }> {
+    return this.http.get<{ total: number }>(`${this.apiUrl}/stats/total`);
+  }
+
+  getCountBySector(): Observable<Record<string, number>> {
+    return this.http.get<Record<string, number>>(`${this.apiUrl}/stats/by-sector`);
+  }
 }

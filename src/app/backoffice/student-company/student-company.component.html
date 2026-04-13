@@ -1,0 +1,29 @@
+<div class="student-company-container">
+  <div class="header">
+    <h2>Available Companies</h2>
+    <button class="refresh-btn" (click)="refreshData()">Refresh</button>
+  </div>
+
+  <div class="loading" *ngIf="loading">Loading companies...</div>
+
+  <div class="cards-grid" *ngIf="!loading">
+    <div class="company-card" *ngFor="let company of companies">
+      <div class="card-header">
+        <h3>{{ company.name }}</h3>
+        <span class="sector-badge">{{ company.sector }}</span>
+      </div>
+      <div class="card-body">
+        <p><strong>Email:</strong> {{ company.email }}</p>
+        <p><strong>Phone:</strong> {{ company.phone }}</p>
+        <p><strong>Address:</strong> {{ company.address }}</p>
+      </div>
+      <div class="card-actions">
+        <button class="apply-btn" (click)="apply(company)">Apply</button>
+        <button class="subject-btn" (click)="subject(company)">Project</button>
+      </div>
+    </div>
+    <div *ngIf="companies.length === 0" class="no-data">
+      No companies found.
+    </div>
+  </div>
+</div>
