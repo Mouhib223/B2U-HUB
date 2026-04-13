@@ -49,8 +49,12 @@ export class AdminShellComponent {
     { label: 'Dashboard',    icon: 'dashboard',  route: '/admin/dashboard'    },
     { label: 'Users',        icon: 'people',     route: '/admin/users'        },
     { label: 'Projects',     icon: 'work',       route: '/admin/projects'     },
+
     { label: 'Applications', icon: 'assignment', route: '/admin/applications' },
     { label: 'Companies',    icon: ' corporate_fare', route: '/admin/companies'    },
+
+    { label: 'Candidatures',  icon: 'description', route: '/admin/candidatures'  },
+
   ];
 
   logout() {

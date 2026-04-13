@@ -45,11 +45,66 @@ export const routes: Routes = [
           .then(m => m.ScoringDashboardComponent)
       },
       {
+        path: 'candidatures',
+        loadComponent: () => import('./backoffice/student-candidatures/student-candidatures.component')
+          .then(m => m.StudentCandidaturesComponent)
+      },
+      {
         path: 'profile',
         loadComponent: () => import('./features/users/my-profile/my-profile')
           .then(m => m.MyProfile)
       },
+      {
+        path: 'edit-profile',
+        loadComponent: () => import('./features/users/edit-profile/edit-profile')
+          .then(m => m.EditProfile)
+      },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
+    ]
+  },
+
+  // ─────────────────────────────────────────
+  // STUDENT — Espace étudiant / freelancer
+  // ─────────────────────────────────────────
+  {
+    path: 'student',
+    loadComponent: () => import('./layout/student-shell/student-shell.component')
+      .then(m => m.StudentShellComponent),
+    children: [
+      {
+        path: 'candidatures',
+        loadComponent: () => import('./backoffice/student-candidatures/student-candidatures.component')
+          .then(m => m.StudentCandidaturesComponent)
+      },
+      {
+        path: 'new-candidature',
+        loadComponent: () => import('./features/candidatures/candidature-form')
+          .then(m => m.CandidatureFormComponent)
+      },
+
+      {
+        path: 'my-company',
+        loadComponent: () => import('./backoffice/student-company/student-company.component')
+          .then(m => m.StudentCompanyComponent)
+      },
+      { path: '', redirectTo: 'candidatures', pathMatch: 'full' }
+    ]
+  },
+
+  // ─────────────────────────────────────────
+  // COMPANY — Espace entreprise
+  // ─────────────────────────────────────────
+  {
+    path: 'company',
+    loadComponent: () => import('./layout/company-shell/company-shell.component')
+      .then(m => m.CompanyShellComponent),
+    children: [
+      {
+        path: 'candidatures',
+        loadComponent: () => import('./backoffice/company-candidatures/company-candidatures.component')
+          .then(m => m.CompanyCandidaturesComponent)
+      },
+      { path: '', redirectTo: 'candidatures', pathMatch: 'full' }
     ]
   },
 
@@ -83,9 +138,16 @@ export const routes: Routes = [
           .then(m => m.ApplicationsOverviewComponent)
       },
       {
+
         path: 'companies',
         loadComponent: () => import('./backoffice/companies-crud/companies-crud')
           .then(m => m.CompaniesCrudComponent)
+      },
+      {
+        path: 'candidatures',
+        loadComponent: () => import('./backoffice/candidatures-crud/candidatures-crud.component')
+          .then(m => m.CandidaturesCrudComponent)
+
       },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]

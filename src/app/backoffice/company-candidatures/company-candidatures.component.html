@@ -1,0 +1,131 @@
+<div class="page">
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h1>Candidatures reçues</h1>
+      <p>Consultez, acceptez ou rejetez les candidatures</p>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <span class="stat-value">{{ stats.total }}</span>
+      <span class="stat-label">Total</span>
+    </div>
+    <div class="stat-card pending">
+      <span class="stat-value">{{ stats.enCours }}</span>
+      <span class="stat-label">En cours</span>
+    </div>
+    <div class="stat-card accepted">
+      <span class="stat-value">{{ stats.acceptes }}</span>
+      <span class="stat-label">Acceptées</span>
+    </div>
+    <div class="stat-card rejected">
+      <span class="stat-value">{{ stats.refuses }}</span>
+      <span class="stat-label">Refusées</span>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters">
+    <div class="search-bar">
+      <mat-icon>search</mat-icon>
+      <input [(ngModel)]="searchTerm" placeholder="Rechercher..." />
+    </div>
+    <select [(ngModel)]="filterStatut" class="filter-select">
+      <option value="">Tous les statuts</option>
+      <option value="En cours">En cours</option>
+      <option value="Acceptée">Acceptée</option>
+      <option value="Refusée">Refusée</option>
+    </select>
+  </div>
+
+  <!-- Layout : table + detail -->
+  <div class="content-layout">
+    <!-- Table -->
+    <div class="table-card">
+      <table>
+        <thead>
+          <tr>
+            <th>Candidat</th><th>Spécialité</th><th>Expérience</th><th>Statut</th><th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let c of filtered"
+              [class.selected-row]="selected?.idCandidature === c.idCandidature"
+              (click)="selected = c" style="cursor:pointer">
+            <td>
+              <div class="candidate-name">
+                <div class="avatar">{{ c.nomCandidat[0] }}{{ c.prenomCandidat[0] }}</div>
+                <div>
+                  <div class="name">{{ c.prenomCandidat }} {{ c.nomCandidat }}</div>
+                  <div class="email">{{ c.email }}</div>
+                </div>
+              </div>
+            </td>
+            <td>{{ c.specialite || '—' }}</td>
+            <td>{{ c.anneeExperience }} an(s)</td>
+            <td><span class="badge" [ngClass]="statusClass(c.statutCandidature)">{{ c.statutCandidature }}</span></td>
+            <td>
+              <div class="actions" (click)="$event.stopPropagation()">
+                <button class="btn-accept" (click)="accept(c)"
+                  [disabled]="c.statutCandidature === 'Acceptée'">
+                  <mat-icon>check</mat-icon> Accepter
+                </button>
+                <button class="btn-reject" (click)="reject(c)"
+                  [disabled]="c.statutCandidature === 'Refusée'">
+                  <mat-icon>close</mat-icon> Rejeter
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="filtered.length === 0">
+            <td colspan="5" class="empty">Aucune candidature trouvée</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Detail panel -->
+    <div class="detail-panel" *ngIf="selected">
+      <div class="detail-header">
+        <div class="detail-avatar">{{ selected.nomCandidat[0] }}{{ selected.prenomCandidat[0] }}</div>
+        <div>
+          <h3>{{ selected.prenomCandidat }} {{ selected.nomCandidat }}</h3>
+          <span class="badge" [ngClass]="statusClass(selected.statutCandidature)">{{ selected.statutCandidature }}</span>
+        </div>
+        <button class="close-btn" (click)="selected=null"><mat-icon>close</mat-icon></button>
+      </div>
+      <div class="detail-body">
+        <div class="detail-row"><mat-icon>email</mat-icon><span>{{ selected.email }}</span></div>
+        <div class="detail-row"><mat-icon>phone</mat-icon><span>{{ selected.telephone }}</span></div>
+        <div class="detail-row" *ngIf="selected.adresse"><mat-icon>location_on</mat-icon><span>{{ selected.adresse }}</span></div>
+        <div class="detail-row" *ngIf="selected.formationActuelle"><mat-icon>school</mat-icon><span>{{ selected.formationActuelle }} — {{ selected.specialite }}</span></div>
+        <div class="detail-row"><mat-icon>work_history</mat-icon><span>{{ selected.anneeExperience }} an(s) d'expérience</span></div>
+        <div class="detail-row" *ngIf="selected.dateCandidature"><mat-icon>calendar_today</mat-icon><span>Candidature : {{ selected.dateCandidature }}</span></div>
+
+        <div class="competences" *ngIf="selected.competences?.length">
+          <p class="comp-title">Compétences</p>
+          <div class="tags">
+            <span class="tag" *ngFor="let comp of selected.competences">{{ comp }}</span>
+          </div>
+        </div>
+
+        <div class="motivation" *ngIf="selected.lettreMotivation">
+          <p class="comp-title">Lettre de motivation</p>
+          <p class="motivation-text">{{ selected.lettreMotivation }}</p>
+        </div>
+
+        <div class="detail-actions">
+          <button class="btn-accept" (click)="accept(selected)" [disabled]="selected.statutCandidature === 'Acceptée'">
+            <mat-icon>check</mat-icon> Accepter
+          </button>
+          <button class="btn-reject" (click)="reject(selected)" [disabled]="selected.statutCandidature === 'Refusée'">
+            <mat-icon>close</mat-icon> Rejeter
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
