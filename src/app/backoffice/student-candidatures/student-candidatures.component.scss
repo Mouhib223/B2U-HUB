@@ -31,7 +31,7 @@ td { padding:.875rem 1rem; font-size:.875rem; color:#334155; border-bottom:1px s
 .field { display:flex; flex-direction:column; gap:4px;
   &.full { grid-column:1/-1; }
   label { font-size:.8rem; font-weight:600; color:#374151; small { font-weight:400; color:#6B7280; } }
-  input, select, textarea { border:1px solid #E5E7EB; border-radius:6px; padding:.45rem .7rem; font-size:.875rem; color:#374151; &:focus { outline:none; border-color:#1A56DB; } }
+  input, select, textarea { border:1px solid #E5E7EB; border-radius:6px; padding:.45rem .7rem; font-size:.875rem; color:#374151; &:focus { outline:none; border-color:#1A56DB; } &.invalid { border-color:#E02424; background:#FFF5F5; } }
   textarea { resize:vertical; }
 }
 .err { font-size:.75rem; color:#E02424; }
