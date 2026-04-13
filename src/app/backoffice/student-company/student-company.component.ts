@@ -39,15 +39,16 @@ export class StudentCompanyComponent implements OnInit {
 
   apply(company: Entreprise) {
     // Navigate to new-candidature page, optionally pass company ID via state or query params
-    this.router.navigate(['/student/new-candidature'], {
+    this.router.navigate(['/app/candidatures'], {
       state: { companyId: company.id, companyName: company.name }
     });
     // Or use queryParams: this.router.navigate(['/student/new-candidature'], { queryParams: { companyId: company.id } });
   }
 
   subject(company: Entreprise) {
-    // TODO: implement later
-    console.log('Subject clicked for', company);
+    this.router.navigate(['/app/projects'], {
+      state: { companyId: company.id, companyName: company.name }
+    });
   }
 
   refreshData() {

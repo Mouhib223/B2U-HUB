@@ -59,6 +59,11 @@ export const routes: Routes = [
         loadComponent: () => import('./features/users/edit-profile/edit-profile')
           .then(m => m.EditProfile)
       },
+      {
+        path: 'my-company',
+        loadComponent: () => import('./backoffice/student-company/student-company.component')
+          .then(m => m.StudentCompanyComponent)
+      },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   },
