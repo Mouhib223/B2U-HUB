@@ -56,6 +56,11 @@ export const routes: Routes = [
         loadComponent: () => import('./features/users/edit-profile/edit-profile')
           .then(m => m.EditProfile)
       },
+      {
+        path: 'my-company',
+        loadComponent: () => import('./backoffice/student-company/student-company.component')
+          .then(m => m.StudentCompanyComponent)
+      },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   },
@@ -76,10 +81,19 @@ export const routes: Routes = [
         loadComponent: () => import('./features/candidatures/candidature-form')
           .then(m => m.CandidatureFormComponent)
       },
+
+
+      {
+        path: 'my-company',
+        loadComponent: () => import('./backoffice/student-company/student-company.component')
+          .then(m => m.StudentCompanyComponent)
+      },
+
        {
     path: 'equipes',
     component: EquipeFront
   },
+
       { path: '', redirectTo: 'candidatures', pathMatch: 'full' }
     ]
   },
@@ -129,9 +143,16 @@ export const routes: Routes = [
 
 
       {
+
+        path: 'companies',
+        loadComponent: () => import('./backoffice/companies-crud/companies-crud')
+          .then(m => m.CompaniesCrudComponent)
+      },
+      {
         path: 'candidatures',
         loadComponent: () => import('./backoffice/candidatures-crud/candidatures-crud.component')
           .then(m => m.CandidaturesCrudComponent)
+
       },
                 { path: 'equipes', loadComponent: () => import('./backoffice/equipe-crud/equipe-crud').then(m => m.EquipeCrudComponent) },  // <--- ici
 
