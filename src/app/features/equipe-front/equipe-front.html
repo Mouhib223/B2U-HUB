@@ -1,0 +1,26 @@
+<div class="container">
+
+  <h2>Teams</h2>
+
+  <input 
+    [(ngModel)]="searchQuery" 
+    placeholder="Search team..." 
+    class="search-input"
+  />
+
+  <div class="team-grid">
+    <div class="team-card" *ngFor="let equipe of filteredEquipes">
+
+      <h3>{{ equipe.nomMembresEquipe }}</h3>
+      <p>{{ equipe.descriptionProfil }}</p>
+
+      <span class="status">{{ equipe.status }}</span>
+
+      <button (click)="joinTeam(equipe)">
+        Join Team
+      </button>
+
+    </div>
+  </div>
+
+</div>

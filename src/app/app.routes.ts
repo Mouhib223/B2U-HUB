@@ -1,28 +1,25 @@
 import { Routes } from '@angular/router';
 import { AuthGuard } from './core/guards/auth.guard';
 import { AdminGuard } from './core/guards/admin.guard';
+import { EquipeFront } from './features/equipe-front/equipe-front';
 
 export const routes: Routes = [
-  // Default redirect
   { path: '', redirectTo: '/landing', pathMatch: 'full' },
 
-  // Public
+
   {
     path: 'landing',
     loadComponent: () => import('./features/landing/landing-page/landing-page')
       .then(m => m.LandingPageComponent)
   },
 
-  // Auth (public)
+
   {
     path: 'auth',
     loadChildren: () => import('./features/auth/auth.routes')
       .then(m => m.AUTH_ROUTES)
   },
 
-  // ─────────────────────────────────────────
-  // FRONT OFFICE — Students & Companies
-  // ─────────────────────────────────────────
   {
     path: 'app',
     loadComponent: () => import('./layout/shell/shell.component')
@@ -63,9 +60,7 @@ export const routes: Routes = [
     ]
   },
 
-  // ─────────────────────────────────────────
-  // STUDENT — Espace étudiant / freelancer
-  // ─────────────────────────────────────────
+ 
   {
     path: 'student',
     loadComponent: () => import('./layout/student-shell/student-shell.component')
@@ -81,13 +76,15 @@ export const routes: Routes = [
         loadComponent: () => import('./features/candidatures/candidature-form')
           .then(m => m.CandidatureFormComponent)
       },
+       {
+    path: 'equipes',
+    component: EquipeFront
+  },
       { path: '', redirectTo: 'candidatures', pathMatch: 'full' }
     ]
   },
 
-  // ─────────────────────────────────────────
-  // COMPANY — Espace entreprise
-  // ─────────────────────────────────────────
+
   {
     path: 'company',
     loadComponent: () => import('./layout/company-shell/company-shell.component')
@@ -102,9 +99,6 @@ export const routes: Routes = [
     ]
   },
 
-  // ─────────────────────────────────────────
-  // BACK OFFICE — Admin only
-  // ─────────────────────────────────────────
   {
     path: 'admin',
     loadComponent: () => import('./layout/admin-shell/admin-shell.component')
@@ -131,11 +125,16 @@ export const routes: Routes = [
         loadComponent: () => import('./backoffice/applications-overview/applications-overview.component')
           .then(m => m.ApplicationsOverviewComponent)
       },
+
+
+
       {
         path: 'candidatures',
         loadComponent: () => import('./backoffice/candidatures-crud/candidatures-crud.component')
           .then(m => m.CandidaturesCrudComponent)
       },
+                { path: 'equipes', loadComponent: () => import('./backoffice/equipe-crud/equipe-crud').then(m => m.EquipeCrudComponent) },  // <--- ici
+
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   },
