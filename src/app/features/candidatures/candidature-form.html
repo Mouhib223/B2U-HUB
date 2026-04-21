@@ -79,12 +79,28 @@
               <option *ngFor="let s of statuts" [value]="s">{{ s }}</option>
             </select>
           </div>
+
+          <!-- File uploads -->
           <div class="field full">
-            <label>Lien CV</label>
+            <label>CV (PDF, max 5MB)</label>
+            <input type="file" accept=".pdf,application/pdf" (change)="onCvSelected($event)" />
+            <div class="file-info" *ngIf="cvFile">Fichier: {{ cvFile.name }}</div>
+            <div class="err" *ngIf="cvError">{{ cvError }}</div>
+          </div>
+
+          <div class="field full">
+            <label>Lettre de motivation (PDF, max 5MB)</label>
+            <input type="file" accept=".pdf,application/pdf" (change)="onLettreSelected($event)" />
+            <div class="file-info" *ngIf="lettreFile">Fichier: {{ lettreFile.name }}</div>
+            <div class="err" *ngIf="lettreError">{{ lettreError }}</div>
+          </div>
+
+          <div class="field full">
+            <label>Lien CV (optionnel)</label>
             <input formControlName="cvLien" placeholder="https://..." />
           </div>
           <div class="field full">
-            <label>Lettre de motivation</label>
+            <label>Lettre de motivation (texte alternatif)</label>
             <textarea formControlName="lettreMotivation" rows="4" placeholder="Décrivez votre motivation..."></textarea>
           </div>
         </div>

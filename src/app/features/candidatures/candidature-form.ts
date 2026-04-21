@@ -20,6 +20,13 @@ export class CandidatureFormComponent {
   readonly statuts = ['En cours', 'Acceptée', 'Refusée'];
   readonly formations = ['Licence', 'Master', 'Ingénieur', 'Doctorat', 'BTS'];
 
+  // files
+  cvFile?: File;
+  lettreFile?: File;
+  cvError = '';
+  lettreError = '';
+  readonly MAX_SIZE = 5 * 1024 * 1024; // 5MB
+
   form = this.fb.group({
     nomCandidat:       ['', Validators.required],
     prenomCandidat:    ['', Validators.required],
@@ -37,12 +44,44 @@ export class CandidatureFormComponent {
 
   get f() { return this.form.controls; }
 
+  onCvSelected(e: Event) {
+    const file = (e.target as HTMLInputElement).files?.[0];
+    this.cvError = '';
+    this.cvFile = undefined;
+    const err = this.validatePdf(file);
+    if (err) this.cvError = err;
+    else this.cvFile = file;
+  }
+
+  onLettreSelected(e: Event) {
+    const file = (e.target as HTMLInputElement).files?.[0];
+    this.lettreError = '';
+    this.lettreFile = undefined;
+    const err = this.validatePdf(file);
+    if (err) this.lettreError = err;
+    else this.lettreFile = file;
+  }
+
+  validatePdf(file?: File): string | null {
+    if (!file) return 'Fichier requis';
+    const name = file.name.toLowerCase();
+    const type = (file.type || '').toLowerCase();
+    if (!type.includes('pdf') && !name.endsWith('.pdf')) return 'Le fichier doit être un PDF';
+    if (file.size > this.MAX_SIZE) return 'Taille maximale 5MB';
+    return null;
+  }
+
   submit() {
     this.submitted = true;
     if (this.form.invalid) return;
 
+    // validate files
+    this.cvError = this.validatePdf(this.cvFile) ?? '';
+    this.lettreError = this.validatePdf(this.lettreFile) ?? '';
+    if (this.cvError || this.lettreError) return;
+
     const val = this.form.getRawValue();
-    this.service.create({
+    const dto = {
       nomCandidat:       val.nomCandidat ?? '',
       prenomCandidat:    val.prenomCandidat ?? '',
       email:             val.email ?? '',
@@ -56,11 +95,25 @@ export class CandidatureFormComponent {
       competences:       val.competences ? val.competences.split(',').map((s: string) => s.trim()) : [],
       cvLien:            val.cvLien ?? '',
       lettreMotivation:  val.lettreMotivation ?? ''
-    }).subscribe({
+    };
+
+    // build FormData
+    const fd = new FormData();
+    const blob = new Blob([JSON.stringify(dto)], { type: 'application/json' });
+    fd.append('data', blob);
+    if (this.cvFile) fd.append('cv', this.cvFile);
+    if (this.lettreFile) fd.append('lettre', this.lettreFile);
+
+    this.service.createWithFiles(fd).subscribe({
       next: () => {
         this.success = true;
         this.form.reset({ anneeExperience: 0, statutCandidature: 'En cours' });
         this.submitted = false;
+        this.cvFile = undefined; this.lettreFile = undefined;
+      },
+      error: (err) => {
+        console.error('Upload error', err);
+        // you can add user-facing error handling here
       }
     });
   }
