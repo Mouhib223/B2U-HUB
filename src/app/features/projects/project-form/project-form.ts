@@ -1,0 +1,72 @@
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { RouterLink, ActivatedRoute, Router } from '@angular/router';
+import { MatIconModule } from '@angular/material/icon';
+import { ProjetService } from '../../../core/services/projet';
+import { Project } from '../../../core/models/project.model';
+
+@Component({
+  selector: 'app-project-form',
+  standalone: true,
+  imports: [CommonModule, FormsModule, RouterLink, MatIconModule],
+  templateUrl: './project-form.html',
+  styleUrls: ['./project-form.scss']
+})
+export class ProjectFormComponent implements OnInit {
+  isEditMode = false;
+  projectId: string | null = null;
+  skillInput = '';
+
+  project: Partial<Project> = {
+    title: '',
+    description: '',
+    companyName: '',
+    companyId: '',
+    requiredSkills: [],
+    teamSize: 1,
+    status: 'open',
+    applicantsCount: 0,
+    deadline: new Date(),
+    createdAt: new Date()
+  };
+
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router,
+    private projetService: ProjetService
+  ) {}
+
+  ngOnInit(): void {
+    this.projectId = this.route.snapshot.paramMap.get('id');
+    if (this.projectId) {
+      this.isEditMode = true;
+      this.projetService.getProjetById(this.projectId).subscribe({
+        next: (data) => this.project = data
+      });
+    }
+  }
+
+  addSkill(): void {
+    if (this.skillInput.trim() && !this.project.requiredSkills?.includes(this.skillInput.trim())) {
+      this.project.requiredSkills?.push(this.skillInput.trim());
+      this.skillInput = '';
+    }
+  }
+
+  removeSkill(skill: string): void {
+    this.project.requiredSkills = this.project.requiredSkills?.filter(s => s !== skill);
+  }
+
+  submit(): void {
+    if (this.isEditMode && this.projectId) {
+      this.projetService.updateProjet(this.projectId, this.project as Project).subscribe({
+        next: () => this.router.navigate(['/app/projects'])
+      });
+    } else {
+      this.projetService.createProjet(this.project as Project).subscribe({
+        next: () => this.router.navigate(['/app/projects'])
+      });
+    }
+  }
+}

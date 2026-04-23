@@ -1,10 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { BadgeComponent } from '../../../shared/components/badge/badge.component';
 import { Project } from '../../../core/models/project.model';
+import { ProjetService } from '../../../core/services/projet';
 
 @Component({
   selector: 'b2u-project-list',
@@ -13,35 +14,26 @@ import { Project } from '../../../core/models/project.model';
   templateUrl: './project-list.component.html',
   styleUrls: ['./project-list.component.scss']
 })
-export class ProjectListComponent {
+export class ProjectListComponent implements OnInit {
   searchQuery = '';
+  projects: Project[] = [];
+  loading = true;
+  error = '';
 
-  projects: Project[] = [
-    {
-      id: '1', title: 'React Dashboard for FinTech Startup',
-      description: 'Build an analytics dashboard with real-time data visualization.',
-      companyId: 'c1', companyName: 'FinTech Corp',
-      requiredSkills: ['React', 'TypeScript', 'Chart.js'],
-      teamSize: 3, deadline: new Date('2025-08-01'),
-      status: 'open', applicantsCount: 8, createdAt: new Date()
-    },
-    {
-      id: '2', title: 'AI Chatbot Integration',
-      description: 'Integrate an NLP-powered chatbot into an existing e-commerce platform.',
-      companyId: 'c2', companyName: 'ShopAI',
-      requiredSkills: ['Python', 'NLP', 'REST API'],
-      teamSize: 2, deadline: new Date('2025-07-15'),
-      status: 'open', applicantsCount: 12, createdAt: new Date()
-    },
-    {
-      id: '3', title: 'Mobile App for University Events',
-      description: 'Design and develop a cross-platform mobile app for campus events.',
-      companyId: 'c3', companyName: 'UniTech',
-      requiredSkills: ['Flutter', 'Dart', 'Firebase'],
-      teamSize: 4, deadline: new Date('2025-09-01'),
-      status: 'open', applicantsCount: 5, createdAt: new Date()
-    },
-  ];
+  constructor(private projetService: ProjetService) {}
+
+  ngOnInit(): void {
+    this.projetService.getAllProjets().subscribe({
+      next: (data) => {
+        this.projects = data;
+        this.loading = false;
+      },
+      error: (err) => {
+        this.error = 'Erreur lors du chargement des projets.';
+        this.loading = false;
+      }
+    });
+  }
 
   get filtered() {
     if (!this.searchQuery) return this.projects;
