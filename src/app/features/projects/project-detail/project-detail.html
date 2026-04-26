@@ -1,1 +1,67 @@
-<p>project-detail works!</p>
+<div class="project-detail-page">
+
+    <!-- Loading -->
+    <div *ngIf="loading" class="loading">
+      <mat-icon>hourglass_empty</mat-icon>
+      <p>Chargement...</p>
+    </div>
+  
+    <!-- Erreur -->
+    <div *ngIf="error" class="error">
+      <mat-icon>error</mat-icon>
+      <p>{{ error }}</p>
+      <a routerLink="/app/projects">← Retour aux projets</a>
+    </div>
+  
+    <!-- Contenu -->
+    <div *ngIf="project && !loading">
+  
+      <!-- Header -->
+      <div class="detail-header">
+        <a routerLink="/app/projects" class="back-link">
+          <mat-icon>arrow_back</mat-icon> Retour aux projets
+        </a>
+        <div class="header-top">
+          <div class="company-avatar">{{ project.companyName ? project.companyName[0] : '?' }}</div>
+          <div class="header-info">
+            <h1>{{ project.title }}</h1>
+            <p class="company">{{ project.companyName }}</p>
+            <span class="status-badge" [class.open]="project.status === 'open'">
+              {{ project.status }}
+            </span>
+          </div>
+        </div>
+      </div>
+  
+      <!-- Description -->
+      <div class="detail-section">
+        <h2><mat-icon>description</mat-icon> Description</h2>
+        <p>{{ project.description }}</p>
+      </div>
+  
+      <!-- Skills -->
+      <div class="detail-section">
+        <h2><mat-icon>code</mat-icon> Compétences requises</h2>
+        <div class="skills">
+          <span class="skill-chip" *ngFor="let s of project.requiredSkills">{{ s }}</span>
+        </div>
+      </div>
+  
+      <!-- Infos -->
+      <div class="detail-section info-grid">
+        <div class="info-card">
+          <mat-icon>group</mat-icon>
+          <span>{{ project.teamSize }} membres</span>
+        </div>
+        <div class="info-card">
+          <mat-icon>people</mat-icon>
+          <span>{{ project.applicantsCount }} candidats</span>
+        </div>
+        <div class="info-card">
+          <mat-icon>calendar_today</mat-icon>
+          <span>{{ project.deadline | date:'dd/MM/yyyy' }}</span>
+        </div>
+      </div>
+  
+    </div>
+  </div>

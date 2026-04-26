@@ -26,6 +26,10 @@ export class CandidatureService {
     return this.http.post<Candidature>(this.url, dto);
   }
 
+  createWithFiles(formData: FormData): Observable<Candidature> {
+    return this.http.post<Candidature>(this.url, formData);
+  }
+
   update(id: string, dto: Candidature): Observable<Candidature> {
     return this.http.put<Candidature>(`${this.url}/${id}`, dto);
   }
