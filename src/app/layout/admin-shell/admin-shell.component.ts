@@ -57,6 +57,9 @@ export class AdminShellComponent {
     { label: 'Applications', icon: 'assignment', route: '/admin/applications' },
     { label: 'Équipes',      icon: 'groups', route: '/admin/equipes' },
 
+
+    { label: 'Applications',  icon: 'assignment',  route: '/admin/applications'  },
+
     { label: 'Candidatures',  icon: 'description', route: '/admin/candidatures'  },
 
   ];

@@ -27,6 +27,9 @@ import { MatIconModule } from '@angular/material/icon';
             <span *ngIf="!collapsed">Nouvelle</span>
           </a>
 
+          <a routerLink="/student/candidatures"    routerLinkActive="active"><mat-icon>description</mat-icon><span *ngIf="!collapsed">Mes Candidatures</span></a>
+          <a routerLink="/student/new-candidature" routerLinkActive="active"><mat-icon>add_circle</mat-icon><span *ngIf="!collapsed">Nouvelle</span></a>
+
           <a routerLink="/student/my-company" routerLinkActive="active">
             <mat-icon>business</mat-icon>
             <span *ngIf="!collapsed">Mon Entreprise</span>
@@ -37,6 +40,15 @@ import { MatIconModule } from '@angular/material/icon';
             <span *ngIf="!collapsed">Equipes</span>
           </a>
         </nav>
+
+
+<a routerLink="/student/equipes" routerLinkActive="active">
+  <mat-icon>groups</mat-icon>
+  <span>Equipes</span>
+  <mat-icon>groups</mat-icon>
+    <span *ngIf="!collapsed">Equipes</span>
+  </a>
+          </nav>
 
       </aside>
 

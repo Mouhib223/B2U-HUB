@@ -80,21 +80,26 @@ export const routes: Routes = [
         loadComponent: () => import('./features/candidatures/candidature-form')
           .then(m => m.CandidatureFormComponent)
       },
-      
+
       {
   path: 'my-workpost/:companyId',
   loadComponent: () => import('./backoffice/student-workpost/student-workpost')
     .then(m => m.StudentWorkpost)
 },
+
+
       {
         path: 'my-company',
         loadComponent: () => import('./backoffice/student-company/student-company.component')
           .then(m => m.StudentCompanyComponent)
       },
+
        {
     path: 'equipes',
     component: EquipeFront
   },
+
+
       { path: '', redirectTo: 'candidatures', pathMatch: 'full' }
     ]
   },
