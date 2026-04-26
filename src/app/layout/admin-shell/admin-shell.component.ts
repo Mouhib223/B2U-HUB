@@ -51,15 +51,12 @@ export class AdminShellComponent {
     { label: 'Users',        icon: 'people',     route: '/admin/users'        },
     { label: 'Projects',     icon: 'work',       route: '/admin/projects'     },
 
-
-    { label: 'Applications', icon: 'assignment', route: '/admin/applications' },
     { label: 'Companies',    icon: ' corporate_fare', route: '/admin/companies'    },
 
 
     { label: 'Applications', icon: 'assignment', route: '/admin/applications' },
     { label: 'Équipes',      icon: 'groups', route: '/admin/equipes' },
 
-    { label: 'Applications',  icon: 'assignment',  route: '/admin/applications'  },
 
     { label: 'Candidatures',  icon: 'description', route: '/admin/candidatures'  },
 

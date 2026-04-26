@@ -64,7 +64,6 @@ export const routes: Routes = [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   },
-
  
   {
     path: 'student',
@@ -82,6 +81,12 @@ export const routes: Routes = [
           .then(m => m.CandidatureFormComponent)
       },
 
+      {
+  path: 'my-workpost/:companyId',
+  loadComponent: () => import('./backoffice/student-workpost/student-workpost')
+    .then(m => m.StudentWorkpost)
+},
+
 
       {
         path: 'my-company',
@@ -93,6 +98,7 @@ export const routes: Routes = [
     path: 'equipes',
     component: EquipeFront
   },
+
 
       { path: '', redirectTo: 'candidatures', pathMatch: 'full' }
     ]
@@ -108,6 +114,11 @@ export const routes: Routes = [
         path: 'candidatures',
         loadComponent: () => import('./backoffice/company-candidatures/company-candidatures.component')
           .then(m => m.CompanyCandidaturesComponent)
+      },
+      {
+        path: 'work-post',
+        loadComponent: () => import('./backoffice/work-post/work-post')
+          .then(m => m.WorkPost)
       },
       { path: '', redirectTo: 'candidatures', pathMatch: 'full' }
     ]

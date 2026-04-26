@@ -1,0 +1,156 @@
+<div class="page">
+  <!-- Header -->
+  <div class="page-header">
+    <h1>Gestion des offres / posts</h1>
+    <p>Créez, modifiez ou supprimez vos missions. Consultez les recommandations.</p>
+  </div>
+
+  <!-- Stats Row -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-value">{{ totalPosts }}</div>
+      <div class="stat-label">Total des posts</div>
+    </div>
+    <div class="stat-card pending">
+      <div class="stat-value">{{ activePosts }}</div>
+      <div class="stat-label">Actifs</div>
+    </div>
+    <div class="stat-card accepted">
+      <div class="stat-value">{{ filledPosts }}</div>
+      <div class="stat-label">Pourvus</div>
+    </div>
+    <div class="stat-card rejected">
+      <div class="stat-value">{{ expiredPosts }}</div>
+      <div class="stat-label">Expirés</div>
+    </div>
+  </div>
+
+  <!-- Filters + Add button -->
+  <div class="filters">
+    <div class="search-bar">
+      <mat-icon>search</mat-icon>
+      <input type="text" placeholder="Rechercher par titre ou compétence..." [(ngModel)]="searchTerm">
+    </div>
+    <select class="filter-select" [(ngModel)]="statusFilter">
+      <option value="">Tous les statuts</option>
+      <option value="ACTIVE">Actif</option>
+      <option value="FILLED">Pourvu</option>
+      <option value="EXPIRED">Expiré</option>
+      <option value="CLOSED">Fermé</option>
+    </select>
+    <button class="btn-add" (click)="showFormPanel = !showFormPanel; selectedPost = null; newPost = emptyPost()">
+      <mat-icon>add</mat-icon> Nouveau post
+    </button>
+  </div>
+
+  <!-- Content layout: table + side panel -->
+  <div class="content-layout">
+    <!-- Table card -->
+    <div class="table-card">
+      <table>
+        <thead>
+          <tr>
+            <th>Titre</th>
+            <th>Description</th>
+            <th>Heures/sem</th>
+            <th>Durée (sem)</th>
+            <th>Compétences</th>
+            <th>Statut</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let post of filteredPosts">
+            <td>
+              <div class="candidate-name">
+                <div class="avatar">{{ post.title.charAt(0) }}</div>
+                <div>
+                  <div class="name">{{ post.title }}</div>
+                  <div class="email">{{ post.id?.slice(-6) }}</div>
+                </div>
+              </div>
+            </td>
+            <td>{{ post.description | slice:0:50 }}...</td>
+            <td>{{ post.hoursPerWeek }}h</td>
+            <td>{{ post.durationWeeks }} sem</td>
+            <td>{{ post.requiredSkills }}</td>
+            <td>
+              <span class="badge" [ngClass]="getStatusClass(post.status!)">
+                {{ post.status }}
+              </span>
+            </td>
+            <td class="actions">
+              <button class="btn-accept" (click)="editPost(post)">
+                <mat-icon>edit</mat-icon> Modifier
+              </button>
+              <button class="btn-reject" (click)="deletePost(post.id!)">
+                <mat-icon>delete</mat-icon> Supprimer
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="filteredPosts.length === 0">
+            <td colspan="7" class="empty">Aucun post trouvé</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Right panel: Add / Edit form -->
+    <div class="detail-panel" *ngIf="showFormPanel">
+      <div class="detail-header">
+        <div class="detail-avatar">
+          <mat-icon>work</mat-icon>
+        </div>
+        <div>
+          <h3>{{ selectedPost ? 'Modifier la mission' : 'Nouvelle mission' }}</h3>
+          <div class="comp-title">Remplissez les champs</div>
+        </div>
+        <button class="close-btn" (click)="cancelForm()"><mat-icon>close</mat-icon></button>
+      </div>
+      <div class="detail-body">
+        <!-- All inputs bind to formModel (either selectedPost or newPost) -->
+        <div class="detail-row">
+          <mat-icon>title</mat-icon>
+          <input type="text" placeholder="Titre du post" class="form-input"
+                 [(ngModel)]="formModel.title">
+        </div>
+        <div class="detail-row">
+          <mat-icon>description</mat-icon>
+          <textarea placeholder="Description" rows="3" class="form-input"
+                    [(ngModel)]="formModel.description"></textarea>
+        </div>
+        <div class="detail-row">
+          <mat-icon>schedule</mat-icon>
+          <input type="number" placeholder="Heures par semaine" class="form-input"
+                 [(ngModel)]="formModel.hoursPerWeek">
+        </div>
+        <div class="detail-row">
+          <mat-icon>event</mat-icon>
+          <input type="number" placeholder="Durée (semaines)" class="form-input"
+                 [(ngModel)]="formModel.durationWeeks">
+        </div>
+        <div class="detail-row">
+          <mat-icon>code</mat-icon>
+          <input type="text" placeholder="Compétences requises (ex: Java, Spring)" class="form-input"
+                 [(ngModel)]="formModel.requiredSkills">
+        </div>
+        <div class="detail-row" *ngIf="selectedPost">
+          <mat-icon>flag</mat-icon>
+          <select class="form-input" [(ngModel)]="formModel.status">
+            <option value="ACTIVE">Actif</option>
+            <option value="FILLED">Pourvu</option>
+            <option value="EXPIRED">Expiré</option>
+            <option value="CLOSED">Fermé</option>
+          </select>
+        </div>
+        <div class="detail-actions">
+          <button class="btn-accept" (click)="selectedPost ? updatePost() : createPost()">
+            {{ selectedPost ? 'Mettre à jour' : 'Créer' }}
+          </button>
+          <button class="btn-reject" (click)="cancelForm()">Annuler</button>
+        </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
