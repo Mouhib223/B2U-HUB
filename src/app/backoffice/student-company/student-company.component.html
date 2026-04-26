@@ -4,26 +4,85 @@
     <button class="refresh-btn" (click)="refreshData()">Refresh</button>
   </div>
 
-  <div class="loading" *ngIf="loading">Loading companies...</div>
+  <div class="loading" *ngIf="loading">
+    Loading companies...
+  </div>
 
   <div class="cards-grid" *ngIf="!loading">
     <div class="company-card" *ngFor="let company of companies">
+      <!-- HEADER -->
       <div class="card-header">
         <h3>{{ company.name }}</h3>
         <span class="sector-badge">{{ company.sector }}</span>
       </div>
+
+      <!-- BODY -->
       <div class="card-body">
         <p><strong>Email:</strong> {{ company.email }}</p>
         <p><strong>Phone:</strong> {{ company.phone }}</p>
         <p><strong>Address:</strong> {{ company.address }}</p>
       </div>
+
+      <!-- ACTIONS -->
       <div class="card-actions">
-        <button class="apply-btn" (click)="apply(company)">Apply</button>
-        <button class="subject-btn" (click)="subject(company)">Project</button>
+        <button class="apply-btn" (click)="apply(company)">
+          Work Posts
+        </button>
+
+        <button class="subject-btn" (click)="subject(company)">
+          Project
+        </button>
+
+        <!-- 🔥 AI BUTTON - opens modal -->
+        <button class="ai-btn" (click)="openSimilarModal(company)">
+          🔍 Similar 
+        </button>
       </div>
     </div>
+
+    <!-- NO DATA -->
     <div *ngIf="companies.length === 0" class="no-data">
       No companies found.
+    </div>
+  </div>
+</div>
+
+<!-- SIMILAR COMPANIES MODAL -->
+<div class="modal-overlay" *ngIf="showSimilarModal" (click)="closeSimilarModal()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Similar Companies to {{ selectedCompanyName }}</h3>
+      <button class="close-modal-btn" (click)="closeSimilarModal()">×</button>
+    </div>
+
+    <div class="modal-body">
+      <!-- Loading state -->
+      <div *ngIf="similarLoading" class="modal-loading">
+        Loading similar companies...
+      </div>
+
+      <!-- Similar companies list -->
+      <div *ngIf="!similarLoading && similarList.length > 0" class="similar-list-modal">
+        <div class="similar-item-modal" *ngFor="let similar of similarList">
+          <div class="similar-info">
+            <span class="similar-name">{{ similar.name }}</span>
+            <span class="similar-sector">{{ similar.sector }}</span>
+          </div>
+          <div class="similar-actions">
+            <button class="apply-similar-btn" (click)="apply(similar)">Apply</button>
+            <button class="subject-similar-btn" (click)="subject(similar)">Project</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty state -->
+      <div *ngIf="!similarLoading && similarList.length === 0" class="modal-empty">
+        No similar companies found.
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button (click)="closeSimilarModal()">Close</button>
     </div>
   </div>
 </div>

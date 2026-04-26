@@ -21,6 +21,8 @@ export class CompaniesCrudComponent implements OnInit {
   showEditModal = false;
   selectedCompany: Entreprise | null = null;
   editingCompany: Entreprise | null = null;
+  equipesByCompany: { [key: string]: any[] } = {};
+  expandedCompanyId: string | null = null;
 
   newCompany = {
     name: '',
@@ -178,4 +180,22 @@ export class CompaniesCrudComponent implements OnInit {
     this.showDeleteConfirm = false;
     this.selectedCompany = null;
   }
+
+  toggleEquipes(companyId: string): void {
+  if (this.expandedCompanyId === companyId) {
+    this.expandedCompanyId = null;
+    return;
+  }
+
+  this.expandedCompanyId = companyId;
+
+  if (!this.equipesByCompany[companyId]) {
+    this.entrepriseService.getEquipesByEntreprise(companyId).subscribe({
+      next: (data) => {
+        this.equipesByCompany[companyId] = data;
+      },
+      error: (err) => console.error('Failed to load equipes', err)
+    });
+  }
+}
 }

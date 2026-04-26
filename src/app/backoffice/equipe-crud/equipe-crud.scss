@@ -1,0 +1,315 @@
+.equipes-page { padding: 0; }
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+
+  h1 { font-size: 1.6rem; color: #1E293B; margin: 0; }
+  p  { color: #64748B; margin-top: 0.25rem; font-size: 0.875rem; }
+}
+
+.filters-bar {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: white;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  flex: 1;
+  min-width: 200px;
+
+  mat-icon { color: #94A3B8; font-size: 18px; width: 18px; height: 18px; }
+
+  input {
+    border: none; outline: none; width: 100%;
+    font-size: 0.875rem; color: #334155;
+    background: transparent;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+}
+
+.add-button-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1.5rem;
+}
+
+.btn-add {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.2rem;
+  background: #E11D48;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  transition: all 0.2s;
+
+  mat-icon { font-size: 18px; width: 18px; height: 18px; }
+  
+  &:hover { background: #BE123C; transform: translateY(-1px); }
+}
+
+.table-card {
+  background: white;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+}
+
+table { width: 100%; border-collapse: collapse; }
+
+thead tr {
+  background: #F8FAFC;
+  border-bottom: 1px solid #E2E8F0;
+}
+
+th {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #64748B;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+td {
+  padding: 0.875rem 1rem;
+  font-size: 0.875rem;
+  color: #334155;
+  border-bottom: 1px solid #F1F5F9;
+}
+
+.team-cell { display: flex; align-items: center; gap: 0.75rem; }
+
+.avatar {
+  width: 36px; height: 36px;
+  background: #E11D48;
+  color: white;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 0.875rem;
+  flex-shrink: 0;
+  text-transform: uppercase;
+}
+
+.team-name { font-weight: 600; font-size: 0.875rem; color: #1E293B; }
+
+.description-text {
+  font-size: 0.875rem;
+  color: #64748B;
+  max-width: 400px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.actions-cell { display: flex; gap: 6px; }
+
+.action-btn {
+  background: none; border: none; cursor: pointer;
+  padding: 5px; border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+  
+  mat-icon { font-size: 18px; width: 18px; height: 18px; }
+  
+  &.edit { color:  #3B82F6; &:hover { background: #FEF2F2; } }
+  &.delete { color: #E11D48; &:hover { background: #FEF2F2; } }
+}
+
+.empty-state {
+  text-align: center; padding: 3rem;
+  color: #94A3B8;
+  
+  mat-icon { font-size: 40px; width: 40px; height: 40px; display: block; margin: 0 auto 0.5rem; }
+}
+
+// MODAL STYLES
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: white; border-radius: 16px;
+  padding: 2rem; max-width: 450px; width: 90%;
+  text-align: center;
+
+  .modal-icon {
+    font-size: 48px; width: 48px; height: 48px; 
+    color: #E11D48; margin-bottom: 1rem;
+    
+    &.warning { color: #F59E0B; }
+  }
+  
+  h3 { font-size: 1.2rem; margin-bottom: 0.5rem; color: #1E293B; }
+  p  { color: #64748B; font-size: 0.875rem; margin-bottom: 1rem; }
+}
+
+.modal-form {
+  text-align: left;
+  margin: 1.5rem 0;
+}
+
+// STYLES POUR LES CHAMPS REQUIS EN ROUGE
+.form-group {
+  margin-bottom: 1rem;
+  
+  label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    font-size: 0.8rem;
+    color: #334155;
+    
+    // Ajouter un astérisque rouge pour les champs requis
+    &::after {
+      content: " *";
+      color: #EF4444;
+      font-weight: bold;
+    }
+  }
+  
+  input, textarea {
+    width: 100%;
+    padding: 0.6rem 0.8rem;
+    border: 1.5px solid #E2E8F0;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    transition: all 0.2s;
+    background: white;
+    
+    &:focus { 
+      outline: none; 
+      border-color: #E11D48;
+      box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.1);
+    }
+    
+    // Style quand le champ est vide et que le formulaire a été soumis
+    &.invalid {
+      border-color: #EF4444;
+      background-color: #FEF2F2;
+      border-width: 1.5px;
+      
+      &:focus {
+        border-color: #DC2626;
+        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+        background-color: #FFFFFF;
+      }
+    }
+    
+    // Style placeholder quand champ invalide
+    &.invalid::placeholder {
+      color: #FCA5A5;
+    }
+  }
+  
+  textarea { 
+    resize: vertical; 
+    min-height: 80px;
+  }
+  
+  // Message d'erreur
+  .error-text {
+    display: block;
+    color: #EF4444;
+    font-size: 0.7rem;
+    margin-top: 0.35rem;
+    font-weight: 500;
+    animation: fadeIn 0.3s ease;
+  }
+}
+
+// Animation pour le message d'erreur
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modal-actions {
+  display: flex; gap: 1rem; margin-top: 1.5rem; justify-content: center;
+}
+
+.btn-cancel {
+  padding: 0.6rem 1.5rem; border-radius: 8px;
+  border: 1px solid #E2E8F0; background: white;
+  font-weight: 600; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif;
+  color: #64748B;
+  transition: all 0.2s;
+  
+  &:hover { background: #F8FAFC; border-color: #E11D48; }
+}
+
+.btn-submit {
+  padding: 0.6rem 1.5rem; border-radius: 8px;
+  background: #E11D48;
+  color: white; border: none;
+  font-weight: 600; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif;
+  transition: all 0.2s;
+  
+  &:hover { 
+    background: #BE123C; 
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(225, 29, 72, 0.3);
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+.btn-delete {
+  padding: 0.6rem 1.5rem; border-radius: 8px;
+  background: #E11D48;
+  color: white; border: none;
+  font-weight: 600; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif;
+  transition: all 0.2s;
+  
+  &:hover { 
+    background: #BE123C; 
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(225, 29, 72, 0.3);
+  }
+}
+
+// Responsive
+@media (max-width: 640px) {
+  .modal {
+    padding: 1.5rem;
+    width: 95%;
+  }
+  
+  .modal-actions {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .btn-cancel, .btn-submit, .btn-delete {
+    width: 100%;
+  }
+}

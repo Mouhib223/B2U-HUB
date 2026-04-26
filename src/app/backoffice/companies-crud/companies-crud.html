@@ -1,12 +1,11 @@
 <div class="users-page">
+
+  <!-- HEADER -->
   <div class="page-header">
-    <div>
-      <h1>Manage Companies</h1>
-    </div>
-    
+    <h1>Manage Companies</h1>
   </div>
 
-  <!-- Stats Cards (2 cards) -->
+  <!-- STATS -->
   <div class="stats-grid">
     <div class="stat-card" *ngFor="let s of stats">
       <div class="stat-icon" [style.background]="s.bg">
@@ -19,9 +18,9 @@
     </div>
   </div>
 
-  <!-- Sector Breakdown Table -->
+  <!-- SECTOR TABLE -->
   <div class="table-card" style="margin-top: 1.5rem;">
-    <h3 style="margin: 0 0 1rem 0; font-size: 1.2rem;">Companies by Sector</h3>
+    <h3>Companies by Sector</h3>
     <table>
       <thead>
         <tr>
@@ -43,19 +42,19 @@
 
   <br>
 
-
+  <!-- SEARCH + ADD -->
   <div class="page-header">
-    <div>
-      <div class="search-box">
+    <div class="search-box">
       <mat-icon>search</mat-icon>
       <input [(ngModel)]="searchQuery" placeholder="Search by name or email..." />
     </div>
-    </div>
+
     <button class="add-btn" (click)="openAddModal()">
       <mat-icon>add_business</mat-icon> Add Company
     </button>
   </div>
-  <!-- Companies Table -->
+
+  <!-- COMPANIES TABLE -->
   <div class="table-card">
     <table>
       <thead>
@@ -65,141 +64,145 @@
           <th>Phone</th>
           <th>Address</th>
           <th>Sector</th>
+          <th>Teams</th>
           <th>Actions</th>
         </tr>
       </thead>
+
       <tbody>
-        <tr *ngFor="let company of filteredCompanies">
-          <td class="user-cell">
-            <div class="avatar">{{ company.name.charAt(0) }}</div>
-            <div>
-              <div class="user-name">{{ company.name }}</div>
-              <div class="user-email">{{ company.email }}</div>
-            </div>
-          </td>
-          <td>{{ company.email }}</td>
-          <td>{{ company.phone }}</td>
-          <td>{{ company.address }}</td>
-          <td>{{ company.sector }}</td>
-          <td class="actions-cell">
-            <button class="action-btn edit" (click)="openEditModal(company)" title="Edit">
-              <mat-icon>edit</mat-icon>
-            </button>
-            <button class="action-btn delete" (click)="confirmDelete(company)" title="Delete">
-              <mat-icon>delete</mat-icon>
-            </button>
-          </td>
-        </tr>
+
+        <ng-container *ngFor="let company of filteredCompanies">
+
+          <!-- COMPANY ROW -->
+          <tr>
+            <td class="user-cell">
+              <div class="avatar">{{ company.name.charAt(0) }}</div>
+              <div>
+                <div class="user-name">{{ company.name }}</div>
+                <div class="user-email">{{ company.email }}</div>
+              </div>
+            </td>
+
+            <td>{{ company.email }}</td>
+            <td>{{ company.phone }}</td>
+            <td>{{ company.address }}</td>
+            <td>{{ company.sector }}</td>
+
+            <!-- EXPAND -->
+            <td>
+              <button (click)="toggleEquipes(company.id)">
+                <mat-icon>
+                  {{ expandedCompanyId === company.id ? 'expand_less' : 'expand_more' }}
+                </mat-icon>
+              </button>
+            </td>
+
+            <!-- ACTIONS -->
+            <td class="actions-cell">
+              <button class="action-btn edit" (click)="openEditModal(company)">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button class="action-btn delete" (click)="confirmDelete(company)">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </tr>
+
+          <!-- TEAMS ROW (IMPORTANT: inside ngFor) -->
+          <tr *ngIf="expandedCompanyId === company.id">
+            <td colspan="7">
+              <div class="equipes-container">
+                <table class="inner-table">
+                  <thead>
+                    <tr>
+                      <th>Team Name</th>
+                      <th>Description</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+
+                    <tr *ngFor="let eq of equipesByCompany[company.id]">
+                      <td>{{ eq.nomMembresEquipe }}</td>
+                      <td>{{ eq.descriptionProfil }}</td>
+                    </tr>
+
+                    <tr *ngIf="!equipesByCompany[company.id]?.length">
+                      <td colspan="2">No teams found</td>
+                    </tr>
+
+                  </tbody>
+                </table>
+              </div>
+            </td>
+          </tr>
+
+        </ng-container>
+
+        <!-- EMPTY -->
         <tr *ngIf="filteredCompanies.length === 0">
-          <td colspan="6" class="empty-state">
+          <td colspan="7" class="empty-state">
             <mat-icon>business_off</mat-icon>
             No companies found
           </td>
         </tr>
+
       </tbody>
     </table>
   </div>
 
-  <!-- Delete Confirmation Modal -->
+  <!-- DELETE MODAL -->
   <div class="modal-overlay" *ngIf="showDeleteConfirm" (click)="cancelDelete()">
     <div class="modal" (click)="$event.stopPropagation()">
-      <mat-icon class="modal-icon">warning</mat-icon>
+      <mat-icon>warning</mat-icon>
       <h3>Delete Company</h3>
-      <p>Are you sure you want to delete <strong>{{ selectedCompany?.name }}</strong>? This cannot be undone.</p>
+      <p>Are you sure you want to delete <strong>{{ selectedCompany?.name }}</strong>?</p>
       <div class="modal-actions">
-        <button class="btn-cancel" (click)="cancelDelete()">Cancel</button>
-        <button class="btn-delete" (click)="deleteCompany()">Delete</button>
+        <button (click)="cancelDelete()">Cancel</button>
+        <button (click)="deleteCompany()">Delete</button>
       </div>
     </div>
   </div>
 
-  <!-- Add Company Modal -->
+  <!-- ADD MODAL -->
   <div class="modal-overlay" *ngIf="showAddModal" (click)="closeAddModal()">
-    <div class="modal add-modal" (click)="$event.stopPropagation()">
-      <mat-icon class="modal-icon">add_business</mat-icon>
-      <h3>Add New Company</h3>
+    <div class="modal" (click)="$event.stopPropagation()">
+      <h3>Add Company</h3>
       <form #addForm="ngForm" (ngSubmit)="addCompany()">
-        <div class="form-group">
-          <label>Name *</label>
-          <input type="text" name="name" [(ngModel)]="newCompany.name" required #name="ngModel" placeholder="Company name" />
-          <div class="error" *ngIf="name.invalid && (name.dirty || name.touched)">
-            <small *ngIf="name.errors?.['required']">Name is required</small>
-          </div>
-        </div>
-        <div class="form-group">
-          <label>Email *</label>
-          <input type="email" name="email" [(ngModel)]="newCompany.email" required email #email="ngModel" placeholder="contact@company.com" />
-          <div class="error" *ngIf="email.invalid && (email.dirty || email.touched)">
-            <small *ngIf="email.errors?.['required']">Email is required</small>
-            <small *ngIf="email.errors?.['email']">Email should be valid</small>
-          </div>
-        </div>
-        <div class="form-group">
-          <label>Phone *</label>
-          <input type="tel" name="phone" [(ngModel)]="newCompany.phone" required pattern="^[0-9]{8}$" #phone="ngModel" placeholder="12345678" />
-          <div class="error" *ngIf="phone.invalid && (phone.dirty || phone.touched)">
-            <small *ngIf="phone.errors?.['required']">Phone is required</small>
-            <small *ngIf="phone.errors?.['pattern']">Phone must contain exactly 8 digits</small>
-          </div>
-        </div>
-        <div class="form-group">
-          <label>Address</label>
-          <input type="text" name="address" [(ngModel)]="newCompany.address" placeholder="Street, City, Country" />
-        </div>
-        <div class="form-group">
-          <label>Sector</label>
-          <input type="text" name="sector" [(ngModel)]="newCompany.sector" placeholder="Technology, Finance, etc." />
-        </div>
+
+        <input type="text" [(ngModel)]="newCompany.name" name="name" placeholder="Name" required />
+        <input type="email" [(ngModel)]="newCompany.email" name="email" placeholder="Email" required />
+        <input type="text" [(ngModel)]="newCompany.phone" name="phone" placeholder="Phone" required />
+        <input type="text" [(ngModel)]="newCompany.address" name="address" placeholder="Address" />
+        <input type="text" [(ngModel)]="newCompany.sector" name="sector" placeholder="Sector" />
+
         <div class="modal-actions">
-          <button type="button" class="btn-cancel" (click)="closeAddModal()">Cancel</button>
-          <button type="submit" class="btn-add" [disabled]="addForm.invalid">Add Company</button>
+          <button type="button" (click)="closeAddModal()">Cancel</button>
+          <button type="submit" [disabled]="addForm.invalid">Add</button>
         </div>
+
       </form>
     </div>
   </div>
 
-  <!-- Edit Company Modal -->
+  <!-- EDIT MODAL -->
   <div class="modal-overlay" *ngIf="showEditModal" (click)="closeEditModal()">
-    <div class="modal add-modal" (click)="$event.stopPropagation()" *ngIf="editingCompany">
-      <mat-icon class="modal-icon">edit</mat-icon>
+    <div class="modal" (click)="$event.stopPropagation()" *ngIf="editingCompany">
       <h3>Edit Company</h3>
       <form #editForm="ngForm" (ngSubmit)="updateCompany()">
-        <div class="form-group">
-          <label>Name *</label>
-          <input type="text" name="name" [(ngModel)]="editingCompany.name" required #editName="ngModel" placeholder="Company name" />
-          <div class="error" *ngIf="editName.invalid && (editName.dirty || editName.touched)">
-            <small *ngIf="editName.errors?.['required']">Name is required</small>
-          </div>
-        </div>
-        <div class="form-group">
-          <label>Email *</label>
-          <input type="email" name="email" [(ngModel)]="editingCompany.email" required email #editEmail="ngModel" placeholder="contact@company.com" />
-          <div class="error" *ngIf="editEmail.invalid && (editEmail.dirty || editEmail.touched)">
-            <small *ngIf="editEmail.errors?.['required']">Email is required</small>
-            <small *ngIf="editEmail.errors?.['email']">Email should be valid</small>
-          </div>
-        </div>
-        <div class="form-group">
-          <label>Phone *</label>
-          <input type="tel" name="phone" [(ngModel)]="editingCompany.phone" required pattern="^[0-9]{8}$" #editPhone="ngModel" placeholder="12345678" />
-          <div class="error" *ngIf="editPhone.invalid && (editPhone.dirty || editPhone.touched)">
-            <small *ngIf="editPhone.errors?.['required']">Phone is required</small>
-            <small *ngIf="editPhone.errors?.['pattern']">Phone must contain exactly 8 digits</small>
-          </div>
-        </div>
-        <div class="form-group">
-          <label>Address</label>
-          <input type="text" name="address" [(ngModel)]="editingCompany.address" placeholder="Street, City, Country" />
-        </div>
-        <div class="form-group">
-          <label>Sector</label>
-          <input type="text" name="sector" [(ngModel)]="editingCompany.sector" placeholder="Technology, Finance, etc." />
-        </div>
+
+        <input type="text" [(ngModel)]="editingCompany.name" name="name" required />
+        <input type="email" [(ngModel)]="editingCompany.email" name="email" required />
+        <input type="text" [(ngModel)]="editingCompany.phone" name="phone" required />
+        <input type="text" [(ngModel)]="editingCompany.address" name="address" />
+        <input type="text" [(ngModel)]="editingCompany.sector" name="sector" />
+
         <div class="modal-actions">
-          <button type="button" class="btn-cancel" (click)="closeEditModal()">Cancel</button>
-          <button type="submit" class="btn-add" [disabled]="editForm.invalid">Save Changes</button>
+          <button type="button" (click)="closeEditModal()">Cancel</button>
+          <button type="submit" [disabled]="editForm.invalid">Save</button>
         </div>
+
       </form>
     </div>
   </div>
+
 </div>

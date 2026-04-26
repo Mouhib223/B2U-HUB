@@ -27,6 +27,7 @@ export class AdminShellComponent {
     this.auth.logout();
   }
 }*/
+
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
@@ -50,8 +51,11 @@ export class AdminShellComponent {
     { label: 'Users',        icon: 'people',     route: '/admin/users'        },
     { label: 'Projects',     icon: 'work',       route: '/admin/projects'     },
 
-    { label: 'Applications', icon: 'assignment', route: '/admin/applications' },
     { label: 'Companies',    icon: ' corporate_fare', route: '/admin/companies'    },
+
+
+    { label: 'Applications', icon: 'assignment', route: '/admin/applications' },
+    { label: 'Équipes',      icon: 'groups', route: '/admin/equipes' },
 
     { label: 'Candidatures',  icon: 'description', route: '/admin/candidatures'  },
 

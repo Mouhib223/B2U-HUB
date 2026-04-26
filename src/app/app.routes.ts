@@ -1,28 +1,25 @@
 import { Routes } from '@angular/router';
 import { AuthGuard } from './core/guards/auth.guard';
 import { AdminGuard } from './core/guards/admin.guard';
+import { EquipeFront } from './features/equipe-front/equipe-front';
 
 export const routes: Routes = [
-  // Default redirect
   { path: '', redirectTo: '/landing', pathMatch: 'full' },
 
-  // Public
+
   {
     path: 'landing',
     loadComponent: () => import('./features/landing/landing-page/landing-page')
       .then(m => m.LandingPageComponent)
   },
 
-  // Auth (public)
+
   {
     path: 'auth',
     loadChildren: () => import('./features/auth/auth.routes')
       .then(m => m.AUTH_ROUTES)
   },
 
-  // ─────────────────────────────────────────
-  // FRONT OFFICE — Students & Companies
-  // ─────────────────────────────────────────
   {
     path: 'app',
     loadComponent: () => import('./layout/shell/shell.component')
@@ -67,10 +64,7 @@ export const routes: Routes = [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   },
-
-  // ─────────────────────────────────────────
-  // STUDENT — Espace étudiant / freelancer
-  // ─────────────────────────────────────────
+ 
   {
     path: 'student',
     loadComponent: () => import('./layout/student-shell/student-shell.component')
@@ -86,19 +80,26 @@ export const routes: Routes = [
         loadComponent: () => import('./features/candidatures/candidature-form')
           .then(m => m.CandidatureFormComponent)
       },
-
+      
+      {
+  path: 'my-workpost/:companyId',
+  loadComponent: () => import('./backoffice/student-workpost/student-workpost')
+    .then(m => m.StudentWorkpost)
+},
       {
         path: 'my-company',
         loadComponent: () => import('./backoffice/student-company/student-company.component')
           .then(m => m.StudentCompanyComponent)
       },
+       {
+    path: 'equipes',
+    component: EquipeFront
+  },
       { path: '', redirectTo: 'candidatures', pathMatch: 'full' }
     ]
   },
 
-  // ─────────────────────────────────────────
-  // COMPANY — Espace entreprise
-  // ─────────────────────────────────────────
+
   {
     path: 'company',
     loadComponent: () => import('./layout/company-shell/company-shell.component')
@@ -109,13 +110,15 @@ export const routes: Routes = [
         loadComponent: () => import('./backoffice/company-candidatures/company-candidatures.component')
           .then(m => m.CompanyCandidaturesComponent)
       },
+      {
+        path: 'work-post',
+        loadComponent: () => import('./backoffice/work-post/work-post')
+          .then(m => m.WorkPost)
+      },
       { path: '', redirectTo: 'candidatures', pathMatch: 'full' }
     ]
   },
 
-  // ─────────────────────────────────────────
-  // BACK OFFICE — Admin only
-  // ─────────────────────────────────────────
   {
     path: 'admin',
     loadComponent: () => import('./layout/admin-shell/admin-shell.component')
@@ -142,6 +145,9 @@ export const routes: Routes = [
         loadComponent: () => import('./backoffice/applications-overview/applications-overview.component')
           .then(m => m.ApplicationsOverviewComponent)
       },
+
+
+
       {
 
         path: 'companies',
@@ -154,6 +160,8 @@ export const routes: Routes = [
           .then(m => m.CandidaturesCrudComponent)
 
       },
+                { path: 'equipes', loadComponent: () => import('./backoffice/equipe-crud/equipe-crud').then(m => m.EquipeCrudComponent) },  // <--- ici
+
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   },
