@@ -26,6 +26,7 @@ export const routes: Routes = [
       .then(m => m.ShellComponent),
     canActivate: [AuthGuard],
     children: [
+       
       {
         path: 'dashboard',
         loadChildren: () => import('./features/dashboard/dashboard.routes')
@@ -61,6 +62,7 @@ export const routes: Routes = [
         loadComponent: () => import('./backoffice/student-company/student-company.component')
           .then(m => m.StudentCompanyComponent)
       },
+      
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   },
@@ -115,11 +117,11 @@ export const routes: Routes = [
         loadComponent: () => import('./backoffice/company-candidatures/company-candidatures.component')
           .then(m => m.CompanyCandidaturesComponent)
       },
-      {
-        path: 'work-post',
+     {
+      path: 'work-post',
         loadComponent: () => import('./backoffice/work-post/work-post')
           .then(m => m.WorkPost)
-      },
+    },
       { path: '', redirectTo: 'candidatures', pathMatch: 'full' }
     ]
   },

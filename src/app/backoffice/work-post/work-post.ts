@@ -26,6 +26,10 @@ export class WorkPost implements OnInit {
   showFormPanel: boolean = true;
   isLoading: boolean = false;
 
+  aiTitle: string = '';
+  aiSector: string = '';
+  isGenerating: boolean = false;
+
   get formModel(): WorkPostModel {
     return this.selectedPost ?? this.newPost;
   }
@@ -37,11 +41,10 @@ export class WorkPost implements OnInit {
   emptyPost(): WorkPostModel {
     return {
       title: '',
-      description: '',
-      hoursPerWeek: 0,
-      durationWeeks: 0,
-      requiredSkills: '',
-      status: 'ACTIVE'
+    hoursPerWeek: 0,
+    requiredSkills: '',
+    status: 'ACTIVE',
+    workMode: 'HYBRID' 
     };
   }
 
@@ -155,4 +158,27 @@ export class WorkPost implements OnInit {
     }
   }
 
+  generateWithAI(): void {
+  if (!this.aiTitle || !this.aiSector) return;
+  
+  this.isGenerating = true;
+  this.workPostService.generate(this.aiTitle, this.aiSector).subscribe({
+    next: (generated: WorkPostModel) => {
+
+      this.newPost = {
+        ...generated,
+        id: undefined,
+        entrepriseId: undefined,
+        createdAt: undefined
+      };
+      this.selectedPost = null;
+      this.showFormPanel = true;
+      this.isGenerating = false;
+    },
+    error: (err: any) => {
+      console.error('AI generation failed', err);
+      this.isGenerating = false;
+    }
+  });
+}
 }

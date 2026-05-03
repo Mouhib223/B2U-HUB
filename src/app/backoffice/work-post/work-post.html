@@ -43,6 +43,30 @@
     </button>
   </div>
 
+  <!-- AI Generation Block -->
+  <div class="ai-block">
+    <div class="ai-header">
+      <mat-icon>auto_awesome</mat-icon>
+      <span>Générer une fiche de poste avec l'IA</span>
+    </div>
+    <div class="ai-inputs">
+      <input 
+        type="text" 
+        placeholder="Titre du poste (ex: Développeur React)" 
+        class="form-input"
+        [(ngModel)]="aiTitle">
+      <input 
+        type="text" 
+        placeholder="Secteur (ex: Tech, Finance, Santé)" 
+        class="form-input"
+        [(ngModel)]="aiSector">
+      <button class="btn-ai" (click)="generateWithAI()" [disabled]="isGenerating">
+        <mat-icon>{{ isGenerating ? 'hourglass_empty' : 'auto_awesome' }}</mat-icon>
+        {{ isGenerating ? 'Génération...' : 'Générer' }}
+      </button>
+    </div>
+  </div>
+
   <!-- Content layout: table + side panel -->
   <div class="content-layout">
     <!-- Table card -->
@@ -51,12 +75,11 @@
         <thead>
           <tr>
             <th>Titre</th>
-            <th>Description</th>
             <th>Heures/sem</th>
-            <th>Durée (sem)</th>
             <th>Compétences</th>
             <th>Statut</th>
             <th>Actions</th>
+            <th>Mode de travail</th>
           </tr>
         </thead>
         <tbody>
@@ -70,10 +93,9 @@
                 </div>
               </div>
             </td>
-            <td>{{ post.description | slice:0:50 }}...</td>
             <td>{{ post.hoursPerWeek }}h</td>
-            <td>{{ post.durationWeeks }} sem</td>
             <td>{{ post.requiredSkills }}</td>
+            <td>{{ post.workMode }}</td>
             <td>
               <span class="badge" [ngClass]="getStatusClass(post.status!)">
                 {{ post.status }}
@@ -115,20 +137,18 @@
                  [(ngModel)]="formModel.title">
         </div>
         <div class="detail-row">
-          <mat-icon>description</mat-icon>
-          <textarea placeholder="Description" rows="3" class="form-input"
-                    [(ngModel)]="formModel.description"></textarea>
-        </div>
-        <div class="detail-row">
           <mat-icon>schedule</mat-icon>
           <input type="number" placeholder="Heures par semaine" class="form-input"
                  [(ngModel)]="formModel.hoursPerWeek">
         </div>
         <div class="detail-row">
-          <mat-icon>event</mat-icon>
-          <input type="number" placeholder="Durée (semaines)" class="form-input"
-                 [(ngModel)]="formModel.durationWeeks">
-        </div>
+        <mat-icon>location_on</mat-icon>
+        <select class="form-input" [(ngModel)]="formModel.workMode">
+          <option value="HYBRID">Hybride</option>
+          <option value="REMOTE">À distance</option>
+          <option value="ONSITE">Sur site</option>
+        </select>
+      </div>
         <div class="detail-row">
           <mat-icon>code</mat-icon>
           <input type="text" placeholder="Compétences requises (ex: Java, Spring)" class="form-input"
