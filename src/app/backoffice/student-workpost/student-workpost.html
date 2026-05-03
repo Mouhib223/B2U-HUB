@@ -14,29 +14,41 @@
 
   <div *ngIf="!loading && !errorMessage && workPosts.length > 0" class="posts-grid">
     <div class="post-card" *ngFor="let post of workPosts">
+      
       <div class="card-header">
         <h3>{{ post.title }}</h3>
+
         <span class="hours-badge">
           {{ post.hoursPerWeek }}h/semaine
         </span>
       </div>
+
       <div class="card-body">
-        <p class="description">{{ post.description }}</p>
-        <p *ngIf="post.durationWeeks" class="duration">
-          📅 Durée : {{ post.durationWeeks }} semaine(s)
-        </p>
+        
         <p *ngIf="post.requiredSkills" class="skills">
           🛠️ Compétences requises : {{ post.requiredSkills }}
         </p>
+
+        <p class="mode">
+  📍 Mode de travail : {{ post.workMode || 'NON DEFINI' }}
+</p>
+
         <p *ngIf="post.status" class="status" [class.active]="post.status === 'ACTIVE'">
           Statut : {{ post.status }}
         </p>
+
+        <p *ngIf="post.createdAt" class="date">
+          📅 Publié le : {{ post.createdAt | date:'mediumDate' }}
+        </p>
+
       </div>
+
       <div class="card-footer">
         <button class="apply-btn" (click)="applyForPost(post)">
           Postuler
         </button>
       </div>
+
     </div>
   </div>
 

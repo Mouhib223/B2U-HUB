@@ -29,4 +29,7 @@ export class WorkPostService  {
   getRecommended(maxHours: number): Observable<WorkPost[]> {
     return this.http.get<WorkPost[]>(`${this.baseUrl}/recommended?maxHours=${maxHours}`);
   }
+  generate(title: string, sector: string): Observable<WorkPost> {
+    return this.http.get<WorkPost>(`${this.baseUrl}/generate?title=${title}&sector=${sector}`);
+  }
 }
