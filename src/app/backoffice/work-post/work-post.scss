@@ -164,3 +164,8 @@ hr { margin:1rem 0; border-color:#F1F5F9; }
     width: 18px;
   }
 }
+
+.btn-detail { display:flex; align-items:center; gap:3px; background:#EBF5FF; color:#1A56DB; border:none; border-radius:8px; padding:4px 10px; font-size:.75rem; font-weight:600; cursor:pointer;
+  mat-icon { font-size:.9rem; }
+  &:hover { background:#DBEAFE; }
+}

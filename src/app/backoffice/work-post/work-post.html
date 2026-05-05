@@ -1,11 +1,9 @@
 <div class="page">
-  <!-- Header -->
   <div class="page-header">
     <h1>Gestion des offres / posts</h1>
     <p>Créez, modifiez ou supprimez vos missions. Consultez les recommandations.</p>
   </div>
 
-  <!-- Stats Row -->
   <div class="stats-row">
     <div class="stat-card">
       <div class="stat-value">{{ totalPosts }}</div>
@@ -25,7 +23,6 @@
     </div>
   </div>
 
-  <!-- Filters + Add button -->
   <div class="filters">
     <div class="search-bar">
       <mat-icon>search</mat-icon>
@@ -43,23 +40,14 @@
     </button>
   </div>
 
-  <!-- AI Generation Block -->
   <div class="ai-block">
     <div class="ai-header">
       <mat-icon>auto_awesome</mat-icon>
       <span>Générer une fiche de poste avec l'IA</span>
     </div>
     <div class="ai-inputs">
-      <input 
-        type="text" 
-        placeholder="Titre du poste (ex: Développeur React)" 
-        class="form-input"
-        [(ngModel)]="aiTitle">
-      <input 
-        type="text" 
-        placeholder="Secteur (ex: Tech, Finance, Santé)" 
-        class="form-input"
-        [(ngModel)]="aiSector">
+      <input type="text" placeholder="Titre du poste (ex: Développeur React)" class="form-input" [(ngModel)]="aiTitle">
+      <input type="text" placeholder="Secteur (ex: Tech, Finance, Santé)" class="form-input" [(ngModel)]="aiSector">
       <button class="btn-ai" (click)="generateWithAI()" [disabled]="isGenerating">
         <mat-icon>{{ isGenerating ? 'hourglass_empty' : 'auto_awesome' }}</mat-icon>
         {{ isGenerating ? 'Génération...' : 'Générer' }}
@@ -67,9 +55,7 @@
     </div>
   </div>
 
-  <!-- Content layout: table + side panel -->
   <div class="content-layout">
-    <!-- Table card -->
     <div class="table-card">
       <table>
         <thead>
@@ -77,9 +63,9 @@
             <th>Titre</th>
             <th>Heures/sem</th>
             <th>Compétences</th>
+            <th>Mode de travail</th>
             <th>Statut</th>
             <th>Actions</th>
-            <th>Mode de travail</th>
           </tr>
         </thead>
         <tbody>
@@ -102,6 +88,9 @@
               </span>
             </td>
             <td class="actions">
+              <button class="btn-detail" (click)="viewDetail(post)">
+                <mat-icon>visibility</mat-icon> Détails
+              </button>
               <button class="btn-accept" (click)="editPost(post)">
                 <mat-icon>edit</mat-icon> Modifier
               </button>
@@ -111,13 +100,12 @@
             </td>
           </tr>
           <tr *ngIf="filteredPosts.length === 0">
-            <td colspan="7" class="empty">Aucun post trouvé</td>
+            <td colspan="6" class="empty">Aucun post trouvé</td>
           </tr>
         </tbody>
       </table>
     </div>
 
-    <!-- Right panel: Add / Edit form -->
     <div class="detail-panel" *ngIf="showFormPanel">
       <div class="detail-header">
         <div class="detail-avatar">
@@ -130,29 +118,25 @@
         <button class="close-btn" (click)="cancelForm()"><mat-icon>close</mat-icon></button>
       </div>
       <div class="detail-body">
-        <!-- All inputs bind to formModel (either selectedPost or newPost) -->
         <div class="detail-row">
           <mat-icon>title</mat-icon>
-          <input type="text" placeholder="Titre du post" class="form-input"
-                 [(ngModel)]="formModel.title">
+          <input type="text" placeholder="Titre du post" class="form-input" [(ngModel)]="formModel.title">
         </div>
         <div class="detail-row">
           <mat-icon>schedule</mat-icon>
-          <input type="number" placeholder="Heures par semaine" class="form-input"
-                 [(ngModel)]="formModel.hoursPerWeek">
+          <input type="number" placeholder="Heures par semaine" class="form-input" [(ngModel)]="formModel.hoursPerWeek">
         </div>
         <div class="detail-row">
-        <mat-icon>location_on</mat-icon>
-        <select class="form-input" [(ngModel)]="formModel.workMode">
-          <option value="HYBRID">Hybride</option>
-          <option value="REMOTE">À distance</option>
-          <option value="ONSITE">Sur site</option>
-        </select>
-      </div>
+          <mat-icon>location_on</mat-icon>
+          <select class="form-input" [(ngModel)]="formModel.workMode">
+            <option value="HYBRID">Hybride</option>
+            <option value="REMOTE">À distance</option>
+            <option value="ONSITE">Sur site</option>
+          </select>
+        </div>
         <div class="detail-row">
           <mat-icon>code</mat-icon>
-          <input type="text" placeholder="Compétences requises (ex: Java, Spring)" class="form-input"
-                 [(ngModel)]="formModel.requiredSkills">
+          <input type="text" placeholder="Compétences requises (ex: Java, Spring)" class="form-input" [(ngModel)]="formModel.requiredSkills">
         </div>
         <div class="detail-row" *ngIf="selectedPost">
           <mat-icon>flag</mat-icon>
@@ -164,12 +148,14 @@
           </select>
         </div>
         <div class="detail-actions">
+          <button class="btn-detail" *ngIf="selectedPost" (click)="viewDetail(selectedPost!)">
+            <mat-icon>visibility</mat-icon> Détails
+          </button>
           <button class="btn-accept" (click)="selectedPost ? updatePost() : createPost()">
             {{ selectedPost ? 'Mettre à jour' : 'Créer' }}
           </button>
           <button class="btn-reject" (click)="cancelForm()">Annuler</button>
         </div>
-        
       </div>
     </div>
   </div>
