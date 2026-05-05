@@ -122,6 +122,16 @@ export const routes: Routes = [
         loadComponent: () => import('./backoffice/work-post/work-post')
           .then(m => m.WorkPost)
     },
+    {
+      path: 'attendance',
+      loadComponent: () => import('./backoffice/attendance/attendance')
+        .then(m => m.AttendanceComponent)
+    },
+    {
+      path: 'work-post/:id',  // ✅ nouveau
+      loadComponent: () => import('./backoffice/work-post-detail/work-post-detail')
+        .then(m => m.WorkPostDetail)
+    },
       { path: '', redirectTo: 'candidatures', pathMatch: 'full' }
     ]
   },

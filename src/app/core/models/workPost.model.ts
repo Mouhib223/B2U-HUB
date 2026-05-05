@@ -10,4 +10,6 @@ export interface WorkPost {
   status?: WorkPostStatus;
   createdAt?: Date;
   workMode: WorkMode;
+
+  projetId?: string;
 }

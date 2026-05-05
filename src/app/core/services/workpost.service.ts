@@ -32,4 +32,16 @@ export class WorkPostService  {
   generate(title: string, sector: string): Observable<WorkPost> {
     return this.http.get<WorkPost>(`${this.baseUrl}/generate?title=${title}&sector=${sector}`);
   }
+
+  assignProjet(workPostId: string, projetId: string): Observable<WorkPost> {
+    return this.http.put<WorkPost>(`${this.baseUrl}/${workPostId}/assign-projet/${projetId}`, {});
+  }
+
+  unassignProjet(workPostId: string): Observable<WorkPost> {
+    return this.http.put<WorkPost>(`${this.baseUrl}/${workPostId}/unassign-projet`, {});
+  }
+
+  getById(id: string): Observable<WorkPost> {
+    return this.http.get<WorkPost>(`${this.baseUrl}/${id}`);
+  }
 }

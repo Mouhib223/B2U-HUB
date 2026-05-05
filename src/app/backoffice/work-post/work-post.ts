@@ -5,6 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { WorkPostService } from '../../core/services/workpost.service';
 import { WorkPost as WorkPostModel } from '../../core/models/workPost.model'; // alias
 import { AuthService } from '../../core/services/auth.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'b2u-work-post',
@@ -16,6 +17,8 @@ import { AuthService } from '../../core/services/auth.service';
 export class WorkPost implements OnInit {
   private workPostService = inject(WorkPostService);
   private auth = inject(AuthService);
+
+  private router = inject(Router);
 
   posts: WorkPostModel[] = [];
   recommendedPosts: WorkPostModel[] = [];
@@ -180,5 +183,9 @@ export class WorkPost implements OnInit {
       this.isGenerating = false;
     }
   });
+}
+
+viewDetail(post: WorkPostModel): void {
+  this.router.navigate(['/company/work-post', post.id]);
 }
 }

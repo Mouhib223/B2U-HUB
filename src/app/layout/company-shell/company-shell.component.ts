@@ -23,6 +23,10 @@ import { AuthService } from '../../core/services/auth.service';
           <a routerLink="/company/work-post" routerLinkActive="active">
             <mat-icon>work</mat-icon><span *ngIf="!collapsed">Work Post</span>
           </a>
+
+          <a routerLink="/company/attendance" routerLinkActive="active">
+            <mat-icon>how_to_reg</mat-icon><span *ngIf="!collapsed">Présences</span>
+          </a>
         </nav>
         <div class="sidebar-footer">
           <button class="logout-btn" (click)="logout()">
