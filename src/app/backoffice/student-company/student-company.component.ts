@@ -100,7 +100,7 @@ export class StudentCompanyComponent implements OnInit {
 
   apply(company: Entreprise) {
   // Utilisez l'email comme identifiant d'entreprise
-  this.router.navigate(['/student/my-workpost', company.email], {
+  this.router.navigate(['/app/my-workpost', company.email], {
     state: { companyName: company.name }
   });
 }

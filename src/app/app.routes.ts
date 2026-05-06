@@ -62,6 +62,11 @@ export const routes: Routes = [
         loadComponent: () => import('./backoffice/student-company/student-company.component')
           .then(m => m.StudentCompanyComponent)
       },
+      {
+  path: 'my-workpost/:companyId',
+  loadComponent: () => import('./backoffice/student-workpost/student-workpost')
+    .then(m => m.StudentWorkpost)
+},
       
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
@@ -90,12 +95,6 @@ export const routes: Routes = [
 },
 
 
-      {
-        path: 'my-company',
-        loadComponent: () => import('./backoffice/student-company/student-company.component')
-          .then(m => m.StudentCompanyComponent)
-      },
-
        {
     path: 'equipes',
     component: EquipeFront
@@ -123,15 +122,15 @@ export const routes: Routes = [
           .then(m => m.WorkPost)
     },
     {
-      path: 'attendance',
-      loadComponent: () => import('./backoffice/attendance/attendance')
-        .then(m => m.AttendanceComponent)
-    },
+  path: 'work-post/:id',
+  loadComponent: () => import('./backoffice/work-post-detail/work-post-detail')
+    .then(m => m.WorkPostDetail)
+},
     {
-      path: 'work-post/:id',  // ✅ nouveau
-      loadComponent: () => import('./backoffice/work-post-detail/work-post-detail')
-        .then(m => m.WorkPostDetail)
-    },
+    path: 'attendance',
+    loadComponent: () => import('./backoffice/attendance/attendance')
+      .then(m => m.AttendanceComponent)
+  },
       { path: '', redirectTo: 'candidatures', pathMatch: 'full' }
     ]
   },

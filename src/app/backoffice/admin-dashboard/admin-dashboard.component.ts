@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
+import { EntrepriseService } from '../../core/services/entreprise.service';
 
 @Component({
   selector: 'b2u-admin-dashboard',
@@ -10,7 +11,26 @@ import { MatIconModule } from '@angular/material/icon';
   templateUrl: './admin-dashboard.component.html',
   styleUrls: ['./admin-dashboard.component.scss']
 })
-export class AdminDashboardComponent {
+export class AdminDashboardComponent implements OnInit {
+
+  constructor(private entrepriseService: EntrepriseService) {}
+  ngOnInit(): void {
+    this.loadEntrepriseCount();
+  }
+
+  loadEntrepriseCount(): void {
+  this.entrepriseService.getTotalCount().subscribe({
+    next: (res) => {
+      const companiesStat = this.stats.find(s => s.label === 'Companies');
+      if (companiesStat) {
+        companiesStat.value = res.total;
+      }
+    },
+    error: (err) => {
+      console.error('Erreur lors du chargement des entreprises', err);
+    }
+  });
+}
   stats = [
     { label: 'Total Users',       value: 248,  icon: 'people',      color: '#3B82F6', bg: '#EFF6FF' },
     { label: 'Active Projects',   value: 63,   icon: 'work',        color: '#10B981', bg: '#ECFDF5' },

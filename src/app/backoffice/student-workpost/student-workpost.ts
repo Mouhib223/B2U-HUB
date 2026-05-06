@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { WorkPostService } from '../../core/services/workpost.service';
 import { WorkPost } from '../../core/models/workPost.model';
+import { ProjetService } from '../../core/services/projet';
+import { Project } from '../../core/models/project.model';
 
 @Component({
   selector: 'b2u-student-workpost',
@@ -13,6 +15,7 @@ import { WorkPost } from '../../core/models/workPost.model';
 })
 export class StudentWorkpost implements OnInit {
   workPosts: WorkPost[] = [];
+  projectMap: { [workPostId: string]: Project } = {};
   loading = false;
   errorMessage = '';
   companyName = '';
@@ -21,14 +24,12 @@ export class StudentWorkpost implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private workPostService: WorkPostService
+    private workPostService: WorkPostService,
+    private projetService: ProjetService
   ) {}
 
   ngOnInit(): void {
-    // 1. Récupérer l'ID depuis l'URL
     this.companyId = this.route.snapshot.paramMap.get('companyId')!;
-
-    // 2. Récupérer le nom depuis le state (optionnel)
     const state = history.state as { companyName: string };
     this.companyName = state?.companyName || 'cette entreprise';
 
@@ -40,27 +41,36 @@ export class StudentWorkpost implements OnInit {
   }
 
   loadWorkPosts(): void {
-  this.loading = true;
-  // Appel de tous les posts (sans filtre)
-  this.workPostService.getAll().subscribe({
-    next: (allPosts) => {
-      console.log('📦 Tous les posts :', allPosts);
-      // Filtrage manuel avec l'ID entreprise
-      const filtered = allPosts.filter(p => p.entrepriseId === this.companyId);
-      this.workPosts = filtered;
-      console.log(`🎯 Posts filtrés pour ${this.companyId} :`, filtered);
-      this.loading = false;
-    },
-    error: (err) => {
-      console.error('Erreur getAll', err);
-      this.errorMessage = 'Erreur chargement des offres.';
-      this.loading = false;
-    }
-  });
-}
+    this.loading = true;
+    this.workPostService.getAll().subscribe({
+      next: (allPosts) => {
+        this.workPosts = allPosts.filter(p => p.entrepriseId === this.companyId);
+        this.loadProjects();
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('Erreur getAll', err);
+        this.errorMessage = 'Erreur chargement des offres.';
+        this.loading = false;
+      }
+    });
+  }
+
+  loadProjects(): void {
+    this.workPosts.forEach(post => {
+      if (post.projetId && post.id) {
+        this.projetService.getProjetById(post.projetId).subscribe({
+          next: (project) => {
+            this.projectMap[post.id!] = project;
+          },
+          error: () => {}
+        });
+      }
+    });
+  }
 
   goBack(): void {
-    this.router.navigate(['/student/my-company']);
+    this.router.navigate(['/app/my-company']);
   }
 
   applyForPost(post: WorkPost): void {

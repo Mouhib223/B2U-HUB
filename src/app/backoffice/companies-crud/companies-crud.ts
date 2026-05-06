@@ -3,6 +3,9 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { EntrepriseService, Entreprise } from '../../core/services/entreprise.service';
+import { Chart, registerables } from 'chart.js';
+import { forkJoin } from 'rxjs';
+Chart.register(...registerables);
 
 @Component({
   selector: 'b2u-companies-crud',
@@ -23,6 +26,8 @@ export class CompaniesCrudComponent implements OnInit {
   editingCompany: Entreprise | null = null;
   equipesByCompany: { [key: string]: any[] } = {};
   expandedCompanyId: string | null = null;
+  sectorChart: any;
+
 
   newCompany = {
     name: '',
@@ -47,48 +52,77 @@ export class CompaniesCrudComponent implements OnInit {
   }
 
   loadStats(): void {
-    Promise.all([
-      this.entrepriseService.getTotalCount().toPromise(),
-      this.entrepriseService.getCountBySector().toPromise()
-    ])
-      .then(([totalRes, sectorMap]) => {
-        const totalCompanies = totalRes?.total ?? 0;
-        const sectorCounts = sectorMap ?? {};
-        const numberOfSectors = Object.keys(sectorCounts).length;
+  forkJoin({
+    total: this.entrepriseService.getTotalCount(),
+    sectors: this.entrepriseService.getCountBySector()
+  }).subscribe({
+    next: ({ total, sectors }) => {
+      const totalCompanies = total?.total ?? 0;
+      const sectorCounts = sectors ?? {};
+      const numberOfSectors = Object.keys(sectorCounts).length;
 
-        // Stats cards (short labels)
-        this.stats = [
-          {
-            label: 'Total',
-            value: totalCompanies,
-            icon: 'business',
-            color: '#3B82F6',
-            bg: '#EFF6FF'
-          },
-          {
-            label: 'Sectors',
-            value: numberOfSectors,
-            icon: 'category',
-            color: '#10B981',
-            bg: '#ECFDF5'
-          }
-        ];
+      // ✅ Stats cards
+      this.stats = [
+        {
+          label: 'Total',
+          value: totalCompanies,
+          icon: 'business',
+          color: '#3B82F6',
+          bg: '#EFF6FF'
+        },
+        {
+          label: 'Sectors',
+          value: numberOfSectors,
+          icon: 'category',
+          color: '#10B981',
+          bg: '#ECFDF5'
+        }
+      ];
 
-        // Prepare sector breakdown table
-        this.sectorBreakdown = Object.entries(sectorCounts).map(([sector, count]) => ({
+      // ✅ Transformer en tableau pour le chart
+      this.sectorBreakdown = Object.entries(sectorCounts).map(
+        ([sector, count]) => ({
           sector,
           count
-        }));
-      })
-      .catch((err) => {
-        console.error('Failed to load stats', err);
-        this.stats = [
-          { label: 'Total', value: 0, icon: 'business', color: '#3B82F6', bg: '#EFF6FF' },
-          { label: 'Sectors', value: 0, icon: 'category', color: '#10B981', bg: '#ECFDF5' }
-        ];
-        this.sectorBreakdown = [];
-      });
-  }
+        })
+      );
+
+      // ✅ Créer / refresh le graphique
+      setTimeout(() => {
+        this.createChart();
+      }, 0);
+    },
+
+    error: (err) => {
+      console.error('Failed to load stats', err);
+
+      // fallback UI
+      this.stats = [
+        {
+          label: 'Total',
+          value: 0,
+          icon: 'business',
+          color: '#3B82F6',
+          bg: '#EFF6FF'
+        },
+        {
+          label: 'Sectors',
+          value: 0,
+          icon: 'category',
+          color: '#10B981',
+          bg: '#ECFDF5'
+        }
+      ];
+
+      this.sectorBreakdown = [];
+
+      // éviter crash du chart
+      if (this.sectorChart) {
+        this.sectorChart.destroy();
+      }
+    }
+  });
+}
 
   get filteredCompanies(): Entreprise[] {
     if (!this.searchQuery.trim()) return this.companies;
@@ -197,5 +231,38 @@ export class CompaniesCrudComponent implements OnInit {
       error: (err) => console.error('Failed to load equipes', err)
     });
   }
+}
+
+createChart(): void {
+  const labels = this.sectorBreakdown.map(s => s.sector);
+  const data = this.sectorBreakdown.map(s => s.count);
+
+  if (this.sectorChart) {
+    this.sectorChart.destroy(); // éviter duplication
+  }
+
+  this.sectorChart = new Chart('sectorChart', {
+    type: 'bar', // tu peux changer en 'pie' ou 'doughnut'
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Companies',
+          data: data,
+          borderWidth: 1
+        }
+      ]
+    },
+    options: {
+  responsive: true,
+  maintainAspectRatio: false, // 🔥 IMPORTANT
+  plugins: {
+    legend: {
+      display: true,
+      position: 'bottom'
+    }
+  }
+}
+  });
 }
 }

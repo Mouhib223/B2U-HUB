@@ -20,25 +20,12 @@
 
   <!-- SECTOR TABLE -->
   <div class="table-card" style="margin-top: 1.5rem;">
-    <h3>Companies by Sector</h3>
-    <table>
-      <thead>
-        <tr>
-          <th>Sector</th>
-          <th>Number of Companies</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let item of sectorBreakdown">
-          <td>{{ item.sector }}</td>
-          <td>{{ item.count }}</td>
-        </tr>
-        <tr *ngIf="sectorBreakdown.length === 0">
-          <td colspan="2" class="empty-state">No sector data available</td>
-        </tr>
-      </tbody>
-    </table>
+  <h3>Companies by Sector</h3>
+
+  <div class="chart-container">
+    <canvas id="sectorChart"></canvas>
   </div>
+</div>
 
   <br>
 
