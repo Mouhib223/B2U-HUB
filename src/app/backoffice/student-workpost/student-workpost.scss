@@ -215,3 +215,74 @@
     }
   }
 }
+
+.projet-section {
+  margin-top: 12px;
+}
+
+.projet-badge {
+  background: #f0f4ff;
+  border: 1px solid #c7d7f9;
+  border-radius: 10px;
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.projet-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #4b6cb7;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.projet-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.projet-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.projet-status {
+  font-size: 0.72rem;
+  background: #dbeafe;
+  color: #1e40af;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+.projet-desc {
+  font-size: 0.82rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.projet-skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.skill-tag {
+  background: #e0e7ff;
+  color: #3730a3;
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.no-projet {
+  margin-top: 10px;
+  font-size: 0.82rem;
+  color: #94a3b8;
+  font-style: italic;
+}

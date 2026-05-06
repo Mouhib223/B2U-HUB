@@ -330,3 +330,13 @@ td {
 .equipes-container {
   padding: 10px;
 }
+
+#sectorChart {
+  max-height: 300px;
+  width: 100% !important;
+}
+
+.chart-container {
+  position: relative;
+  height: 300px;
+}
