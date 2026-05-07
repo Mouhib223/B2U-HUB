@@ -19,6 +19,7 @@ import { AuthService } from '../../core/services/auth.service';
           <a routerLink="/company/candidatures" routerLinkActive="active">
             <mat-icon>people</mat-icon><span *ngIf="!collapsed">Candidatures</span>
           </a>
+         
         </nav>
         <div class="sidebar-footer">
           <button class="logout-btn" (click)="logout()">

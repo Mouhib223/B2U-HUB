@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { EquipeService } from '../../core/services/equipe.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'b2u-equipe-front',
@@ -15,7 +16,7 @@ export class EquipeFront implements OnInit {
   equipes: any[] = [];
   searchQuery = '';
 
-  constructor(private equipeService: EquipeService) {}
+  constructor(private equipeService: EquipeService,  private router: Router) {}
 
   ngOnInit() {
     this.loadEquipes();
@@ -40,8 +41,7 @@ export class EquipeFront implements OnInit {
   joinTeam(equipe: any) {
     const roomId = 'team-' + equipe.idEquipe;
 
-    console.log('Navigate to chat:', roomId);
-
+this.router.navigate(['/student/chat', equipe.idEquipe]);
 
    
   }
