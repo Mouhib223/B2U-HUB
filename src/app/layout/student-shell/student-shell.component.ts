@@ -118,6 +118,7 @@ import { MatIconModule } from '@angular/material/icon';
       flex-direction: column;
       background: #F9FAFB;
       overflow: hidden;
+      min-width: 0;
     }
 
     header {
@@ -129,6 +130,7 @@ import { MatIconModule } from '@angular/material/icon';
       border-bottom: 1px solid #E2E8F0;
       font-weight: 600;
       color: #1E293B;
+      flex-shrink: 0;
     }
 
     header button {
@@ -143,7 +145,8 @@ import { MatIconModule } from '@angular/material/icon';
     main {
       flex: 1;
       overflow-y: auto;
-      padding: 1.5rem;
+      overflow-x: hidden;
+      padding: 0;
     }
 
     .expanded {

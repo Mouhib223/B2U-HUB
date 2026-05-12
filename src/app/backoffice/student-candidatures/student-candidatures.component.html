@@ -1,99 +1,401 @@
 <div class="page">
-  <div class="page-header">
-    <div>
-      <h1>Mes Candidatures</h1>
-      <p>Gérez vos candidatures soumises</p>
+  <section class="page-header">
+    <div class="header-copy">
+      <span class="eyebrow">Espace étudiant</span>
+      <h1>Mes candidatures</h1>
+      <p>Suivez vos réponses, vos scores de matching et les projets où votre profil a le plus de chances.</p>
     </div>
-    <button class="btn-primary" (click)="openCreate()">
-      <mat-icon>add</mat-icon> Nouvelle candidature
-    </button>
+
+    <div class="header-actions">
+      <button class="btn ghost" type="button" (click)="refreshData()" [disabled]="loading || saving">
+        <mat-icon>refresh</mat-icon>
+        Actualiser
+      </button>
+      <button class="btn primary" type="button" (click)="openCreate()">
+        <mat-icon>add</mat-icon>
+        Nouvelle candidature
+      </button>
+    </div>
+  </section>
+
+  <div class="error-banner" *ngIf="errorMessage && !showModal">
+    <mat-icon>error_outline</mat-icon>
+    <span>{{ errorMessage }}</span>
   </div>
 
-  <div class="table-card">
-    <table>
-      <thead>
-        <tr>
-          <th>Nom</th><th>Email</th><th>Formation</th>
-          <th>Expérience</th><th>Date</th><th>Statut</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let c of candidatures">
-          <td>{{ c.prenomCandidat }} {{ c.nomCandidat }}</td>
-          <td>{{ c.email }}</td>
-          <td>{{ c.formationActuelle || '—' }}</td>
-          <td>{{ c.anneeExperience }} an(s)</td>
-          <td>{{ c.dateCandidature || '—' }}</td>
-          <td><span class="badge" [ngClass]="statusClass(c.statutCandidature)">{{ c.statutCandidature }}</span></td>
-        </tr>
-        <tr *ngIf="candidatures.length === 0">
-          <td colspan="6" class="empty">Aucune candidature</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+  <section class="summary-grid" *ngIf="totalCount > 0">
+    <article class="summary-card">
+      <mat-icon>description</mat-icon>
+      <strong>{{ totalCount }}</strong>
+      <span>Total</span>
+    </article>
+    <article class="summary-card">
+      <mat-icon>schedule</mat-icon>
+      <strong>{{ countEnCours }}</strong>
+      <span>En cours</span>
+    </article>
+    <article class="summary-card">
+      <mat-icon>check_circle</mat-icon>
+      <strong>{{ countAccepted }}</strong>
+      <span>Acceptées</span>
+    </article>
+    <article class="summary-card">
+      <mat-icon>star</mat-icon>
+      <strong>{{ countRecommended }}</strong>
+      <span>Matchs forts</span>
+    </article>
+    <article class="summary-card">
+      <mat-icon>insights</mat-icon>
+      <strong>{{ averageScore }}%</strong>
+      <span>Score moyen</span>
+    </article>
+  </section>
+
+  <section class="filters" *ngIf="!loading">
+    <label class="search">
+      <mat-icon>search</mat-icon>
+      <input
+        type="text"
+        placeholder="Rechercher une candidature, un projet ou une spécialité"
+        [(ngModel)]="searchTerm"
+        (input)="onFilterChange()"
+      />
+    </label>
+
+    <button class="btn filter" type="button" (click)="toggleFilters()" [class.active]="showFilters">
+      <mat-icon>tune</mat-icon>
+      Filtres
+      <span *ngIf="activeFilterCount > 0">{{ activeFilterCount }}</span>
+    </button>
+
+    <button class="btn reset" type="button" *ngIf="activeFilterCount > 0" (click)="resetFilters()">
+      <mat-icon>close</mat-icon>
+      Réinitialiser
+    </button>
+
+    <div class="result-count">{{ totalItems }} résultat(s)</div>
+  </section>
+
+  <section class="filter-panel" *ngIf="showFilters && !loading">
+    <div class="filter-group">
+      <h3><mat-icon>flag</mat-icon> Statut</h3>
+      <label class="check" *ngFor="let entry of statusChecks | keyvalue">
+        <input type="checkbox" [(ngModel)]="statusChecks[entry.key]" (change)="onFilterChange()" />
+        <span></span>
+        {{ entry.key }}
+      </label>
+    </div>
+
+    <div class="filter-group">
+      <h3><mat-icon>donut_large</mat-icon> Niveau de matching</h3>
+      <label class="check">
+        <input type="checkbox" [(ngModel)]="scoreChecks.excellent" (change)="onFilterChange()" />
+        <span class="excellent"></span>
+        Excellent, 80% et plus
+      </label>
+      <label class="check">
+        <input type="checkbox" [(ngModel)]="scoreChecks.good" (change)="onFilterChange()" />
+        <span class="good"></span>
+        Très bon, 65 à 79%
+      </label>
+      <label class="check">
+        <input type="checkbox" [(ngModel)]="scoreChecks.average" (change)="onFilterChange()" />
+        <span class="average"></span>
+        Bon, 50 à 64%
+      </label>
+      <label class="check">
+        <input type="checkbox" [(ngModel)]="scoreChecks.low" (change)="onFilterChange()" />
+        <span class="low"></span>
+        Faible, moins de 50%
+      </label>
+    </div>
+
+    <div class="filter-group">
+      <h3><mat-icon>linear_scale</mat-icon> Score</h3>
+      <label class="range-label">Minimum <strong>{{ scoreMin }}%</strong></label>
+      <input type="range" min="0" max="100" step="5" [(ngModel)]="scoreMin" (input)="onFilterChange()" />
+      <label class="range-label">Maximum <strong>{{ scoreMax }}%</strong></label>
+      <input type="range" min="0" max="100" step="5" [(ngModel)]="scoreMax" (input)="onFilterChange()" />
+    </div>
+  </section>
+
+  <section class="loading-state" *ngIf="loading">
+    <mat-icon>sync</mat-icon>
+    <span>Chargement de vos candidatures...</span>
+  </section>
+
+  <section class="content" *ngIf="!loading">
+    <header class="content-head">
+      <div>
+        <h2>Liste des candidatures</h2>
+        <p>Dernière mise à jour : {{ lastUpdate | date: 'HH:mm:ss' }}</p>
+      </div>
+      <div class="content-actions">
+        <div class="mini-pagination" *ngIf="totalItems > pageSize">
+          <button class="page-btn" type="button" (click)="goToPage(pageIndex - 1)" [disabled]="pageIndex === 0" matTooltip="Précédent">
+            <mat-icon>chevron_left</mat-icon>
+          </button>
+          <span>{{ pageIndex + 1 }} / {{ totalPages }}</span>
+          <button class="page-btn" type="button" (click)="goToPage(pageIndex + 1)" [disabled]="pageIndex >= totalPages - 1" matTooltip="Suivant">
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+        </div>
+        <select class="page-size" [(ngModel)]="pageSize" (change)="onPageSizeChange()">
+          <option [ngValue]="6">6 par page</option>
+          <option [ngValue]="12">12 par page</option>
+          <option [ngValue]="24">24 par page</option>
+        </select>
+      </div>
+    </header>
+
+    <div class="empty-state" *ngIf="displayed.length === 0">
+      <mat-icon>inbox</mat-icon>
+      <h3>Aucune candidature trouvée</h3>
+      <p>Essayez de modifier les filtres ou envoyez une nouvelle candidature.</p>
+      <button class="btn primary" type="button" (click)="openCreate()">
+        <mat-icon>add</mat-icon>
+        Soumettre une candidature
+      </button>
+    </div>
+
+    <div class="cand-grid" *ngIf="displayed.length > 0">
+      <article class="cand-card" *ngFor="let c of displayed; trackBy: trackById">
+        <header class="cand-head">
+          <div class="avatar">{{ c._initials || getInitials(c) }}</div>
+          <div class="identity">
+            <h3>{{ c.prenomCandidat }} {{ c.nomCandidat }}</h3>
+            <p>{{ c.email }}</p>
+          </div>
+          <span class="status" [ngClass]="statusClass(c.statutCandidature)">
+            <mat-icon>{{ getStatusIcon(c.statutCandidature) }}</mat-icon>
+            {{ displayStatus(c.statutCandidature) }}
+          </span>
+        </header>
+
+        <div class="cand-body">
+          <div class="meta">
+            <span><mat-icon>work</mat-icon>{{ c._projectTitle || c.projectId || 'Projet non défini' }}</span>
+            <span><mat-icon>school</mat-icon>{{ c.formationActuelle || 'Formation non renseignée' }}</span>
+            <span><mat-icon>calendar_today</mat-icon>{{ c.dateCandidature | date: 'dd/MM/yyyy' }}</span>
+          </div>
+
+          <div class="score-line">
+            <div
+              class="score-ring"
+              [style.--pct]="(c.scoreMatching ?? 0) + '%'"
+              [style.--clr]="getScoreColor(c.scoreMatching)"
+            >
+              <span>{{ c.scoreMatching ?? 0 }}%</span>
+            </div>
+            <div class="score-copy">
+              <div class="score-top">
+                <strong [style.color]="getScoreColor(c.scoreMatching)">{{ getScoreLabel(c.scoreMatching) }}</strong>
+                <span>{{ getRecoLabel(c.scoreMatching) }}</span>
+              </div>
+              <div class="score-bar">
+                <div [style.width.%]="c.scoreMatching ?? 0" [style.background]="getScoreColor(c.scoreMatching)"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <footer class="cand-actions">
+          <button class="btn detail" type="button" (click)="openDetail(c)">
+            <mat-icon>analytics</mat-icon>
+            Voir le matching
+          </button>
+        </footer>
+      </article>
+    </div>
+
+    <footer class="pagination" *ngIf="totalItems > pageSize">
+      <p>Page {{ pageIndex + 1 }} sur {{ totalPages }}</p>
+      <div>
+        <button class="page-btn" type="button" (click)="goToPage(0)" [disabled]="pageIndex === 0" matTooltip="Première page">
+          <mat-icon>first_page</mat-icon>
+        </button>
+        <button class="page-btn" type="button" (click)="goToPage(pageIndex - 1)" [disabled]="pageIndex === 0" matTooltip="Précédent">
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+        <button class="page-btn number" type="button" *ngFor="let p of pageNumbers" [class.active]="p === pageIndex" (click)="goToPage(p)">
+          {{ p + 1 }}
+        </button>
+        <button class="page-btn" type="button" (click)="goToPage(pageIndex + 1)" [disabled]="pageIndex >= totalPages - 1" matTooltip="Suivant">
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+        <button class="page-btn" type="button" (click)="goToPage(totalPages - 1)" [disabled]="pageIndex >= totalPages - 1" matTooltip="Dernière page">
+          <mat-icon>last_page</mat-icon>
+        </button>
+      </div>
+    </footer>
+  </section>
 </div>
 
-<!-- Modal -->
-<div class="modal-overlay" *ngIf="showModal" (click)="showModal=false">
-  <div class="modal" (click)="$event.stopPropagation()">
-    <div class="modal-header">
-      <h2>Nouvelle candidature</h2>
-      <button class="close-btn" (click)="showModal=false"><mat-icon>close</mat-icon></button>
+<div class="overlay" *ngIf="showModal" (click)="showModal = false">
+  <section class="modal" (click)="$event.stopPropagation()">
+    <header class="modal-head">
+      <div class="modal-icon"><mat-icon>edit_note</mat-icon></div>
+      <div>
+        <h2>Nouvelle candidature</h2>
+        <p>Renseignez vos informations et ajoutez vos documents PDF.</p>
+      </div>
+      <button class="icon-close" type="button" (click)="showModal = false" matTooltip="Fermer">
+        <mat-icon>close</mat-icon>
+      </button>
+    </header>
+
+    <div class="error-banner modal-error" *ngIf="errorMessage">
+      <mat-icon>error_outline</mat-icon>
+      {{ errorMessage }}
     </div>
-    <form [formGroup]="form" (ngSubmit)="save()" novalidate class="modal-form">
-      <div class="form-grid">
-        <div class="field">
-          <label>Nom *</label>
-          <input formControlName="nomCandidat" [class.invalid]="submitted && f['nomCandidat'].invalid" />
-          <span class="err" *ngIf="submitted && f['nomCandidat'].errors?.['required']">Le nom est obligatoire</span>
-        </div>
-        <div class="field">
-          <label>Prénom *</label>
-          <input formControlName="prenomCandidat" [class.invalid]="submitted && f['prenomCandidat'].invalid" />
-          <span class="err" *ngIf="submitted && f['prenomCandidat'].errors?.['required']">Le prénom est obligatoire</span>
-        </div>
-        <div class="field">
-          <label>Téléphone *</label>
-          <input formControlName="telephone" [class.invalid]="submitted && f['telephone'].invalid" />
-          <span class="err" *ngIf="submitted && f['telephone'].errors?.['required']">Le téléphone est obligatoire</span>
-        </div>
-        <div class="field">
-          <label>Adresse</label>
-          <input formControlName="adresse" />
-        </div>
-        <div class="field">
-          <label>Formation</label>
-          <select formControlName="formationActuelle">
-            <option value="">-- Choisir --</option>
-            <option *ngFor="let f of formations" [value]="f">{{ f }}</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Spécialité</label>
-          <input formControlName="specialite" />
-        </div>
-        <div class="field">
-          <label>Années d'expérience</label>
-          <input formControlName="anneeExperience" type="number" min="0" />
-        </div>
-        <div class="field">
-          <label>Compétences <small>(virgule)</small></label>
-          <input formControlName="competences" />
-        </div>
-        <div class="field full">
-          <label>Lien CV</label>
-          <input formControlName="cvLien" />
-        </div>
-        <div class="field full">
-          <label>Lettre de motivation</label>
-          <textarea formControlName="lettreMotivation" rows="3"></textarea>
+
+    <form [formGroup]="form" (ngSubmit)="save()" novalidate class="modal-body">
+      <div class="form-section">
+        <h3><mat-icon>person</mat-icon> Informations personnelles</h3>
+        <div class="form-grid">
+          <label class="field">
+            Nom <span>*</span>
+            <input formControlName="nomCandidat" placeholder="Votre nom" [class.invalid]="submitted && f.nomCandidat.invalid" />
+            <small *ngIf="submitted && f.nomCandidat.errors?.['required']">Obligatoire</small>
+          </label>
+          <label class="field">
+            Prénom <span>*</span>
+            <input formControlName="prenomCandidat" placeholder="Votre prénom" [class.invalid]="submitted && f.prenomCandidat.invalid" />
+            <small *ngIf="submitted && f.prenomCandidat.errors?.['required']">Obligatoire</small>
+          </label>
+          <label class="field">
+            Téléphone <span>*</span>
+            <input formControlName="telephone" placeholder="55 000 000" [class.invalid]="submitted && f.telephone.invalid" />
+            <small *ngIf="submitted && f.telephone.errors?.['required']">Obligatoire</small>
+          </label>
+          <label class="field">
+            Adresse
+            <input formControlName="adresse" placeholder="Ville, pays" />
+          </label>
         </div>
       </div>
-      <div class="modal-actions">
-        <button type="button" class="btn-secondary" (click)="showModal=false">Annuler</button>
-        <button type="submit" class="btn-primary">Soumettre</button>
+
+      <div class="form-section">
+        <h3><mat-icon>school</mat-icon> Formation et projet</h3>
+        <div class="form-grid">
+          <label class="field">
+            Formation
+            <select formControlName="formationActuelle">
+              <option value="">Choisir</option>
+              <option *ngFor="let formation of formations" [value]="formation">{{ formation }}</option>
+            </select>
+          </label>
+          <label class="field">
+            Spécialité
+            <input formControlName="specialite" placeholder="Ex : Informatique" />
+          </label>
+          <label class="field">
+            Années d'expérience
+            <input formControlName="anneeExperience" type="number" min="0" />
+          </label>
+          <label class="field">
+            Projet <span>*</span>
+            <select formControlName="projetId" [class.invalid]="submitted && f.projetId.invalid">
+              <option value="">Choisir un projet</option>
+              <option *ngFor="let project of projects" [value]="project.id">{{ project.title }}</option>
+            </select>
+            <small *ngIf="submitted && f.projetId.errors?.['required']">Projet requis</small>
+          </label>
+        </div>
       </div>
+
+      <div class="form-section">
+        <h3><mat-icon>attach_file</mat-icon> Documents</h3>
+        <div class="documents">
+          <label class="file-drop" [class.has-file]="cvFile">
+            <mat-icon>{{ cvFile ? 'check_circle' : 'upload_file' }}</mat-icon>
+            <strong>{{ cvFile ? cvFile.name : 'Ajouter votre CV' }}</strong>
+            <span>PDF, 5 MB maximum</span>
+            <input type="file" accept=".pdf,application/pdf" (change)="onCvSelected($event)" />
+          </label>
+          <small class="file-error" *ngIf="cvError">{{ cvError }}</small>
+
+          <label class="file-drop" [class.has-file]="lettreFile">
+            <mat-icon>{{ lettreFile ? 'check_circle' : 'description' }}</mat-icon>
+            <strong>{{ lettreFile ? lettreFile.name : 'Ajouter la lettre de motivation' }}</strong>
+            <span>PDF, 5 MB maximum</span>
+            <input type="file" accept=".pdf,application/pdf" (change)="onLettreSelected($event)" />
+          </label>
+          <small class="file-error" *ngIf="lettreError">{{ lettreError }}</small>
+        </div>
+      </div>
+
+      <footer class="modal-footer">
+        <button class="btn cancel" type="button" (click)="showModal = false">Annuler</button>
+        <button class="btn primary" type="submit" [disabled]="saving">
+          <mat-icon>{{ saving ? 'hourglass_empty' : 'send' }}</mat-icon>
+          {{ saving ? 'Envoi...' : 'Soumettre' }}
+        </button>
+      </footer>
     </form>
-  </div>
+  </section>
+</div>
+
+<div class="overlay" *ngIf="detailSelected" (click)="closeDetail()">
+  <section class="modal detail-modal" (click)="$event.stopPropagation()">
+    <header class="modal-head">
+      <div class="modal-icon accent"><mat-icon>analytics</mat-icon></div>
+      <div>
+        <h2>Résultat de matching</h2>
+        <p>{{ detailSelected.prenomCandidat }} {{ detailSelected.nomCandidat }} - {{ detailSelected._projectTitle || detailSelected.projectId }}</p>
+      </div>
+      <button class="icon-close" type="button" (click)="closeDetail()" matTooltip="Fermer">
+        <mat-icon>close</mat-icon>
+      </button>
+    </header>
+
+    <div class="detail-body">
+      <section class="score-hero">
+        <div
+          class="big-ring"
+          [style.--pct]="(detailSelected.scoreMatching ?? 0) + '%'"
+          [style.--clr]="getScoreColor(detailSelected.scoreMatching)"
+        >
+          <span [style.color]="getScoreColor(detailSelected.scoreMatching)">{{ detailSelected.scoreMatching ?? 0 }}%</span>
+        </div>
+
+        <div class="reco-panel" [ngClass]="getRecoClass(detailSelected.scoreMatching)">
+          <mat-icon>{{ getRecoIcon(detailSelected.scoreMatching) }}</mat-icon>
+          <div>
+            <strong>{{ getRecoLabel(detailSelected.scoreMatching) }}</strong>
+            <p>{{ getRecoDescription(detailSelected.scoreMatching) }}</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="kpi-row">
+        <div><strong>{{ getScoreLabel(detailSelected.scoreMatching) }}</strong><span>Niveau</span></div>
+        <div><strong>{{ detailSelected.anneeExperience || 0 }} an(s)</strong><span>Expérience</span></div>
+        <div><strong>{{ detailSelected.competences?.length || 0 }}</strong><span>Compétences</span></div>
+        <div><strong>{{ displayStatus(detailSelected.statutCandidature) }}</strong><span>Statut</span></div>
+      </section>
+
+      <section class="detail-section" *ngIf="detailMatchingParts.length > 0">
+        <h3><mat-icon>compare_arrows</mat-icon> Analyse du matching</h3>
+        <div class="matching-block" *ngFor="let part of detailMatchingParts" [ngClass]="part.type">
+          <header>
+            <mat-icon>{{ part.type === 'matched' ? 'check_circle' : 'cancel' }}</mat-icon>
+            {{ part.label }}
+            <span>{{ part.skillList.length }}</span>
+          </header>
+          <div>
+            <span class="chip" *ngFor="let skill of part.skillList">{{ skill }}</span>
+            <span class="empty-chip" *ngIf="part.skillList.length === 0">Aucune donnée</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="detail-section" *ngIf="detailSelected.competences?.length">
+        <h3><mat-icon>psychology</mat-icon> Compétences extraites du CV</h3>
+        <div class="skill-list">
+          <span *ngFor="let skill of detailSelected.competences">{{ skill }}</span>
+        </div>
+      </section>
+    </div>
+  </section>
 </div>

@@ -15,7 +15,11 @@ export class ProjectService {
     if (filter?.skills?.length) params = params.set('skills', filter.skills.join(','));
     if (filter?.status)         params = params.set('status', filter.status);
     if (filter?.search)         params = params.set('search', filter.search);
-    return this.http.get<Project[]>(this.api, { params });
+    // Temporairement désactiver l'authentification pour tester
+    return this.http.get<Project[]>(this.api, {
+      params,
+      headers: {} // Pas de header Authorization
+    });
   }
 
   getProjectById(id: string): Observable<Project> {

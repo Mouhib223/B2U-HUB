@@ -1,7 +1,9 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { CandidatureService } from '../../core/services/candidature.service';
+import { ProjectService } from '../../core/services/project.service';
+import { Project } from '../../core/models/project.model';
 
 @Component({
   selector: 'b2u-candidature-form',
@@ -10,12 +12,16 @@ import { CandidatureService } from '../../core/services/candidature.service';
   templateUrl: './candidature-form.html',
   styleUrls: ['./candidature-form.scss']
 })
-export class CandidatureFormComponent {
+export class CandidatureFormComponent implements OnInit {
   private fb = inject(FormBuilder);
   private service = inject(CandidatureService);
+  private projectService = inject(ProjectService);
 
   submitted = false;
   success = false;
+  errorMessage = '';
+
+  projects: Project[] = [];
 
   readonly statuts = ['En cours', 'Acceptée', 'Refusée'];
   readonly formations = ['Licence', 'Master', 'Ingénieur', 'Doctorat', 'BTS'];
@@ -36,13 +42,30 @@ export class CandidatureFormComponent {
     formationActuelle: [''],
     specialite:        [''],
     anneeExperience:   [0, [Validators.required, Validators.min(0)]],
-    statutCandidature: ['En cours', Validators.required],
-    competences:       [''],
-    cvLien:            [''],
-    lettreMotivation:  ['']
+    projetId:          ['', Validators.required],
+    statutCandidature: ['En cours', Validators.required]
   });
 
   get f() { return this.form.controls; }
+
+  ngOnInit() {
+    this.loadProjects();
+  }
+
+  private loadProjects(): void {
+    console.log('CandidatureForm: Loading projects...');
+    this.projectService.getProjects().subscribe({
+      next: (projects) => {
+        console.log('CandidatureForm: Projects loaded:', projects);
+        this.projects = projects;
+      },
+      error: (error) => {
+        console.error('CandidatureForm: Error loading projects:', error);
+        this.projects = [];
+        this.errorMessage = 'Impossible de charger la liste des projets. Vérifiez votre connexion.';
+      }
+    });
+  }
 
   onCvSelected(e: Event) {
     const file = (e.target as HTMLInputElement).files?.[0];
@@ -73,12 +96,20 @@ export class CandidatureFormComponent {
 
   submit() {
     this.submitted = true;
-    if (this.form.invalid) return;
+    this.errorMessage = '';
+
+    if (this.form.invalid) {
+      this.errorMessage = 'Merci de remplir tous les champs requis et de corriger les erreurs indiquées.';
+      return;
+    }
 
     // validate files
     this.cvError = this.validatePdf(this.cvFile) ?? '';
     this.lettreError = this.validatePdf(this.lettreFile) ?? '';
-    if (this.cvError || this.lettreError) return;
+    if (this.cvError || this.lettreError) {
+      this.errorMessage = 'Les pièces jointes doivent être des PDF valides de moins de 5 Mo.';
+      return;
+    }
 
     const val = this.form.getRawValue();
     const dto = {
@@ -91,29 +122,20 @@ export class CandidatureFormComponent {
       specialite:        val.specialite ?? '',
       anneeExperience:   val.anneeExperience ?? 0,
       dateCandidature:   new Date().toISOString().split('T')[0],
-      statutCandidature: val.statutCandidature ?? 'En cours',
-      competences:       val.competences ? val.competences.split(',').map((s: string) => s.trim()) : [],
-      cvLien:            val.cvLien ?? '',
-      lettreMotivation:  val.lettreMotivation ?? ''
+      projectId:         val.projetId ?? '',
+      statutCandidature: val.statutCandidature ?? 'En cours'
     };
 
-    // build FormData
-    const fd = new FormData();
-    const blob = new Blob([JSON.stringify(dto)], { type: 'application/json' });
-    fd.append('data', blob);
-    if (this.cvFile) fd.append('cv', this.cvFile);
-    if (this.lettreFile) fd.append('lettre', this.lettreFile);
-
-    this.service.createWithFiles(fd).subscribe({
+    this.service.createWithFiles(dto, this.cvFile!, this.lettreFile!).subscribe({
       next: () => {
         this.success = true;
-        this.form.reset({ anneeExperience: 0, statutCandidature: 'En cours' });
+        this.form.reset({ anneeExperience: 0, projetId: '', statutCandidature: 'En cours' });
         this.submitted = false;
         this.cvFile = undefined; this.lettreFile = undefined;
       },
       error: (err) => {
         console.error('Upload error', err);
-        // you can add user-facing error handling here
+        this.errorMessage = `Erreur lors de l'envoi de la candidature (${err.status}): ${err.error?.message || err.message || 'Bad Request'}`;
       }
     });
   }

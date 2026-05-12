@@ -8,6 +8,9 @@
     <div class="success-banner" *ngIf="success">
       ✅ Votre candidature a été soumise avec succès !
     </div>
+    <div class="error-banner" *ngIf="errorMessage">
+      ❌ {{ errorMessage }}
+    </div>
 
     <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
 
@@ -58,13 +61,17 @@
             <input formControlName="specialite" placeholder="Ex: Informatique" />
           </div>
           <div class="field">
+            <label>Projet *</label>
+            <select formControlName="projetId">
+              <option value="">-- Choisir un projet --</option>
+              <option *ngFor="let project of projects" [value]="project.id">{{ project.title }}</option>
+            </select>
+            <span class="err" *ngIf="submitted && f['projetId'].errors?.['required']">Projet requis</span>
+          </div>
+          <div class="field">
             <label>Années d'expérience *</label>
             <input formControlName="anneeExperience" type="number" min="0" />
             <span class="err" *ngIf="submitted && f['anneeExperience'].errors">Valeur invalide</span>
-          </div>
-          <div class="field">
-            <label>Compétences <small>(séparées par virgule)</small></label>
-            <input formControlName="competences" placeholder="Angular, Java, SQL..." />
           </div>
         </div>
       </section>
@@ -93,15 +100,6 @@
             <input type="file" accept=".pdf,application/pdf" (change)="onLettreSelected($event)" />
             <div class="file-info" *ngIf="lettreFile">Fichier: {{ lettreFile.name }}</div>
             <div class="err" *ngIf="lettreError">{{ lettreError }}</div>
-          </div>
-
-          <div class="field full">
-            <label>Lien CV (optionnel)</label>
-            <input formControlName="cvLien" placeholder="https://..." />
-          </div>
-          <div class="field full">
-            <label>Lettre de motivation (texte alternatif)</label>
-            <textarea formControlName="lettreMotivation" rows="4" placeholder="Décrivez votre motivation..."></textarea>
           </div>
         </div>
       </section>

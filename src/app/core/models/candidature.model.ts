@@ -13,4 +13,19 @@ export interface Candidature {
   competences?: string[];
   cvLien?: string;
   lettreMotivation?: string;
+  scoreMatching?: number;
+  matchingDetails?: string;
+  projectId?: string;
+  // UI helper fields
+  _initials?: string;
+  _scorePercent?: number;
+  _projectTitle?: string;
+}
+
+export interface CandidaturePage {
+  content: Candidature[];
+  totalElements: number;
+  totalPages: number;
+  size: number;
+  number: number;
 }
