@@ -1,1 +1,60 @@
-<p>chat works!</p>
+<div class="chat-container">
+
+  <div class="header">
+    <div class="header-info">
+      <span class="room-badge">💬 Team Chat</span>
+      <span class="room-id">Room: {{ roomId | slice:0:8 }}...</span>
+      <span class="user-name">👤 {{ currentUser }}</span>
+      <span class="connection-status" [class.connected]="isConnected">
+        {{ isConnected ? '● Connecté' : '○ Déconnecté' }}
+      </span>
+    </div>
+  </div>
+
+  <div class="messages">
+    <!-- Loading indicator -->
+    <div *ngIf="isLoading" class="loading-history">
+      <div class="spinner"></div>
+      <p>Chargement de l'historique...</p>
+    </div>
+
+    <!-- Empty state -->
+    <div *ngIf="!isLoading && messages.length === 0" class="empty-chat">
+      <div class="empty-icon">💬</div>
+      <p>Aucun message pour le moment</p>
+      <small>Soyez le premier à envoyer un message !</small>
+    </div>
+
+    <!-- Messages list -->
+    <div *ngFor="let msg of messages"
+         [class.me]="msg.sender === currentUser"
+         [class.other]="msg.sender !== currentUser && msg.sender !== 'System'"
+         [class.system]="msg.sender === 'System'"
+         class="message">
+      
+      <div class="message-sender" *ngIf="msg.sender !== currentUser && msg.sender !== 'System'">
+        {{ msg.sender }}
+      </div>
+      
+      <div class="message-content">{{ msg.content }}</div>
+      
+      <div class="message-time" *ngIf="msg.timestamp">
+        {{ msg.timestamp | date:'HH:mm' }}
+      </div>
+    </div>
+  </div>
+
+  <!-- Input toujours actif -->
+  <div class="input-box">
+    <input
+      type="text"
+      [(ngModel)]="message"
+      placeholder="Écrire un message..."
+      (keydown.enter)="sendMessage()"
+    />
+    <button (click)="sendMessage()">
+      ➤
+    </button>
+  </div>
+
+</div>
