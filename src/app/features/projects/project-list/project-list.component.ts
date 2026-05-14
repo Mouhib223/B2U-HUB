@@ -40,7 +40,11 @@ export class ProjectListComponent implements OnInit {
     const q = this.searchQuery.toLowerCase();
     return this.projects.filter(p =>
       p.title.toLowerCase().includes(q) ||
-      p.requiredSkills.some(s => s.toLowerCase().includes(q))
+      this.projectSkills(p).some(s => s.toLowerCase().includes(q))
     );
+  }
+
+  projectSkills(project: Project): string[] {
+    return project.requiredSkills?.length ? project.requiredSkills : project.technologies ?? [];
   }
 }

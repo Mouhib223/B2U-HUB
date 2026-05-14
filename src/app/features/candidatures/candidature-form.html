@@ -1,20 +1,33 @@
 <div class="cand-page">
   <div class="cand-card">
     <div class="cand-header">
-      <h1>Soumettre une Candidature</h1>
-      <p>Remplissez le formulaire ci-dessous pour postuler</p>
+      <h1>Soumettre une candidature</h1>
+      <p>La candidature est rattachee au projet que vous avez choisi.</p>
     </div>
 
     <div class="success-banner" *ngIf="success">
-      ✅ Votre candidature a été soumise avec succès !
+      Votre candidature a ete soumise avec succes.
     </div>
+
     <div class="error-banner" *ngIf="errorMessage">
-      ❌ {{ errorMessage }}
+      {{ errorMessage }}
     </div>
+
+    <a class="back-projects" routerLink="/app/projects" *ngIf="!selectedProject">
+      Choisir un projet
+    </a>
+
+    <section class="selected-project" *ngIf="selectedProject">
+      <div>
+        <span>{{ selectedProject.type || 'PROJET' }}</span>
+        <h2>{{ selectedProject.title }}</h2>
+        <p>{{ selectedProject.companyName || 'Entreprise' }}</p>
+      </div>
+    </section>
 
     <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <input type="hidden" formControlName="projectId" />
 
-      <!-- Informations personnelles -->
       <section class="form-section">
         <h2 class="section-title">Informations personnelles</h2>
         <div class="form-grid">
@@ -24,8 +37,8 @@
             <span class="err" *ngIf="submitted && f['nomCandidat'].errors?.['required']">Obligatoire</span>
           </div>
           <div class="field">
-            <label>Prénom *</label>
-            <input formControlName="prenomCandidat" placeholder="Votre prénom" />
+            <label>Prenom *</label>
+            <input formControlName="prenomCandidat" placeholder="Votre prenom" />
             <span class="err" *ngIf="submitted && f['prenomCandidat'].errors?.['required']">Obligatoire</span>
           </div>
           <div class="field">
@@ -34,7 +47,7 @@
             <span class="err" *ngIf="submitted && f['email'].errors">Email invalide</span>
           </div>
           <div class="field">
-            <label>Téléphone *</label>
+            <label>Telephone *</label>
             <input formControlName="telephone" placeholder="55 000 000" />
             <span class="err" *ngIf="submitted && f['telephone'].errors?.['required']">Obligatoire</span>
           </div>
@@ -45,49 +58,31 @@
         </div>
       </section>
 
-      <!-- Formation & Expérience -->
       <section class="form-section">
-        <h2 class="section-title">Formation & Expérience</h2>
+        <h2 class="section-title">Formation et experience</h2>
         <div class="form-grid">
           <div class="field">
             <label>Formation actuelle</label>
             <select formControlName="formationActuelle">
-              <option value="">-- Choisir --</option>
+              <option value="">Choisir</option>
               <option *ngFor="let f of formations" [value]="f">{{ f }}</option>
             </select>
           </div>
           <div class="field">
-            <label>Spécialité</label>
+            <label>Specialite</label>
             <input formControlName="specialite" placeholder="Ex: Informatique" />
           </div>
           <div class="field">
-            <label>Projet *</label>
-            <select formControlName="projetId">
-              <option value="">-- Choisir un projet --</option>
-              <option *ngFor="let project of projects" [value]="project.id">{{ project.title }}</option>
-            </select>
-            <span class="err" *ngIf="submitted && f['projetId'].errors?.['required']">Projet requis</span>
-          </div>
-          <div class="field">
-            <label>Années d'expérience *</label>
+            <label>Annees d'experience *</label>
             <input formControlName="anneeExperience" type="number" min="0" />
             <span class="err" *ngIf="submitted && f['anneeExperience'].errors">Valeur invalide</span>
           </div>
         </div>
       </section>
 
-      <!-- Candidature -->
       <section class="form-section">
-        <h2 class="section-title">Détails de la candidature</h2>
+        <h2 class="section-title">Pieces jointes</h2>
         <div class="form-grid">
-          <div class="field">
-            <label>Statut *</label>
-            <select formControlName="statutCandidature">
-              <option *ngFor="let s of statuts" [value]="s">{{ s }}</option>
-            </select>
-          </div>
-
-          <!-- File uploads -->
           <div class="field full">
             <label>CV (PDF, max 5MB)</label>
             <input type="file" accept=".pdf,application/pdf" (change)="onCvSelected($event)" />
@@ -105,7 +100,7 @@
       </section>
 
       <div class="form-actions">
-        <button type="submit" class="btn-primary">Soumettre la candidature</button>
+        <button type="submit" class="btn-primary" [disabled]="!selectedProject">Soumettre la candidature</button>
       </div>
     </form>
   </div>

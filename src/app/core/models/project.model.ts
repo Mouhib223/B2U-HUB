@@ -4,8 +4,10 @@ export interface Project {
   id: string;
   title: string;
   description: string;
+  type?: 'STAGE' | 'PROJET' | 'HACKATHON' | string;
   companyId: string;
   companyName: string;
+  technologies?: string[];
   requiredSkills: string[];
   teamSize: number;
   deadline: Date;

@@ -6,7 +6,7 @@ import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class ProjectService {
-  private api = `${environment.apiUrl}/projects`;
+  private api = `${environment.apiUrl}/api/projets`;
 
   constructor(private http: HttpClient) {}
 
@@ -16,10 +16,7 @@ export class ProjectService {
     if (filter?.status)         params = params.set('status', filter.status);
     if (filter?.search)         params = params.set('search', filter.search);
     // Temporairement désactiver l'authentification pour tester
-    return this.http.get<Project[]>(this.api, {
-      params,
-      headers: {} // Pas de header Authorization
-    });
+    return this.http.get<Project[]>(this.api, { params });
   }
 
   getProjectById(id: string): Observable<Project> {
@@ -35,6 +32,6 @@ export class ProjectService {
   }
 
   getMyProjects(): Observable<Project[]> {
-    return this.http.get<Project[]>(`${this.api}/my`);
+    return this.http.get<Project[]>(this.api);
   }
 }

@@ -7,10 +7,6 @@
     </div>
 
     <div class="header-actions">
-      <button class="btn ghost" type="button" (click)="refreshData()" [disabled]="loading || saving">
-        <mat-icon>refresh</mat-icon>
-        Actualiser
-      </button>
       <button class="btn primary" type="button" (click)="openCreate()">
         <mat-icon>add</mat-icon>
         Nouvelle candidature
@@ -22,6 +18,21 @@
     <mat-icon>error_outline</mat-icon>
     <span>{{ errorMessage }}</span>
   </div>
+
+  <section class="notification-panel" *ngIf="unreadNotifications.length > 0">
+    <article class="notification-card" *ngFor="let notification of unreadNotifications">
+      <mat-icon>notifications_active</mat-icon>
+      <div>
+        <strong>{{ notification.title }}</strong>
+        <p>{{ notification.message }}</p>
+        <small *ngIf="notification.createdAt">{{ notification.createdAt | date: 'dd/MM/yyyy HH:mm' }}</small>
+      </div>
+      <button class="btn ghost-light" type="button" (click)="markNotificationAsRead(notification)">
+        <mat-icon>done</mat-icon>
+        Lu
+      </button>
+    </article>
+  </section>
 
   <section class="summary-grid" *ngIf="totalCount > 0">
     <article class="summary-card">
@@ -293,14 +304,12 @@
             Années d'expérience
             <input formControlName="anneeExperience" type="number" min="0" />
           </label>
-          <label class="field">
-            Projet <span>*</span>
-            <select formControlName="projetId" [class.invalid]="submitted && f.projetId.invalid">
-              <option value="">Choisir un projet</option>
-              <option *ngFor="let project of projects" [value]="project.id">{{ project.title }}</option>
-            </select>
+          <div class="field selected-project-field">
+            <span>Projet</span>
+            <strong>{{ getSelectedProjectTitle() }}</strong>
+            <input type="hidden" formControlName="projetId" />
             <small *ngIf="submitted && f.projetId.errors?.['required']">Projet requis</small>
-          </label>
+          </div>
         </div>
       </div>
 
@@ -394,6 +403,18 @@
         <h3><mat-icon>psychology</mat-icon> Compétences extraites du CV</h3>
         <div class="skill-list">
           <span *ngFor="let skill of detailSelected.competences">{{ skill }}</span>
+        </div>
+      </section>
+      <section class="detail-section interview-prep" *ngIf="getInterviewPreparationLines(detailSelected).length > 0">
+        <h3><mat-icon>school</mat-icon> Preparation AI a l'entretien</h3>
+        <div class="prep-list">
+          <p
+            *ngFor="let line of getInterviewPreparationLines(detailSelected)"
+            [class.heading]="isPreparationHeading(line)"
+            [class.answer]="isPreparationAnswer(line)"
+          >
+            {{ line }}
+          </p>
         </div>
       </section>
     </div>

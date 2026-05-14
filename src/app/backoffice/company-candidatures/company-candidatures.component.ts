@@ -3,14 +3,16 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { Subscription } from 'rxjs';
+import { forkJoin, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { AutoRefreshService } from '../../core/services/auto-refresh.service';
 import { CandidatureService } from '../../core/services/candidature.service';
+import { AuthService } from '../../core/services/auth.service';
 import { Candidature } from '../../core/models/candidature.model';
 
 type ScoreBand = 'excellent' | 'good' | 'average' | 'low';
-type MatchingPart = { label: string; skillList: string[]; type: 'matched' | 'missing' };
+type MatchingPart = { label: string; skillList: string[]; type: 'matched' | 'partial' | 'missing' };
+type ProjectType = 'STAGE' | 'PROJET' | 'HACKATHON';
 
 @Component({
   selector: 'b2u-company-candidatures',
@@ -22,10 +24,12 @@ type MatchingPart = { label: string; skillList: string[]; type: 'matched' | 'mis
 })
 export class CompanyCandidaturesComponent implements OnInit, OnDestroy {
   private service = inject(CandidatureService);
+  private auth = inject(AuthService);
   private autoRefreshService = inject(AutoRefreshService);
   private cdr = inject(ChangeDetectorRef);
 
   candidatures: Candidature[] = [];
+  allFilteredCandidatures: Candidature[] = [];
   filteredCandidatures: Candidature[] = [];
   selected?: Candidature;
   selectedMatchingParts: MatchingPart[] = [];
@@ -46,6 +50,7 @@ export class CompanyCandidaturesComponent implements OnInit, OnDestroy {
 
   statusChecks: Record<string, boolean> = {
     'En cours': false,
+    'En revue': false,
     'Acceptée': false,
     'Refusée': false,
     Recommandé: false,
@@ -106,7 +111,6 @@ export class CompanyCandidaturesComponent implements OnInit, OnDestroy {
     const averageScore = total
       ? Math.round(this.candidatures.reduce((sum, c) => sum + (c.scoreMatching ?? 0), 0) / total)
       : 0;
-
     return { total, pending, accepted, refused, strongMatches, averageScore };
   }
 
@@ -123,16 +127,16 @@ export class CompanyCandidaturesComponent implements OnInit, OnDestroy {
     this.loading = true;
     this.errorMessage = '';
 
-    this.service.getPaged(this.pageIndex, this.pageSize).subscribe({
-      next: resp => {
-        this.setCandidatures(resp.items || []);
-        this.totalItems = resp.total ?? resp.items.length;
+    this.loadSource().subscribe({
+      next: items => {
+        this.setCandidatures(items || []);
         this.loading = false;
         this.lastUpdate = new Date();
         this.cdr.markForCheck();
       },
       error: err => {
         this.candidatures = [];
+        this.allFilteredCandidatures = [];
         this.filteredCandidatures = [];
         this.totalItems = 0;
         this.loading = false;
@@ -158,6 +162,7 @@ export class CompanyCandidaturesComponent implements OnInit, OnDestroy {
     this.scoreMax = 100;
     Object.keys(this.statusChecks).forEach(key => (this.statusChecks[key] = false));
     Object.keys(this.scoreChecks).forEach(key => (this.scoreChecks[key as ScoreBand] = false));
+    this.pageIndex = 0;
     this.applyFilters();
   }
 
@@ -165,19 +170,20 @@ export class CompanyCandidaturesComponent implements OnInit, OnDestroy {
     if (this.scoreMin > this.scoreMax) {
       [this.scoreMin, this.scoreMax] = [this.scoreMax, this.scoreMin];
     }
+    this.pageIndex = 0;
     this.applyFilters();
   }
 
   goToPage(page: number) {
     if (page < 0 || page >= this.totalPages) return;
     this.pageIndex = page;
-    this.load();
+    this.applyFilters();
   }
 
   onPageSizeChange() {
     this.pageIndex = 0;
     this.pageSize = Number(this.pageSize);
-    this.load();
+    this.applyFilters();
   }
 
   viewDetails(candidature: Candidature) {
@@ -192,11 +198,11 @@ export class CompanyCandidaturesComponent implements OnInit, OnDestroy {
   }
 
   accept(candidature: Candidature) {
-    this.updateStatus(candidature, 'Acceptée');
+    this.updateStatus(candidature, 'ACCEPTEE');
   }
 
   reject(candidature: Candidature) {
-    this.updateStatus(candidature, 'Refusée');
+    this.updateStatus(candidature, 'REFUSEE');
   }
 
   statusClass(status?: string): string {
@@ -204,6 +210,7 @@ export class CompanyCandidaturesComponent implements OnInit, OnDestroy {
       'Acceptée': 'accepted',
       'Refusée': 'rejected',
       'En cours': 'pending',
+      'En revue': 'waiting',
       Recommandé: 'recommended',
       Présélectionné: 'preselected',
       'En attente': 'waiting',
@@ -217,6 +224,7 @@ export class CompanyCandidaturesComponent implements OnInit, OnDestroy {
       'Acceptée': 'check_circle',
       'Refusée': 'cancel',
       'En cours': 'schedule',
+      'En revue': 'rate_review',
       Recommandé: 'star',
       Présélectionné: 'bookmark',
       'En attente': 'hourglass_empty',
@@ -302,11 +310,30 @@ export class CompanyCandidaturesComponent implements OnInit, OnDestroy {
         ? raw
             .split(',')
             .map(skill => skill.trim())
-            .filter(Boolean)
+            .filter(skill => !!skill && !/^aucune$/i.test(skill))
         : [];
-      const type = /matched|compatibles|acquises/i.test(label) ? 'matched' : 'missing';
+      if (/summary|recommendation/i.test(label)) return null;
+      const type = /matched|compatibles|acquises/i.test(label)
+        ? 'matched'
+        : /partial|partiel/i.test(label)
+          ? 'partial'
+          : 'missing';
       return { label, skillList, type };
-    });
+    }).filter((part): part is MatchingPart => !!part);
+  }
+
+  getInterviewPreparationLines(candidature?: Candidature): string[] {
+    return candidature?.interviewPreparation
+      ? candidature.interviewPreparation.split('\n').map(line => line.trim()).filter(Boolean)
+      : [];
+  }
+
+  isPreparationHeading(line: string): boolean {
+    return !line.match(/^[0-9]+\./) && !line.startsWith('-') && !line.toLowerCase().startsWith('reponse modele');
+  }
+
+  isPreparationAnswer(line: string): boolean {
+    return line.toLowerCase().startsWith('reponse modele');
   }
 
   trackById(index: number, item: Candidature): string {
@@ -315,9 +342,7 @@ export class CompanyCandidaturesComponent implements OnInit, OnDestroy {
 
   private startAutoRefresh() {
     this.refreshSubscription = this.autoRefreshService
-      .startAutoRefresh(this.componentId, () =>
-        this.service.getPaged(this.pageIndex, this.pageSize).pipe(map(response => response.items))
-      )
+      .startAutoRefresh(this.componentId, () => this.loadSource())
       .subscribe({
         next: items => {
           this.setCandidatures(items || []);
@@ -333,7 +358,9 @@ export class CompanyCandidaturesComponent implements OnInit, OnDestroy {
   }
 
   private setCandidatures(items: Candidature[]) {
-    this.candidatures = items.map(item => this.enrich(item));
+    this.candidatures = items
+      .map(item => this.enrich(item))
+      .sort((a, b) => this.compareNewestFirst(a, b));
     this.applyFilters();
 
     if (this.selected?.idCandidature) {
@@ -346,6 +373,7 @@ export class CompanyCandidaturesComponent implements OnInit, OnDestroy {
     return {
       ...candidature,
       statutCandidature: this.normalizeStatus(candidature.statutCandidature),
+      _projectTitle: candidature.projectTitle || candidature._projectTitle || candidature.projectId,
       _initials: candidature._initials || this.getInitials(candidature),
       _scorePercent: this.getScorePercentage(candidature.scoreMatching)
     };
@@ -357,7 +385,7 @@ export class CompanyCandidaturesComponent implements OnInit, OnDestroy {
 
     if (search) {
       filtered = filtered.filter(c =>
-        [c.nomCandidat, c.prenomCandidat, c.email, c.formationActuelle, c.specialite, c.projectId]
+        [c.nomCandidat, c.prenomCandidat, c.email, c.formationActuelle, c.specialite, c.projectTitle, c._projectTitle, c.projectId]
           .filter(Boolean)
           .some(value => String(value).toLowerCase().includes(search))
       );
@@ -378,8 +406,29 @@ export class CompanyCandidaturesComponent implements OnInit, OnDestroy {
       return score >= this.scoreMin && score <= this.scoreMax;
     });
 
-    this.filteredCandidatures = filtered;
+    filtered = filtered.sort((a, b) => this.compareNewestFirst(a, b));
+    this.allFilteredCandidatures = filtered;
+    this.totalItems = filtered.length;
+
+    const maxPageIndex = Math.max(0, Math.ceil(this.totalItems / this.pageSize) - 1);
+    if (this.pageIndex > maxPageIndex) {
+      this.pageIndex = maxPageIndex;
+    }
+
+    const start = this.pageIndex * this.pageSize;
+    this.filteredCandidatures = filtered.slice(start, start + this.pageSize);
     this.cdr.markForCheck();
+  }
+
+  private compareNewestFirst(a: Candidature, b: Candidature): number {
+    const dateDiff = this.getCandidatureTime(b) - this.getCandidatureTime(a);
+    if (dateDiff !== 0) return dateDiff;
+    return (b.idCandidature || '').localeCompare(a.idCandidature || '');
+  }
+
+  private getCandidatureTime(candidature: Candidature): number {
+    const time = candidature.dateCandidature ? new Date(candidature.dateCandidature).getTime() : 0;
+    return Number.isNaN(time) ? 0 : time;
   }
 
   private isScoreInBand(score = 0, band: ScoreBand): boolean {
@@ -389,7 +438,13 @@ export class CompanyCandidaturesComponent implements OnInit, OnDestroy {
     return score < 50;
   }
 
-  private updateStatus(candidature: Candidature, status: 'Acceptée' | 'Refusée') {
+  normalizeProjectType(type?: string): ProjectType {
+    const normalized = (type || 'PROJET').trim().toUpperCase();
+    if (normalized === 'STAGE' || normalized === 'HACKATHON') return normalized;
+    return 'PROJET';
+  }
+
+  private updateStatus(candidature: Candidature, status: 'ACCEPTEE' | 'REFUSEE') {
     if (!candidature.idCandidature) return;
     this.actionLoadingId = candidature.idCandidature;
 
@@ -412,6 +467,33 @@ export class CompanyCandidaturesComponent implements OnInit, OnDestroy {
     });
   }
 
+  private loadSource() {
+    const user = this.auth.getCurrentUser();
+    if (!user) {
+      return this.service.getPaged(this.pageIndex, this.pageSize).pipe(map(response => response.items));
+    }
+
+    const companyKeys = [user.id, user.email, user.companyName]
+      .filter((value): value is string => !!value && value.trim().length > 0)
+      .filter((value, index, values) => values.indexOf(value) === index);
+
+    if (!companyKeys.length) {
+      return this.service.getAll();
+    }
+
+    return forkJoin([
+      ...companyKeys.map(key => this.service.getByCompany(key)),
+      this.service.getAll()
+    ]).pipe(
+      map(groups => {
+        const byId = new Map<string, Candidature>();
+        groups.flat()
+          .forEach(item => byId.set(item.idCandidature || `${item.email}-${item.projectId}`, item));
+        return Array.from(byId.values());
+      })
+    );
+  }
+
   private normalizeStatus(status?: string): string {
     const raw = (status || '').trim().replaceAll('\u00c3\u00a9', 'é');
     const upper = raw.toUpperCase();
@@ -425,6 +507,8 @@ export class CompanyCandidaturesComponent implements OnInit, OnDestroy {
       PRESELECTIONNE: 'Présélectionné',
       'PRÉSÉLECTIONNÉ': 'Présélectionné',
       EN_ATTENTE: 'En attente',
+      EN_COURS: 'En cours',
+      EN_REVUE: 'En revue',
       NON_RETENU: 'Non retenu'
     };
     return map[upper] ?? raw;

@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { ProjetService } from '../../../core/services/projet';
+import { AuthService } from '../../../core/services/auth.service';
 import { Project } from '../../../core/models/project.model';
 
 @Component({
@@ -21,6 +22,7 @@ export class ProjectFormComponent implements OnInit {
   project: Partial<Project> = {
     title: '',
     description: '',
+    type: 'PROJET',
     companyName: '',
     companyId: '',
     requiredSkills: [],
@@ -34,7 +36,8 @@ export class ProjectFormComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private projetService: ProjetService
+    private projetService: ProjetService,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -44,6 +47,12 @@ export class ProjectFormComponent implements OnInit {
       this.projetService.getProjetById(this.projectId).subscribe({
         next: (data) => this.project = data
       });
+    } else {
+      const currentUser = this.authService.getCurrentUser();
+      if (currentUser?.role === 'company') {
+        this.project.companyId = currentUser.id;
+        this.project.companyName = currentUser.companyName || `${currentUser.firstName} ${currentUser.lastName}`.trim();
+      }
     }
   }
 

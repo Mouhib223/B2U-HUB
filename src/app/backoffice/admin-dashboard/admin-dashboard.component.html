@@ -1,74 +1,91 @@
 <div class="admin-dashboard">
-
-  <div class="page-header">
-    <h1>Admin Dashboard</h1>
-    <p>Full platform overview and control panel</p>
-  </div>
-
-  <!-- Stats Grid -->
-  <div class="stats-grid">
-    <div class="stat-card" *ngFor="let s of stats">
-      <div class="stat-icon" [style.background]="s.bg">
-        <mat-icon [style.color]="s.color">{{ s.icon }}</mat-icon>
-      </div>
-      <div class="stat-body">
-        <div class="stat-value">{{ s.value }}</div>
-        <div class="stat-label">{{ s.label }}</div>
-      </div>
+  <section class="page-header">
+    <div>
+      <span class="eyebrow">Administration</span>
+      <h1><mat-icon>dashboard</mat-icon> Dashboard</h1>
+      <p>Vue globale des candidatures, projets, companies et performances du matching AI.</p>
+      <small>Dernière mise à jour : {{ lastUpdate | date:'HH:mm:ss' }}</small>
     </div>
-  </div>
+  </section>
 
-  <!-- Quick Actions -->
-  <div class="section-title">Quick Actions</div>
-  <div class="quick-actions">
-    <a routerLink="/admin/users" class="action-card">
-      <mat-icon>person_add</mat-icon>
-      <span>Manage Users</span>
-    </a>
-    <a routerLink="/admin/projects" class="action-card">
-      <mat-icon>add_circle</mat-icon>
-      <span>Manage Projects</span>
-    </a>
-    <a routerLink="/admin/applications" class="action-card">
-      <mat-icon>fact_check</mat-icon>
-      <span>Review Applications</span>
-    </a>
-    <a routerLink="/admin/companies" class="action-card">
-      <mat-icon>business</mat-icon>
-      <span>Manage Companies</span>
-    </a>
-  </div>
+  <section class="loading-card" *ngIf="loading">
+    <mat-icon>sync</mat-icon>
+    <p>Chargement du dashboard...</p>
+  </section>
 
-  <!-- Recent Users Table -->
-  <div class="section-title">Recent Registrations</div>
-  <div class="table-card">
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Email</th>
-          <th>Role</th>
-          <th>Joined</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let u of recentUsers">
-          <td>{{ u.name }}</td>
-          <td>{{ u.email }}</td>
-          <td><span class="role-badge" [ngClass]="u.role">{{ u.role }}</span></td>
-          <td>{{ u.date }}</td>
-          <td>
-            <button class="action-btn edit">
-              <mat-icon>edit</mat-icon>
-            </button>
-            <button class="action-btn delete">
-              <mat-icon>delete</mat-icon>
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+  <ng-container *ngIf="!loading">
+    <section class="stats-grid">
+      <article class="stat-card" *ngFor="let s of stats" [ngClass]="s.tone">
+        <mat-icon>{{ s.icon }}</mat-icon>
+        <div>
+          <strong>{{ s.value }}</strong>
+          <span>{{ s.label }}</span>
+        </div>
+      </article>
+    </section>
 
+    <section class="quick-actions">
+      <a routerLink="/admin/candidatures" class="action-card">
+        <mat-icon>assignment</mat-icon>
+        <span>Candidatures</span>
+      </a>
+      <a routerLink="/admin/projects" class="action-card">
+        <mat-icon>work</mat-icon>
+        <span>Projets</span>
+      </a>
+      <a routerLink="/admin/companies" class="action-card">
+        <mat-icon>corporate_fare</mat-icon>
+        <span>Companies</span>
+      </a>
+      <a routerLink="/admin/users" class="action-card">
+        <mat-icon>people</mat-icon>
+        <span>Utilisateurs</span>
+      </a>
+    </section>
+
+    <section class="dashboard-grid">
+      <article class="panel">
+        <header>
+          <h2>Dernières candidatures</h2>
+          <a routerLink="/admin/candidatures">Voir tout</a>
+        </header>
+        <div class="candidate-list" *ngIf="recentCandidatures.length > 0; else noRecent">
+          <div class="candidate-row" *ngFor="let c of recentCandidatures">
+            <div class="avatar">{{ c.prenomCandidat[0] + c.nomCandidat[0] }}</div>
+            <div class="candidate-main">
+              <strong>{{ c.prenomCandidat }} {{ c.nomCandidat }}</strong>
+              <span>{{ c.projectTitle || c.projectId || 'Projet non défini' }}</span>
+            </div>
+            <div class="candidate-score">{{ c.scoreMatching || 0 }}%</div>
+            <span class="status-pill" [ngClass]="getStatusClass(c.statutCandidature)">
+              {{ displayStatus(c.statutCandidature) }}
+            </span>
+          </div>
+        </div>
+        <ng-template #noRecent>
+          <div class="empty-state">Aucune candidature pour le moment.</div>
+        </ng-template>
+      </article>
+
+      <article class="panel">
+        <header>
+          <h2>Projets les plus demandés</h2>
+          <a routerLink="/admin/projects">Gérer</a>
+        </header>
+        <div class="project-list" *ngIf="topProjects.length > 0; else noProjects">
+          <div class="project-row" *ngFor="let project of topProjects">
+            <div>
+              <strong>{{ project.title }}</strong>
+              <span>{{ project.companyName || project.companyId || 'Company non définie' }}</span>
+            </div>
+            <span class="type-chip">{{ project.type || 'PROJET' }}</span>
+            <strong class="count">{{ project.applicantsCount || 0 }}</strong>
+          </div>
+        </div>
+        <ng-template #noProjects>
+          <div class="empty-state">Aucun projet disponible.</div>
+        </ng-template>
+      </article>
+    </section>
+  </ng-container>
 </div>

@@ -39,6 +39,44 @@
   font-weight: 600;
 }
 
+.back-projects {
+  display: inline-flex;
+  margin-bottom: var(--space-lg);
+  color: var(--color-primary);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.selected-project {
+  margin-bottom: var(--space-xl);
+  padding: 1rem;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  border-radius: var(--radius-md);
+
+  span {
+    display: inline-flex;
+    margin-bottom: .35rem;
+    padding: .18rem .55rem;
+    color: #065f46;
+    background: #d1fae5;
+    border-radius: 999px;
+    font-size: .72rem;
+    font-weight: 800;
+  }
+
+  h2 {
+    margin: 0;
+    color: var(--color-dark);
+    font-size: 1rem;
+  }
+
+  p {
+    margin: .2rem 0 0;
+    color: var(--color-muted);
+  }
+}
+
 .form-section {
   margin-bottom: var(--space-xl);
 }

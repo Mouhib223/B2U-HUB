@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+﻿import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
@@ -13,11 +13,10 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { Subscription } from 'rxjs';
-import { map } from 'rxjs/operators';
 
-import { Candidature } from '../../../core/models/candidature.model';
-import { CandidatureService } from '../../../core/services/candidature.service';
-import { AutoRefreshService } from '../../../core/services/auto-refresh.service';
+import { Candidature } from '../../core/models/candidature.model';
+import { CandidatureService } from '../../core/services/candidature.service';
+import { AutoRefreshService } from '../../core/services/auto-refresh.service';
 
 @Component({
   selector: 'app-admin-candidatures',
@@ -44,6 +43,7 @@ import { AutoRefreshService } from '../../../core/services/auto-refresh.service'
 })
 export class AdminCandidaturesComponent implements OnInit, OnDestroy {
   candidatures: Candidature[] = [];
+  allFilteredCandidatures: Candidature[] = [];
   filteredCandidatures: Candidature[] = [];
   // pagination
   pageIndex = 0;
@@ -61,26 +61,47 @@ export class AdminCandidaturesComponent implements OnInit, OnDestroy {
   loading = false;
   lastUpdate?: Date;
   searchTerm = '';
-  statusFilter = 'all';
-  scoreFilter = 'all';
   showFilters = false;
-  scoreMin = 0;
-  scoreMax = 100;
+  projectFilter = '';
+  companyFilter = '';
+  formationFilter = '';
+  specialiteFilter = '';
+  dateFrom = '';
+  dateTo = '';
+  experienceMin: number | null = null;
+  experienceMax: number | null = null;
   statusChecks: Record<string, boolean> = {
-    'En cours': false, 'Acceptée': false, 'Refusée': false,
-    'RECOMMANDE': false, 'PRESELECTIONNE': false, 'EN_ATTENTE': false, 'NON_RETENU': false
+    'En cours': false,
+    'En revue': false,
+    'Acceptee': false,
+    'Refusee': false
   };
-  scoreChecks: Record<string, boolean> = { excellent: false, good: false, average: false, low: false };
+
   get activeFilterCount(): number {
     return Object.values(this.statusChecks).filter(v => v).length +
-           Object.values(this.scoreChecks).filter(v => v).length +
-           (this.searchTerm.trim() ? 1 : 0) +
-           (this.scoreMin > 0 || this.scoreMax < 100 ? 1 : 0);
+           (this.projectFilter ? 1 : 0) +
+           (this.companyFilter ? 1 : 0) +
+           (this.formationFilter ? 1 : 0) +
+           (this.specialiteFilter ? 1 : 0) +
+           (this.dateFrom ? 1 : 0) +
+           (this.dateTo ? 1 : 0) +
+           (this.experienceMin !== null && this.experienceMin !== undefined ? 1 : 0) +
+           (this.experienceMax !== null && this.experienceMax !== undefined ? 1 : 0) +
+           (this.searchTerm.trim() ? 1 : 0);
   }
+
   resetFilters() {
-    this.searchTerm = ''; this.scoreMin = 0; this.scoreMax = 100;
+    this.searchTerm = '';
+    this.projectFilter = '';
+    this.companyFilter = '';
+    this.formationFilter = '';
+    this.specialiteFilter = '';
+    this.dateFrom = '';
+    this.dateTo = '';
+    this.experienceMin = null;
+    this.experienceMax = null;
     Object.keys(this.statusChecks).forEach(k => this.statusChecks[k] = false);
-    Object.keys(this.scoreChecks).forEach(k => this.scoreChecks[k] = false);
+    this.pageIndex = 0;
     this.applyFilters();
     this.cdr.markForCheck();
   }
@@ -107,21 +128,17 @@ export class AdminCandidaturesComponent implements OnInit, OnDestroy {
     this.refreshSubscription = this.autoRefreshService
       .startAutoRefresh(
         this.componentId,
-        () => this.service.getPaged(this.pageIndex, this.pageSize).pipe(map(r => r.items))
+        () => this.service.getAll()
       )
       .subscribe({
         next: data => {
-          this.candidatures = (data || []).map(item => ({
-            ...item,
-            _initials: `${item.prenomCandidat?.charAt(0) || ''}${item.nomCandidat?.charAt(0) || ''}`.toUpperCase(),
-            _scorePercent: this.getScorePercentage(item.scoreMatching)
-          } as Candidature & any));
+          this.candidatures = this.enrich(data || []);
           this.applyFilters();
           this.lastUpdate = new Date();
           this.cdr.markForCheck();
         },
         error: () => {
-          console.warn('⚠️ Échec du rafraîchissement automatique (admin)');
+          console.warn('âš ï¸ Ã‰chec du rafraÃ®chissement automatique (admin)');
         }
       });
   }
@@ -135,14 +152,9 @@ export class AdminCandidaturesComponent implements OnInit, OnDestroy {
 
   load() {
     this.loading = true;
-    this.service.getPaged(this.pageIndex, this.pageSize).subscribe({
-      next: resp => {
-        this.candidatures = (resp.items || []).map(item => ({
-          ...item,
-          _initials: `${item.prenomCandidat?.charAt(0) || ''}${item.nomCandidat?.charAt(0) || ''}`.toUpperCase(),
-          _scorePercent: this.getScorePercentage(item.scoreMatching)
-        } as Candidature & any));
-        this.totalItems = resp.total ?? resp.items.length;
+    this.service.getAll().subscribe({
+      next: items => {
+        this.candidatures = this.enrich(items || []);
         this.applyFilters();
         this.loading = false;
         this.lastUpdate = new Date();
@@ -150,6 +162,7 @@ export class AdminCandidaturesComponent implements OnInit, OnDestroy {
       },
       error: () => {
         this.candidatures = [];
+        this.allFilteredCandidatures = [];
         this.filteredCandidatures = [];
         this.totalItems = 0;
         this.loading = false;
@@ -160,19 +173,19 @@ export class AdminCandidaturesComponent implements OnInit, OnDestroy {
   onPageChange(event: any) {
     this.pageIndex = event.pageIndex ?? this.pageIndex;
     this.pageSize = event.pageSize ?? this.pageSize;
-    this.load();
+    this.applyFilters();
   }
 
   goToPage(p: number) {
     if (p < 0 || p >= this.totalPages) return;
     this.pageIndex = p;
-    this.load();
+    this.applyFilters();
   }
 
   onPageSizeChange() {
     this.pageIndex = 0;
     this.pageSize = Number(this.pageSize); // select returns string
-    this.load();
+    this.applyFilters();
   }
 
   refreshData() {
@@ -180,77 +193,150 @@ export class AdminCandidaturesComponent implements OnInit, OnDestroy {
     this.load();
   }
 
-  onSearchChange() { this.applyFilters(); }
-  onStatusFilterChange() { this.applyFilters(); }
-  onScoreFilterChange() { this.applyFilters(); }
-  onFilterChange() { this.applyFilters(); this.cdr.markForCheck(); }
+  onSearchChange() { this.pageIndex = 0; this.applyFilters(); }
+  onStatusFilterChange() { this.pageIndex = 0; this.applyFilters(); }
+  onFilterChange() { this.pageIndex = 0; this.applyFilters(); this.cdr.markForCheck(); }
 
   private applyFilters() {
-    let filtered = this.candidatures;
+    let filtered = [...this.candidatures];
     if (this.searchTerm.trim()) {
       const term = this.searchTerm.toLowerCase();
       filtered = filtered.filter(c =>
         c.nomCandidat?.toLowerCase().includes(term) ||
         c.prenomCandidat?.toLowerCase().includes(term) ||
         c.email?.toLowerCase().includes(term) ||
+        c.projectTitle?.toLowerCase().includes(term) ||
+        c.projectId?.toLowerCase().includes(term) ||
+        c.companyName?.toLowerCase().includes(term) ||
         c.formationActuelle?.toLowerCase().includes(term) ||
         c.specialite?.toLowerCase().includes(term)
       );
     }
     const activeStatus = Object.entries(this.statusChecks).filter(([,v]) => v).map(([k]) => k);
     if (activeStatus.length > 0) {
-      filtered = filtered.filter(c => activeStatus.includes(c.statutCandidature || ''));
+      filtered = filtered.filter(c => activeStatus.includes(this.normalizeStatusLabel(this.displayStatus(c.statutCandidature))));
     }
-    const activeScore = Object.entries(this.scoreChecks).filter(([,v]) => v).map(([k]) => k);
-    if (activeScore.length > 0) {
-      filtered = filtered.filter(c => {
-        const s = c.scoreMatching ?? 0;
-        return activeScore.some(k => {
-          if (k === 'excellent') return s >= 80;
-          if (k === 'good')      return s >= 65 && s < 80;
-          if (k === 'average')   return s >= 50 && s < 65;
-          if (k === 'low')       return s < 50;
-          return false;
-        });
-      });
+
+    if (this.projectFilter) {
+      filtered = filtered.filter(c => this.getProjectLabel(c) === this.projectFilter);
     }
-    filtered = filtered.filter(c => { const s = c.scoreMatching ?? 0; return s >= this.scoreMin && s <= this.scoreMax; });
-    this.filteredCandidatures = filtered;
+
+    if (this.companyFilter) {
+      filtered = filtered.filter(c => (c.companyName || 'N/A') === this.companyFilter);
+    }
+
+    if (this.formationFilter) {
+      filtered = filtered.filter(c => (c.formationActuelle || 'N/A') === this.formationFilter);
+    }
+
+    if (this.specialiteFilter) {
+      filtered = filtered.filter(c => (c.specialite || 'N/A') === this.specialiteFilter);
+    }
+
+    if (this.experienceMin !== null && this.experienceMin !== undefined) {
+      filtered = filtered.filter(c => (c.anneeExperience ?? 0) >= Number(this.experienceMin));
+    }
+
+    if (this.experienceMax !== null && this.experienceMax !== undefined) {
+      filtered = filtered.filter(c => (c.anneeExperience ?? 0) <= Number(this.experienceMax));
+    }
+
+    if (this.dateFrom) {
+      const from = new Date(this.dateFrom).setHours(0, 0, 0, 0);
+      filtered = filtered.filter(c => this.getTime(c.dateCandidature) >= from);
+    }
+
+    if (this.dateTo) {
+      const to = new Date(this.dateTo).setHours(23, 59, 59, 999);
+      filtered = filtered.filter(c => this.getTime(c.dateCandidature) <= to);
+    }
+
+    filtered = filtered.sort((a, b) => this.getTime(b.dateCandidature) - this.getTime(a.dateCandidature));
+    this.allFilteredCandidatures = filtered;
+    this.totalItems = filtered.length;
+    const maxPageIndex = Math.max(0, Math.ceil(this.totalItems / this.pageSize) - 1);
+    if (this.pageIndex > maxPageIndex) this.pageIndex = maxPageIndex;
+    const start = this.pageIndex * this.pageSize;
+    this.filteredCandidatures = filtered.slice(start, start + this.pageSize);
   }
 
-  accept(c: Candidature) {
-    this.service.update(c.idCandidature!, { ...c, statutCandidature: 'Acceptée' }).subscribe({
-      next: updated => {
-        this.updateCandidatureInList(updated);
-      }
-    });
-  }
+  deleteCandidature(candidature: Candidature) {
+    if (!candidature.idCandidature) return;
+    const confirmed = confirm(`Supprimer la candidature de ${candidature.prenomCandidat} ${candidature.nomCandidat} ?`);
+    if (!confirmed) return;
 
-  reject(c: Candidature) {
-    this.service.update(c.idCandidature!, { ...c, statutCandidature: 'Refusée' }).subscribe({
-      next: updated => {
-        this.updateCandidatureInList(updated);
+    this.service.delete(candidature.idCandidature).subscribe({
+      next: () => {
+        this.candidatures = this.candidatures.filter(item => item.idCandidature !== candidature.idCandidature);
+        if (this.selected?.idCandidature === candidature.idCandidature) {
+          this.selected = undefined;
+        }
+        this.applyFilters();
+        this.cdr.markForCheck();
       }
     });
   }
 
   private updateCandidatureInList(updated: Candidature) {
+    const enriched = this.enrichOne(updated);
     this.candidatures = this.candidatures.map(x =>
-      x.idCandidature === updated.idCandidature ? updated : x
+      x.idCandidature === enriched.idCandidature ? enriched : x
     );
     this.applyFilters();
-    if (this.selected?.idCandidature === updated.idCandidature) {
-      this.selected = updated;
+    if (this.selected?.idCandidature === enriched.idCandidature) {
+      this.selected = enriched;
     }
   }
 
+  private enrich(items: Candidature[]): Candidature[] {
+    return items.map(item => this.enrichOne(item));
+  }
+
+  private enrichOne(item: Candidature): Candidature {
+    return {
+      ...item,
+      statutCandidature: this.displayStatus(item.statutCandidature),
+      _initials: `${item.prenomCandidat?.charAt(0) || ''}${item.nomCandidat?.charAt(0) || ''}`.toUpperCase(),
+      _projectTitle: item.projectTitle || item.projectId
+    } as Candidature & any;
+  }
+
+  displayStatus(status?: string): string {
+    const raw = (status || '').trim().toUpperCase()
+      .replace('Ã‰', 'E')
+      .replace('Ãˆ', 'E')
+      .replace('ÃŠ', 'E')
+      .replace('ÃƒÂ©', 'E')
+      .replace('Ãƒâ€°', 'E')
+      .replace(' ', '_');
+    const map: Record<string, string> = {
+      ACCEPTEE: 'Acceptée',
+      REFUSEE: 'Refusée',
+      EN_COURS: 'En cours',
+      EN_REVUE: 'En revue',
+      RECOMMANDE: 'Recommandé',
+      PRESELECTIONNE: 'Présélectionné',
+      EN_ATTENTE: 'En attente',
+      NON_RETENU: 'Non retenu'
+    };
+    return map[raw] ?? (status || 'Inconnu');
+  }
+
+  private normalizeStatusLabel(status?: string): string {
+    const value = (status || '').trim();
+    if (value === 'Acceptée' || value === 'ACCEPTEE') return 'Acceptee';
+    if (value === 'Refusée' || value === 'REFUSEE') return 'Refusee';
+    if (value === 'EN_COURS') return 'En cours';
+    if (value === 'EN_REVUE') return 'En revue';
+    return value;
+  }
+
   statusClass(s: string): string {
-    return s === 'Acceptée' ? 'accepted' :
-           s === 'Refusée' ? 'rejected' :
-           s === 'En cours' ? 'pending' :
-           s === 'RECOMMANDE' ? 'recommended' :
-           s === 'PRESELECTIONNE' ? 'preselected' :
-           s === 'EN_ATTENTE' ? 'waiting' : 'unknown';
+    const status = this.normalizeStatusLabel(this.displayStatus(s));
+    return status === 'Acceptee' ? 'accepted' :
+           status === 'Refusee' ? 'rejected' :
+           status === 'En cours' ? 'pending' :
+           status === 'En revue' ? 'waiting' : 'unknown';
   }
 
   trackById(index: number, item: Candidature): string {
@@ -261,7 +347,7 @@ export class AdminCandidaturesComponent implements OnInit, OnDestroy {
     this.selected = {
       ...candidature,
       _initials: candidature._initials || `${candidature.prenomCandidat?.charAt(0) || ''}${candidature.nomCandidat?.charAt(0) || ''}`.toUpperCase(),
-      _scorePercent: candidature._scorePercent ?? this.getScorePercentage(candidature.scoreMatching)
+      _projectTitle: candidature.projectTitle || candidature._projectTitle || candidature.projectId
     } as Candidature & any;
   }
 
@@ -273,107 +359,56 @@ export class AdminCandidaturesComponent implements OnInit, OnDestroy {
     return `${prenom?.charAt(0) || ''}${nom?.charAt(0) || ''}`.toUpperCase() || '?';
   }
 
-  getScorePercentage(score?: number): number { return score ?? 0; }
-
-  getScoreColor(score?: number): string {
-    const s = score ?? 0;
-    if (s >= 80) return '#10B981';
-    if (s >= 65) return '#3B82F6';
-    if (s >= 50) return '#F59E0B';
-    if (s >= 35) return '#F97316';
-    return '#EF4444';
+  get projectOptions(): string[] {
+    return this.uniqueOptions(this.candidatures.map(c => this.getProjectLabel(c)));
   }
 
-  getScoreLabel(score?: number): string {
-    const s = score ?? 0;
-    if (s >= 80) return 'Excellent';
-    if (s >= 65) return 'Très bon';
-    if (s >= 50) return 'Bon';
-    if (s >= 35) return 'Moyen';
-    return 'Faible';
+  get companyOptions(): string[] {
+    return this.uniqueOptions(this.candidatures.map(c => c.companyName || 'N/A'));
   }
 
-  getRecoClass(score?: number): string {
-    const s = score ?? 0;
-    if (s >= 80) return 'reco-excellent';
-    if (s >= 65) return 'reco-good';
-    if (s >= 50) return 'reco-average';
-    if (s >= 35) return 'reco-low';
-    return 'reco-none';
+  get formationOptions(): string[] {
+    return this.uniqueOptions(this.candidatures.map(c => c.formationActuelle || 'N/A'));
   }
 
-  getRecoIcon(score?: number): string {
-    const s = score ?? 0;
-    if (s >= 80) return 'verified';
-    if (s >= 65) return 'thumb_up';
-    if (s >= 50) return 'thumbs_up_down';
-    if (s >= 35) return 'warning';
-    return 'block';
+  get specialiteOptions(): string[] {
+    return this.uniqueOptions(this.candidatures.map(c => c.specialite || 'N/A'));
   }
 
-  getRecoLabel(score?: number): string {
-    const s = score ?? 0;
-    if (s >= 80) return 'Fortement recommandé';
-    if (s >= 65) return 'Recommandé';
-    if (s >= 50) return 'Conditionnel';
-    if (s >= 35) return 'Limité';
-    return 'Non recommandé';
+  private getProjectLabel(candidature: Candidature): string {
+    return candidature._projectTitle || candidature.projectTitle || candidature.projectId || 'N/A';
   }
 
-  getRecoDescription(score?: number): string {
-    const s = score ?? 0;
-    if (s >= 80) return 'Profil idéal — inviter en entretien en priorité';
-    if (s >= 65) return 'Très bon profil — à contacter rapidement';
-    if (s >= 50) return 'Profil intéressant — à considérer si pas de meilleur candidat';
-    if (s >= 35) return 'Profil partiel — garder en réserve';
-    return 'Profil inadapté — ne pas retenir pour ce poste';
+  private uniqueOptions(values: string[]): string[] {
+    return Array.from(new Set(values.map(v => (v || 'N/A').trim()).filter(Boolean)))
+      .sort((a, b) => a.localeCompare(b));
   }
 
-  parseMatchingDetails(details: string): { label: string; skills: string; type: string }[] {
-    if (!details) return [];
-    return details.split('|').map(part => {
-      const trimmed = part.trim();
-      const isMatched = trimmed.startsWith('Matched');
-      const colonIdx = trimmed.indexOf(':');
-      const label = colonIdx > -1 ? trimmed.substring(0, colonIdx).trim() : trimmed;
-      const skills = colonIdx > -1 ? trimmed.substring(colonIdx + 1).trim() : '';
-      return { label, skills, type: isMatched ? 'matched' : 'missing' };
-    });
-  }
-
-  getStatusOptions() {
-    return [
-      { value: 'all', label: 'Tous les statuts' },
-      { value: 'En cours', label: 'En cours' },
-      { value: 'Acceptée', label: 'Acceptée' },
-      { value: 'Refusée', label: 'Refusée' },
-      { value: 'RECOMMANDE', label: 'Recommandé' },
-      { value: 'PRESELECTIONNE', label: 'Pré-sélectionné' },
-      { value: 'EN_ATTENTE', label: 'En attente' },
-      { value: 'NON_RETENU', label: 'Non retenu' },
-    ];
+  private getTime(date?: string): number {
+    const time = date ? new Date(date).getTime() : 0;
+    return Number.isNaN(time) ? 0 : time;
   }
 
   get stats() {
     return {
       total: this.candidatures.length,
-      enCours: this.candidatures.filter(c => c.statutCandidature === 'En cours').length,
-      accepte: this.candidatures.filter(c => c.statutCandidature === 'Acceptée').length,
-      refuse: this.candidatures.filter(c => c.statutCandidature === 'Refusée').length,
-      recommande: this.candidatures.filter(c => c.statutCandidature === 'RECOMMANDE').length,
-      preselectionne: this.candidatures.filter(c => c.statutCandidature === 'PRESELECTIONNE').length,
-      enAttente: this.candidatures.filter(c => c.statutCandidature === 'EN_ATTENTE').length
+      enCours: this.candidatures.filter(c => this.normalizeStatusLabel(c.statutCandidature) === 'En cours').length,
+      accepte: this.candidatures.filter(c => this.normalizeStatusLabel(c.statutCandidature) === 'Acceptee').length,
+      refuse: this.candidatures.filter(c => this.normalizeStatusLabel(c.statutCandidature) === 'Refusee').length
     };
   }
 
   getStatusIcon(status: string): string {
-    switch (status) {
-      case 'Acceptée': return 'check_circle';
-      case 'Refusée': return 'cancel';
+    switch (this.normalizeStatusLabel(this.displayStatus(status))) {
+      case 'Acceptee': return 'check_circle';
+      case 'Refusee': return 'cancel';
       case 'En cours': return 'schedule';
-      case 'RECOMMANDE': return 'star';
-      case 'PRESELECTIONNE': return 'bookmark';
-      case 'EN_ATTENTE': return 'hourglass_empty';
+      case 'En revue': return 'hourglass_empty';
       default: return 'help';
     }
   }
+
+}
+
+
+

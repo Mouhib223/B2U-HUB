@@ -2,14 +2,17 @@ import { ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angula
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { of, Subscription } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
 import { AutoRefreshService } from '../../core/services/auto-refresh.service';
 import { CandidatureService } from '../../core/services/candidature.service';
+import { NotificationService } from '../../core/services/notification.service';
 import { ProjectService } from '../../core/services/project.service';
 import { Candidature } from '../../core/models/candidature.model';
+import { StudentNotification } from '../../core/models/notification.model';
 import { Project } from '../../core/models/project.model';
 
 type ScoreBand = 'excellent' | 'good' | 'average' | 'low';
@@ -24,14 +27,17 @@ type ScoreBand = 'excellent' | 'good' | 'average' | 'low';
 export class StudentCandidaturesComponent implements OnInit, OnDestroy {
   private service = inject(CandidatureService);
   private projectService = inject(ProjectService);
+  private notificationService = inject(NotificationService);
   private auth = inject(AuthService);
   private autoRefresh = inject(AutoRefreshService);
   private fb = inject(FormBuilder);
   private cdr = inject(ChangeDetectorRef);
+  private route = inject(ActivatedRoute);
 
   private allCandidatures: Candidature[] = [];
   displayed: Candidature[] = [];
   projects: Project[] = [];
+  selectedProjectForApply?: Project;
 
   loading = true;
   saving = false;
@@ -42,6 +48,7 @@ export class StudentCandidaturesComponent implements OnInit, OnDestroy {
   lastUpdate = new Date();
   detailSelected?: Candidature;
   detailMatchingParts: { label: string; skillList: string[]; type: string }[] = [];
+  notifications: StudentNotification[] = [];
 
   pageIndex = 0;
   pageSize = 6;
@@ -156,9 +163,15 @@ export class StudentCandidaturesComponent implements OnInit, OnDestroy {
     return Math.round(total / this.allCandidatures.length);
   }
 
+  get unreadNotifications(): StudentNotification[] {
+    return this.notifications.filter(notification => !notification.read);
+  }
+
   ngOnInit() {
     this.loadProjects();
     this.load();
+    this.loadNotifications();
+    this.openProjectApplicationFromRoute();
     this.sub = this.autoRefresh
       .startAutoRefresh(this.componentId, () => {
         const email = this.auth.getCurrentUser()?.email;
@@ -167,6 +180,7 @@ export class StudentCandidaturesComponent implements OnInit, OnDestroy {
       .subscribe({
         next: items => {
           this.setCandidatures(items);
+          this.loadNotifications();
           this.lastUpdate = new Date();
           this.cdr.detectChanges();
         }
@@ -192,6 +206,7 @@ export class StudentCandidaturesComponent implements OnInit, OnDestroy {
     this.service.getByEmail(email).subscribe({
       next: items => {
         this.setCandidatures(items);
+        this.loadNotifications();
         this.loading = false;
         this.lastUpdate = new Date();
         this.cdr.detectChanges();
@@ -210,6 +225,31 @@ export class StudentCandidaturesComponent implements OnInit, OnDestroy {
   refreshData() {
     this.autoRefresh.forceRefresh(this.componentId);
     this.load();
+    this.loadNotifications();
+  }
+
+  loadNotifications() {
+    const email = this.auth.getCurrentUser()?.email;
+    if (!email) return;
+
+    this.notificationService.getByStudent(email).subscribe({
+      next: notifications => {
+        this.notifications = notifications || [];
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  markNotificationAsRead(notification: StudentNotification) {
+    if (!notification.id) return;
+    this.notificationService.markAsRead(notification.id).subscribe({
+      next: updated => {
+        this.notifications = this.notifications.map(item =>
+          item.id === updated.id ? updated : item
+        );
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   toggleFilters() {
@@ -256,8 +296,9 @@ export class StudentCandidaturesComponent implements OnInit, OnDestroy {
     this.applyFilters();
   }
 
-  openCreate() {
-    this.form.reset({ anneeExperience: 0, projetId: '' });
+  openCreate(project?: Project) {
+    this.selectedProjectForApply = project;
+    this.form.reset({ anneeExperience: 0, projetId: project?.id ?? '' });
     this.submitted = false;
     this.errorMessage = '';
     this.cvFile = undefined;
@@ -276,6 +317,20 @@ export class StudentCandidaturesComponent implements OnInit, OnDestroy {
   closeDetail() {
     this.detailSelected = undefined;
     this.detailMatchingParts = [];
+  }
+
+  getInterviewPreparationLines(candidature?: Candidature): string[] {
+    return candidature?.interviewPreparation
+      ? candidature.interviewPreparation.split('\n').map(line => line.trim()).filter(Boolean)
+      : [];
+  }
+
+  isPreparationHeading(line: string): boolean {
+    return !line.match(/^[0-9]+\./) && !line.startsWith('-') && !line.toLowerCase().startsWith('reponse modele');
+  }
+
+  isPreparationAnswer(line: string): boolean {
+    return line.toLowerCase().startsWith('reponse modele');
   }
 
   onCvSelected(event: Event) {
@@ -357,6 +412,11 @@ export class StudentCandidaturesComponent implements OnInit, OnDestroy {
   getProjectTitle(projectId?: string): string {
     if (!projectId) return 'Projet non défini';
     return this.projects.find(project => project.id === projectId)?.title ?? projectId;
+  }
+
+  getSelectedProjectTitle(): string {
+    const projectId = this.form.get('projetId')?.value || this.selectedProjectForApply?.id;
+    return this.selectedProjectForApply?.title || this.getProjectTitle(projectId ?? undefined);
   }
 
   displayStatus(status?: string): string {
@@ -483,7 +543,7 @@ export class StudentCandidaturesComponent implements OnInit, OnDestroy {
     return items.map(item => ({
       ...item,
       statutCandidature: this.normalizeStatus(item.statutCandidature),
-      _projectTitle: this.getProjectTitle(item.projectId),
+      _projectTitle: item.projectTitle || this.getProjectTitle(item.projectId),
       _initials: this.getInitials(item)
     }));
   }
@@ -563,12 +623,36 @@ export class StudentCandidaturesComponent implements OnInit, OnDestroy {
       next: projects => {
         this.projects = projects?.length ? projects : this.fallbackProjects();
         this.setCandidatures(this.allCandidatures);
+        this.openProjectApplicationFromRoute();
       },
       error: () => {
         this.projects = this.fallbackProjects();
         this.setCandidatures(this.allCandidatures);
+        this.openProjectApplicationFromRoute();
       }
     });
+  }
+
+  private openProjectApplicationFromRoute(): void {
+    const projectId = this.route.snapshot.queryParamMap.get('projectId') || history.state?.projectId;
+    if (!projectId || this.showModal) return;
+
+    const project = this.projects.find(item => item.id === projectId) ?? ({
+      id: projectId,
+      title: history.state?.workPostTitle || 'Projet selectionne',
+      description: '',
+      companyId: history.state?.companyId || '',
+      companyName: history.state?.companyName || '',
+      requiredSkills: [],
+      teamSize: 1,
+      deadline: new Date(),
+      status: 'open',
+      applicantsCount: 0,
+      createdAt: new Date()
+    } as Project);
+
+    this.openCreate(project);
+    this.cdr.detectChanges();
   }
 
   private fallbackProjects(): Project[] {

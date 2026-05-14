@@ -28,6 +28,10 @@ export class CandidatureService {
     return this.http.get<Candidature[]>(`${this.url}/my`, { params: { email } });
   }
 
+  getByCompany(companyId: string): Observable<Candidature[]> {
+    return this.http.get<Candidature[]>(`${this.url}/company/${companyId}`);
+  }
+
   getById(id: string): Observable<Candidature> {
     return this.http.get<Candidature>(`${this.url}/${id}`);
   }

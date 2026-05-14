@@ -7,10 +7,6 @@
       <small *ngIf="lastUpdate">Dernière mise à jour : {{ lastUpdate | date: 'HH:mm:ss' }}</small>
     </div>
 
-    <button class="btn ghost" type="button" (click)="refreshData()" [disabled]="loading">
-      <mat-icon>refresh</mat-icon>
-      Actualiser
-    </button>
   </section>
 
   <div class="error-banner" *ngIf="errorMessage">
@@ -49,6 +45,11 @@
       <strong>{{ stats.averageScore }}%</strong>
       <span>Score moyen</span>
     </article>
+    <article class="stat-card ai-criteria">
+      <mat-icon>psychology</mat-icon>
+      <strong>AI</strong>
+      <span>Type pris en compte dans le score</span>
+    </article>
   </section>
 
   <section class="filters-section">
@@ -57,7 +58,7 @@
         <mat-icon>search</mat-icon>
         <input
           type="text"
-          placeholder="Rechercher par nom, email, formation ou spécialité"
+          placeholder="Rechercher par nom, email, projet, formation ou spécialité"
           [(ngModel)]="searchTerm"
           (input)="onFilterChange()"
         />
@@ -74,7 +75,7 @@
         Réinitialiser
       </button>
 
-      <span class="filter-result">{{ filteredCandidatures.length }} résultat(s)</span>
+      <span class="filter-result">{{ totalItems }} résultat(s)</span>
     </div>
 
     <div class="filter-panel" *ngIf="showFilters">
@@ -131,7 +132,7 @@
       <header class="table-header">
         <div>
           <h2>Candidatures</h2>
-          <p>{{ filteredCandidatures.length }} profil(s) affiché(s)</p>
+          <p>{{ totalItems }} profil(s) trouvé(s)</p>
         </div>
 
         <div class="table-actions">
@@ -158,6 +159,7 @@
           <thead>
             <tr>
               <th>Candidat</th>
+              <th>Projet</th>
               <th>Formation</th>
               <th>Expérience</th>
               <th>Matching</th>
@@ -183,6 +185,12 @@
                 </div>
               </td>
 
+              <td>
+                <div class="project-cell">
+                  <span class="badge-gray">{{ c._projectTitle || c.projectTitle || c.projectId || 'N/A' }}</span>
+                  <span class="type-chip">{{ normalizeProjectType(c.projectType) }}</span>
+                </div>
+              </td>
               <td><span class="badge-gray">{{ c.formationActuelle || 'N/A' }}</span></td>
               <td><span class="badge-gray">{{ c.anneeExperience || 0 }} an(s)</span></td>
 
@@ -315,7 +323,7 @@
           <h4><mat-icon>analytics</mat-icon> Analyse du matching</h4>
           <div class="matching-block" *ngFor="let part of selectedMatchingParts" [ngClass]="part.type">
             <header>
-              <mat-icon>{{ part.type === 'matched' ? 'check_circle' : 'cancel' }}</mat-icon>
+              <mat-icon>{{ part.type === 'matched' ? 'check_circle' : part.type === 'partial' ? 'sync_alt' : 'cancel' }}</mat-icon>
               <span>{{ part.label }}</span>
               <strong>{{ part.skillList.length }}</strong>
             </header>
@@ -323,6 +331,24 @@
               <span class="skill-chip" *ngFor="let skill of part.skillList" [ngClass]="part.type">{{ skill }}</span>
               <span class="no-skills" *ngIf="part.skillList.length === 0">Aucune donnée</span>
             </div>
+          </div>
+        </section>
+
+        <section class="detail-section" *ngIf="selected.recommendation">
+          <h4><mat-icon>tips_and_updates</mat-icon> Commentaire AI</h4>
+          <p class="ai-comment">{{ selected.recommendation }}</p>
+        </section>
+
+        <section class="detail-section interview-ai" *ngIf="getInterviewPreparationLines(selected).length > 0">
+          <h4><mat-icon>record_voice_over</mat-icon> Questions entretien AI</h4>
+          <div class="interview-ai-list">
+            <p
+              *ngFor="let line of getInterviewPreparationLines(selected)"
+              [class.heading]="isPreparationHeading(line)"
+              [class.answer]="isPreparationAnswer(line)"
+            >
+              {{ line }}
+            </p>
           </div>
         </section>
 
@@ -340,6 +366,8 @@
             <div><label>Téléphone</label><span>{{ selected.telephone || 'N/A' }}</span></div>
             <div><label>Formation</label><span>{{ selected.formationActuelle || 'N/A' }}</span></div>
             <div><label>Spécialité</label><span>{{ selected.specialite || 'N/A' }}</span></div>
+            <div><label>Projet</label><span>{{ selected._projectTitle || selected.projectTitle || selected.projectId || 'N/A' }}</span></div>
+            <div><label>Type</label><span>{{ normalizeProjectType(selected.projectType) }}</span></div>
             <div><label>Date</label><span>{{ selected.dateCandidature | date: 'dd/MM/yyyy' }}</span></div>
           </div>
         </section>

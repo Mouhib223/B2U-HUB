@@ -14,8 +14,14 @@ export interface Candidature {
   cvLien?: string;
   lettreMotivation?: string;
   scoreMatching?: number;
+  recommendation?: string;
   matchingDetails?: string;
+  interviewPreparation?: string;
   projectId?: string;
+  projectTitle?: string;
+  projectType?: string;
+  companyId?: string;
+  companyName?: string;
   // UI helper fields
   _initials?: string;
   _scorePercent?: number;

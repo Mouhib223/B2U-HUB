@@ -19,9 +19,10 @@
       </div>
       <h3>{{ p.title }}</h3>
       <p>{{ p.companyName }}</p>
+      <span class="type-chip">{{ p.type || 'PROJET' }}</span>
       <p class="description">{{ p.description }}</p>
       <div class="skills">
-        <span class="skill-chip" *ngFor="let s of p.requiredSkills">{{ s }}</span>
+        <span class="skill-chip" *ngFor="let s of projectSkills(p)">{{ s }}</span>
       </div>
       <div class="card-footer">
         <span><mat-icon>group</mat-icon> {{ p.teamSize }} members</span>
