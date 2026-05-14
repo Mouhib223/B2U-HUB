@@ -63,6 +63,17 @@
 
 h3 { font-size: 1rem; margin-bottom: 0.25rem; }
 
+.type-chip {
+  display: inline-flex;
+  margin-top: .35rem;
+  padding: .22rem .58rem;
+  color: #065f46;
+  background: #d1fae5;
+  border-radius: 999px;
+  font-size: .72rem;
+  font-weight: 700;
+}
+
 .description {
   font-size: 0.85rem; color: var(--color-muted);
   margin: 0.5rem 0 1rem;

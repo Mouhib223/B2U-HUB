@@ -125,3 +125,23 @@
     color: #555;
     font-size: 0.95rem;
   }
+
+  .apply-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    margin-top: .85rem;
+    padding: .62rem 1rem;
+    color: #fff;
+    background: #0e9f6e;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: .88rem;
+    font-weight: 700;
+
+    mat-icon {
+      width: 18px;
+      height: 18px;
+      font-size: 18px;
+    }
+  }

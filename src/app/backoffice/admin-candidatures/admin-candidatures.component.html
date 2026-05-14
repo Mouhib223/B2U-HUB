@@ -1,0 +1,352 @@
+<div class="page">
+
+  <div class="page-header">
+    <div class="header-content">
+      <h1>
+        <mat-icon>admin_panel_settings</mat-icon>
+        Gestion des candidatures
+      </h1>
+      <p>Liste administrative, filtres simples et details de candidature.</p>
+      <div class="refresh-info">
+        <small>
+          <mat-icon>sync</mat-icon>
+          <span class="auto-refresh">Mise a jour automatique activee</span>
+          @if (lastUpdate) {
+            <span>- Derniere mise a jour : {{ lastUpdate | date:'HH:mm:ss' }}</span>
+          }
+        </small>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card stat-total">
+      <mat-icon>description</mat-icon>
+      <div>
+        <div class="stat-number">{{ stats.total }}</div>
+        <div class="stat-label">Total</div>
+      </div>
+    </div>
+    <div class="stat-card stat-pending">
+      <mat-icon>schedule</mat-icon>
+      <div>
+        <div class="stat-number">{{ stats.enCours }}</div>
+        <div class="stat-label">En cours</div>
+      </div>
+    </div>
+    <div class="stat-card stat-accepted">
+      <mat-icon>check_circle</mat-icon>
+      <div>
+        <div class="stat-number">{{ stats.accepte }}</div>
+        <div class="stat-label">Acceptees</div>
+      </div>
+    </div>
+    <div class="stat-card stat-rejected">
+      <mat-icon>cancel</mat-icon>
+      <div>
+        <div class="stat-number">{{ stats.refuse }}</div>
+        <div class="stat-label">Refusees</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="filters-section">
+    <div class="filters-top">
+      <div class="search-box">
+        <mat-icon>search</mat-icon>
+        <input
+          type="text"
+          placeholder="Rechercher par nom, email, projet, formation..."
+          [(ngModel)]="searchTerm"
+          (input)="onFilterChange()">
+      </div>
+
+      <button class="btn-filter" (click)="showFilters = !showFilters" [class.active]="showFilters">
+        <mat-icon>tune</mat-icon>
+        Filtres
+        <span class="filter-count" *ngIf="activeFilterCount > 0">{{ activeFilterCount }}</span>
+      </button>
+
+      <button class="btn-reset" *ngIf="activeFilterCount > 0" (click)="resetFilters()">
+        <mat-icon>clear</mat-icon>
+        Reinitialiser
+      </button>
+
+      <span class="filter-result">{{ totalItems }} resultat(s)</span>
+    </div>
+
+    <div class="filter-panel simple-filter-panel" *ngIf="showFilters">
+      <div class="filter-group">
+        <div class="filter-group-title">
+          <mat-icon>flag</mat-icon>
+          Statut
+        </div>
+        <div class="checkbox-list status-list">
+          <label class="cb-item" *ngFor="let entry of statusChecks | keyvalue">
+            <input type="checkbox" [(ngModel)]="statusChecks[entry.key]" (change)="onFilterChange()">
+            <span class="cb-box"></span>
+            <span class="cb-label">{{ entry.key }}</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="filter-grid">
+        <label class="filter-field">
+          <span>Projet</span>
+          <select [(ngModel)]="projectFilter" (change)="onFilterChange()">
+            <option value="">Tous les projets</option>
+            @for (project of projectOptions; track project) {
+              <option [value]="project">{{ project }}</option>
+            }
+          </select>
+        </label>
+
+        <label class="filter-field">
+          <span>Entreprise</span>
+          <select [(ngModel)]="companyFilter" (change)="onFilterChange()">
+            <option value="">Toutes les entreprises</option>
+            @for (company of companyOptions; track company) {
+              <option [value]="company">{{ company }}</option>
+            }
+          </select>
+        </label>
+
+        <label class="filter-field">
+          <span>Formation</span>
+          <select [(ngModel)]="formationFilter" (change)="onFilterChange()">
+            <option value="">Toutes les formations</option>
+            @for (formation of formationOptions; track formation) {
+              <option [value]="formation">{{ formation }}</option>
+            }
+          </select>
+        </label>
+
+        <label class="filter-field">
+          <span>Specialite</span>
+          <select [(ngModel)]="specialiteFilter" (change)="onFilterChange()">
+            <option value="">Toutes les specialites</option>
+            @for (specialite of specialiteOptions; track specialite) {
+              <option [value]="specialite">{{ specialite }}</option>
+            }
+          </select>
+        </label>
+
+        <label class="filter-field">
+          <span>Experience min</span>
+          <input type="number" min="0" placeholder="0" [(ngModel)]="experienceMin" (input)="onFilterChange()">
+        </label>
+
+        <label class="filter-field">
+          <span>Experience max</span>
+          <input type="number" min="0" placeholder="10" [(ngModel)]="experienceMax" (input)="onFilterChange()">
+        </label>
+
+        <label class="filter-field">
+          <span>Date debut</span>
+          <input type="date" [(ngModel)]="dateFrom" (change)="onFilterChange()">
+        </label>
+
+        <label class="filter-field">
+          <span>Date fin</span>
+          <input type="date" [(ngModel)]="dateTo" (change)="onFilterChange()">
+        </label>
+      </div>
+    </div>
+  </div>
+
+  @if (loading) {
+    <div class="loading-card">
+      <mat-icon class="spin">sync</mat-icon>
+      <p>Chargement des candidatures...</p>
+    </div>
+  } @else {
+    <div class="content-layout">
+      <div class="table-card">
+        <div class="table-header">
+          <h3>
+            Candidatures
+            <span class="count-badge">{{ totalItems }}</span>
+          </h3>
+        </div>
+
+        <div class="table-responsive">
+          @if (filteredCandidatures.length > 0) {
+            <table class="modern-table">
+              <thead>
+                <tr>
+                  <th>Candidat</th>
+                  <th>Projet</th>
+                  <th>Formation</th>
+                  <th>Specialite</th>
+                  <th>Experience</th>
+                  <th>Statut</th>
+                  <th>Date</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (c of filteredCandidatures; track trackById($index, c)) {
+                  <tr
+                    class="table-row"
+                    [class.selected-row]="selected?.idCandidature === c.idCandidature"
+                    (click)="viewDetails(c)">
+
+                    <td>
+                      <div class="candidate-info">
+                        <div class="candidate-avatar">
+                          {{ c._initials || getInitials(c.nomCandidat, c.prenomCandidat) }}
+                        </div>
+                        <div>
+                          <div class="candidate-name">{{ c.prenomCandidat }} {{ c.nomCandidat }}</div>
+                          <div class="candidate-email">{{ c.email }}</div>
+                        </div>
+                      </div>
+                    </td>
+
+                    <td>
+                      <span class="formation-badge">{{ c._projectTitle || c.projectTitle || c.projectId || 'N/A' }}</span>
+                    </td>
+
+                    <td>
+                      <span class="formation-badge">{{ c.formationActuelle || 'N/A' }}</span>
+                    </td>
+
+                    <td>
+                      <span class="specialty-badge">{{ c.specialite || 'N/A' }}</span>
+                    </td>
+
+                    <td>
+                      <span class="experience-badge">{{ c.anneeExperience }} an(s)</span>
+                    </td>
+
+                    <td>
+                      <span class="status-badge" [ngClass]="statusClass(c.statutCandidature || '')">
+                        <mat-icon>{{ getStatusIcon(c.statutCandidature || '') }}</mat-icon>
+                        {{ displayStatus(c.statutCandidature) }}
+                      </span>
+                    </td>
+
+                    <td class="date-cell">{{ c.dateCandidature | date:'dd/MM/yyyy' }}</td>
+
+                    <td>
+                      <div class="action-buttons">
+                        <button
+                          class="btn-icon info"
+                          (click)="viewDetails(c); $event.stopPropagation()"
+                          matTooltip="Voir les details">
+                          <mat-icon>visibility</mat-icon>
+                        </button>
+                        <button
+                          class="btn-icon danger"
+                          (click)="deleteCandidature(c); $event.stopPropagation()"
+                          matTooltip="Supprimer">
+                          <mat-icon>delete</mat-icon>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+
+            <div class="pagination-bar">
+              <div class="pagination-info">
+                Page <strong>{{ pageIndex + 1 }}</strong> sur <strong>{{ totalPages }}</strong>
+                - {{ totalItems }} candidature(s)
+              </div>
+
+              <div class="pagination-controls">
+                <button class="page-btn" (click)="goToPage(0)" [disabled]="pageIndex === 0" matTooltip="Premiere page">
+                  <mat-icon>first_page</mat-icon>
+                </button>
+                <button class="page-btn" (click)="goToPage(pageIndex - 1)" [disabled]="pageIndex === 0" matTooltip="Precedent">
+                  <mat-icon>chevron_left</mat-icon>
+                </button>
+
+                @for (p of pageNumbers; track p) {
+                  <button class="page-btn page-number" [class.active]="p === pageIndex" (click)="goToPage(p)">
+                    {{ p + 1 }}
+                  </button>
+                }
+
+                <button class="page-btn" (click)="goToPage(pageIndex + 1)" [disabled]="pageIndex >= totalPages - 1" matTooltip="Suivant">
+                  <mat-icon>chevron_right</mat-icon>
+                </button>
+                <button class="page-btn" (click)="goToPage(totalPages - 1)" [disabled]="pageIndex >= totalPages - 1" matTooltip="Derniere page">
+                  <mat-icon>last_page</mat-icon>
+                </button>
+
+                <select class="page-size-select" [(ngModel)]="pageSize" (change)="onPageSizeChange()">
+                  <option [value]="5">5 / page</option>
+                  <option [value]="10">10 / page</option>
+                  <option [value]="25">25 / page</option>
+                  <option [value]="50">50 / page</option>
+                </select>
+              </div>
+            </div>
+          } @else {
+            <div class="empty-state">
+              <mat-icon>search_off</mat-icon>
+              <h3>Aucune candidature trouvee</h3>
+              <p>Modifiez vos criteres de recherche.</p>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (selected) {
+    <div class="detail-overlay" (click)="closeDetails()">
+      <div class="detail-dialog" (click)="$event.stopPropagation()">
+        <div class="detail-header">
+          <div class="detail-avatar">
+            {{ selected._initials || getInitials(selected.nomCandidat, selected.prenomCandidat) }}
+          </div>
+          <div class="detail-info">
+            <h3>{{ selected.prenomCandidat }} {{ selected.nomCandidat }}</h3>
+            <div class="detail-meta">
+              <span class="status-badge" [ngClass]="statusClass(selected.statutCandidature || '')">
+                <mat-icon>{{ getStatusIcon(selected.statutCandidature || '') }}</mat-icon>
+                {{ displayStatus(selected.statutCandidature) }}
+              </span>
+            </div>
+          </div>
+          <button class="close-btn" (click)="closeDetails()" matTooltip="Fermer">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+
+        <div class="detail-body">
+          <div class="detail-section">
+            <h4><mat-icon>assignment</mat-icon> Details de la candidature</h4>
+            <div class="info-grid">
+              <div class="info-item"><label>Projet</label><span>{{ selected._projectTitle || selected.projectTitle || selected.projectId || 'N/A' }}</span></div>
+              <div class="info-item"><label>Entreprise</label><span>{{ selected.companyName || 'N/A' }}</span></div>
+              <div class="info-item"><label>Date candidature</label><span>{{ selected.dateCandidature | date:'dd/MM/yyyy' }}</span></div>
+              <div class="info-item"><label>Formation</label><span>{{ selected.formationActuelle || 'N/A' }}</span></div>
+              <div class="info-item"><label>Specialite</label><span>{{ selected.specialite || 'N/A' }}</span></div>
+              <div class="info-item"><label>Experience</label><span>{{ selected.anneeExperience }} an(s)</span></div>
+            </div>
+          </div>
+
+          <div class="detail-section">
+            <h4><mat-icon>person</mat-icon> Informations candidat</h4>
+            <div class="info-grid">
+              <div class="info-item"><label>Email</label><span>{{ selected.email }}</span></div>
+              <div class="info-item"><label>Telephone</label><span>{{ selected.telephone || 'N/A' }}</span></div>
+              <div class="info-item"><label>Adresse</label><span>{{ selected.adresse || 'N/A' }}</span></div>
+            </div>
+          </div>
+
+          <div class="detail-actions">
+            <button class="btn-danger" (click)="deleteCandidature(selected)">
+              <mat-icon>delete</mat-icon>
+              Supprimer la candidature
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>

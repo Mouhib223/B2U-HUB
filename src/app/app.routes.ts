@@ -135,6 +135,8 @@ export const routes: Routes = [
       },
       {
         path: 'applications',
+        loadComponent: () => import('./backoffice/admin-candidatures/admin-candidatures.component')
+          .then(m => m.AdminCandidaturesComponent)
         loadComponent: () =>
           import('./backoffice/applications-overview/applications-overview.component')
             .then(m => m.ApplicationsOverviewComponent)
@@ -147,6 +149,9 @@ export const routes: Routes = [
       },
       {
         path: 'candidatures',
+        loadComponent: () => import('./backoffice/admin-candidatures/admin-candidatures.component')
+          .then(m => m.AdminCandidaturesComponent)
+
         loadComponent: () =>
           import('./backoffice/candidatures-crud/candidatures-crud.component')
             .then(m => m.CandidaturesCrudComponent)
