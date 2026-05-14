@@ -1,0 +1,122 @@
+<div class="page">
+  <div class="page-header">
+    <h1>Gestion des présences</h1>
+    <p>Marquez les présences et consultez les statistiques par étudiant.</p>
+  </div>
+
+  <!-- Stats Row -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-value">{{ attendances.length }}</div>
+      <div class="stat-label">Total enregistrements</div>
+    </div>
+    <div class="stat-card accepted">
+      <div class="stat-value">{{ presenceRate | number:'1.0-0' }}%</div>
+      <div class="stat-label">Taux de présence</div>
+    </div>
+    <div class="stat-card rejected">
+      <div class="stat-value">{{ absenceCount }}</div>
+      <div class="stat-label">Absences</div>
+    </div>
+    <div class="stat-card pending">
+      <div class="stat-value">{{ goodStudents.length }}</div>
+      <div class="stat-label">Bons étudiants</div>
+    </div>
+  </div>
+
+  <div class="content-layout">
+
+    <!-- Table -->
+    <div class="table-card">
+
+      <!-- Search bar -->
+      <div class="table-toolbar">
+        <div class="search-bar">
+          <mat-icon>person_search</mat-icon>
+          <input type="text" placeholder="ID étudiant..." [(ngModel)]="studentId">
+        </div>
+        <button class="btn-add" (click)="searchStudent()">
+          <mat-icon>search</mat-icon> Rechercher
+        </button>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Étudiant ID</th>
+            <th>Date</th>
+            <th>Statut</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let a of attendances">
+            <td>
+              <div class="candidate-name">
+                <div class="avatar">{{ a.studentId.charAt(0).toUpperCase() }}</div>
+                <div class="name">{{ a.studentId }}</div>
+              </div>
+            </td>
+            <td>{{ a.date }}</td>
+            <td>
+              <span class="badge" [ngClass]="a.present ? 'accepted' : 'rejected'">
+                {{ a.present ? 'Présent' : 'Absent' }}
+              </span>
+            </td>
+          </tr>
+          <tr *ngIf="attendances.length === 0">
+            <td colspan="3" class="empty">Aucun enregistrement trouvé</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Right panel -->
+    <div class="detail-panel">
+      <div class="detail-header">
+        <div class="detail-avatar"><mat-icon>how_to_reg</mat-icon></div>
+        <div>
+          <h3>Marquer présence</h3>
+          <div class="comp-title">Remplissez les champs</div>
+        </div>
+      </div>
+      <div class="detail-body">
+        <div class="detail-row">
+          <mat-icon>person</mat-icon>
+          <input type="text" placeholder="ID étudiant" class="form-input"
+                 [(ngModel)]="studentId">
+        </div>
+        <div class="detail-row">
+          <mat-icon>calendar_today</mat-icon>
+          <input type="date" class="form-input" [(ngModel)]="selectedDate">
+        </div>
+        <div class="detail-row">
+          <mat-icon>check_circle</mat-icon>
+          <select class="form-input" [(ngModel)]="isPresent">
+            <option [ngValue]="true">Présent</option>
+            <option [ngValue]="false">Absent</option>
+          </select>
+        </div>
+        <div class="detail-actions">
+          <button class="btn-accept" (click)="markAttendance()" [disabled]="isLoading">
+            <mat-icon>save</mat-icon>
+            {{ isLoading ? 'Enregistrement...' : 'Enregistrer' }}
+          </button>
+        </div>
+
+        <!-- Good students -->
+        <hr>
+        <div class="comp-title">Bons étudiants 🏆</div>
+        <div *ngFor="let s of goodStudents" class="recommended-item">
+          <div>
+            <mat-icon style="font-size:14px">star</mat-icon>
+            {{ s }}
+          </div>
+        </div>
+        <div *ngIf="goodStudents.length === 0" class="empty" style="padding: 0.5rem">
+          Aucun bon étudiant trouvé
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

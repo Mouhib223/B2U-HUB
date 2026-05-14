@@ -320,3 +320,23 @@ td {
 .form-group input.ng-invalid.ng-touched {
   border-color: #d32f2f;
 }
+
+.inner-table {
+  width: 100%;
+  background: #f9fafb;
+  margin-top: 10px;
+}
+
+.equipes-container {
+  padding: 10px;
+}
+
+#sectorChart {
+  max-height: 300px;
+  width: 100% !important;
+}
+
+.chart-container {
+  position: relative;
+  height: 300px;
+}

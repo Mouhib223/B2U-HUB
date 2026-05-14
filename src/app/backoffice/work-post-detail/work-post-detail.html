@@ -1,0 +1,88 @@
+<div class="detail-page" *ngIf="!isLoading && post">
+
+  <!-- Back button -->
+  <div class="back-bar">
+    <button class="btn-back" (click)="goBack()">
+      <mat-icon>arrow_back</mat-icon> Retour aux posts
+    </button>
+  </div>
+
+  <!-- Hero card -->
+  <div class="hero-card">
+    <div class="hero-avatar"><mat-icon>work</mat-icon></div>
+    <div class="hero-info">
+      <h1>{{ post.title }}</h1>
+      <span class="badge" [ngClass]="getStatusClass(post.status!)">{{ post.status }}</span>
+    </div>
+    <div class="hero-meta">
+      <div class="meta-item"><mat-icon>schedule</mat-icon> {{ post.hoursPerWeek }}h / semaine</div>
+      <div class="meta-item"><mat-icon>location_on</mat-icon> {{ post.workMode }}</div>
+      <div class="meta-item"><mat-icon>calendar_today</mat-icon> {{ post.createdAt | date:'dd/MM/yyyy' }}</div>
+    </div>
+  </div>
+
+  <!-- Skills card -->
+  <div class="info-card">
+    <div class="card-title"><mat-icon>code</mat-icon> Compétences requises</div>
+    <div class="tags">
+      <span class="tag" *ngFor="let skill of post.requiredSkills?.split(',')">{{ skill.trim() }}</span>
+    </div>
+  </div>
+
+  <!-- Projet affecté -->
+  <div class="info-card projet-card">
+    <div class="card-title"><mat-icon>folder_special</mat-icon> Projet affecté</div>
+
+    <!-- Aucun projet -->
+    <div *ngIf="!assignedProject" class="no-projet">
+      <mat-icon>info</mat-icon>
+      <span>Aucun projet affecté à ce post</span>
+    </div>
+
+    <!-- Projet assigné -->
+    <div *ngIf="assignedProject" class="projet-detail">
+      <div class="projet-row">
+        <div class="projet-avatar">{{ assignedProject.title.charAt(0) }}</div>
+        <div>
+          <div class="projet-title">{{ assignedProject.title }}</div>
+          <div class="projet-desc">{{ assignedProject.description }}</div>
+        </div>
+      </div>
+      <div class="projet-meta">
+  <span class="tag" *ngFor="let tech of assignedProject.requiredSkills">{{ tech }}</span>
+</div>
+      <div class="projet-actions">
+        <div class="meta-item"><mat-icon>flag</mat-icon> Statut : {{ assignedProject.status }}</div>
+        <button class="btn-unassign" (click)="unassign()">
+          <mat-icon>link_off</mat-icon> Retirer le projet
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bouton affecter -->
+  <div class="assign-section">
+    <button class="btn-assign" (click)="showAssignPanel = !showAssignPanel">
+      <mat-icon>add_link</mat-icon>
+      {{ assignedProject ? 'Changer le projet' : 'Affecter un projet' }}
+    </button>
+
+    <div class="assign-panel" *ngIf="showAssignPanel">
+      <select class="form-input" [(ngModel)]="selectedProjectId">
+        <option value="">-- Sélectionner un projet --</option>
+        <option *ngFor="let p of allProjects" [value]="p.id">{{ p.title }}</option>
+      </select>
+      <button class="btn-confirm" (click)="assign()" [disabled]="!selectedProjectId">
+        <mat-icon>check</mat-icon> Confirmer
+      </button>
+      <button class="btn-cancel" (click)="showAssignPanel = false">
+        <mat-icon>close</mat-icon> Annuler
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<div *ngIf="isLoading" class="loading">
+  <mat-icon>hourglass_empty</mat-icon> Chargement...
+</div>
