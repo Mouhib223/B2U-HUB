@@ -11,6 +11,7 @@ import { AutoRefreshService } from '../../core/services/auto-refresh.service';
 import { CandidatureService } from '../../core/services/candidature.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { ProjectService } from '../../core/services/project.service';
+import { AiAssistantService } from '../../core/services/ai-assistant.service';
 import { Candidature } from '../../core/models/candidature.model';
 import { StudentNotification } from '../../core/models/notification.model';
 import { Project } from '../../core/models/project.model';
@@ -33,6 +34,9 @@ export class StudentCandidaturesComponent implements OnInit, OnDestroy {
   private fb = inject(FormBuilder);
   private cdr = inject(ChangeDetectorRef);
   private route = inject(ActivatedRoute);
+  private aiService = inject(AiAssistantService);
+
+  feedbackMap: Record<string, { loading: boolean; text?: string }> = {};
 
   private allCandidatures: Candidature[] = [];
   displayed: Candidature[] = [];
@@ -519,6 +523,27 @@ export class StudentCandidaturesComponent implements OnInit, OnDestroy {
         : [];
       const type = /matched|compatibles|acquises/i.test(label) ? 'matched' : 'missing';
       return { label, skillList, type };
+    });
+  }
+
+  isRefused(status?: string): boolean {
+    const s = this.normalizeStatus(status);
+    return s === 'Refusée' || s === 'Non retenu';
+  }
+
+  generateFeedback(c: Candidature): void {
+    const id = c.idCandidature!;
+    this.feedbackMap[id] = { loading: true };
+    this.cdr.detectChanges();
+    this.aiService.generateCandidatureFeedback(id).subscribe({
+      next: (res) => {
+        this.feedbackMap[id] = { loading: false, text: res.feedback };
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.feedbackMap[id] = { loading: false, text: 'Erreur lors de la génération. Réessayez.' };
+        this.cdr.detectChanges();
+      }
     });
   }
 
