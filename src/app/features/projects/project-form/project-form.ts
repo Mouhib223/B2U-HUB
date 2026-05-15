@@ -5,6 +5,7 @@ import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { ProjetService } from '../../../core/services/projet';
 import { AuthService } from '../../../core/services/auth.service';
+import { AiAssistantService } from '../../../core/services/ai-assistant.service';
 import { Project } from '../../../core/models/project.model';
 
 @Component({
@@ -18,6 +19,9 @@ export class ProjectFormComponent implements OnInit {
   isEditMode = false;
   projectId: string | null = null;
   skillInput = '';
+  aiLoading = false;
+  aiError = '';
+  sector = '';
 
   project: Partial<Project> = {
     title: '',
@@ -37,7 +41,8 @@ export class ProjectFormComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private projetService: ProjetService,
-    private authService: AuthService
+    private authService: AuthService,
+    private aiService: AiAssistantService
   ) {}
 
   ngOnInit(): void {
@@ -67,14 +72,34 @@ export class ProjectFormComponent implements OnInit {
     this.project.requiredSkills = this.project.requiredSkills?.filter(s => s !== skill);
   }
 
+  generateWithAI(): void {
+    if (!this.project.title?.trim()) {
+      this.aiError = 'Entrez un titre avant de générer.';
+      return;
+    }
+    this.aiLoading = true;
+    this.aiError = '';
+    this.aiService.generateProjectDescription(this.project.title!, this.sector || 'Technologie').subscribe({
+      next: (result) => {
+        this.project.description = result.description;
+        this.project.requiredSkills = result.requiredSkills;
+        this.aiLoading = false;
+      },
+      error: () => {
+        this.aiError = 'Erreur lors de la génération IA. Réessayez.';
+        this.aiLoading = false;
+      }
+    });
+  }
+
   submit(): void {
     if (this.isEditMode && this.projectId) {
       this.projetService.updateProjet(this.projectId, this.project as Project).subscribe({
-        next: () => this.router.navigate(['/app/projects'])
+        next: () => this.router.navigate(['..'], { relativeTo: this.route })
       });
     } else {
       this.projetService.createProjet(this.project as Project).subscribe({
-        next: () => this.router.navigate(['/app/projects'])
+        next: () => this.router.navigate(['..'], { relativeTo: this.route })
       });
     }
   }

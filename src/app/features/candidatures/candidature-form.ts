@@ -25,8 +25,9 @@ export class CandidatureFormComponent implements OnInit {
   success = false;
   errorMessage = '';
   selectedProject?: Project;
+  allProjects: Project[] = [];
+  loadingProjects = false;
 
-  readonly statuts = ['En cours'];
   readonly formations = ['Licence', 'Master', 'Ingenieur', 'Doctorat', 'BTS'];
 
   cvFile?: File;
@@ -48,57 +49,75 @@ export class CandidatureFormComponent implements OnInit {
     statutCandidature: ['En cours', Validators.required]
   });
 
-  get f() {
-    return this.form.controls;
-  }
+  get f() { return this.form.controls; }
 
   ngOnInit() {
     const projectId = this.route.snapshot.queryParamMap.get('projectId') || history.state?.projectId;
     const currentUser = this.auth.getCurrentUser();
 
-    if (currentUser?.email) {
-      this.form.patchValue({ email: currentUser.email });
+    if (currentUser) {
+      this.form.patchValue({
+        email: currentUser.email ?? '',
+        nomCandidat: currentUser.lastName ?? '',
+        prenomCandidat: currentUser.firstName ?? ''
+      });
     }
 
-    if (!projectId) {
-      this.errorMessage = 'Choisissez un projet puis cliquez sur Postuler pour envoyer une candidature.';
-      return;
+    if (projectId) {
+      this.form.patchValue({ projectId });
+      this.projectService.getProjectById(projectId).subscribe({
+        next: project => { this.selectedProject = project; },
+        error: () => { this.loadAllProjects(); }
+      });
+    } else {
+      this.loadAllProjects();
     }
+  }
 
-    this.form.patchValue({ projectId });
-    this.projectService.getProjectById(projectId).subscribe({
-      next: project => {
-        this.selectedProject = project;
+  loadAllProjects() {
+    this.loadingProjects = true;
+    this.projectService.getProjects().subscribe({
+      next: (projects) => {
+        this.allProjects = projects.filter(p => p.status !== 'closed');
+        this.loadingProjects = false;
       },
-      error: () => {
-        this.errorMessage = 'Projet introuvable. Retournez a la liste des projets.';
-      }
+      error: () => { this.loadingProjects = false; }
     });
+  }
+
+  selectProject(projectId: string) {
+    const project = this.allProjects.find(p => p.id === projectId);
+    if (project) {
+      this.selectedProject = project;
+      this.form.patchValue({ projectId: project.id });
+    }
   }
 
   onCvSelected(e: Event) {
     const file = (e.target as HTMLInputElement).files?.[0];
     this.cvError = '';
     this.cvFile = undefined;
-    const err = this.validatePdf(file);
-    if (err) this.cvError = err;
-    else this.cvFile = file;
+    if (file) {
+      const err = this.validatePdf(file);
+      if (err) this.cvError = err;
+      else this.cvFile = file;
+    }
   }
 
   onLettreSelected(e: Event) {
     const file = (e.target as HTMLInputElement).files?.[0];
     this.lettreError = '';
     this.lettreFile = undefined;
-    const err = this.validatePdf(file);
-    if (err) this.lettreError = err;
-    else this.lettreFile = file;
+    if (file) {
+      const err = this.validatePdf(file);
+      if (err) this.lettreError = err;
+      else this.lettreFile = file;
+    }
   }
 
-  validatePdf(file?: File): string | null {
-    if (!file) return 'Fichier requis';
-    const name = file.name.toLowerCase();
+  validatePdf(file: File): string | null {
     const type = (file.type || '').toLowerCase();
-    if (!type.includes('pdf') && !name.endsWith('.pdf')) return 'Le fichier doit etre un PDF';
+    if (!type.includes('pdf') && !file.name.toLowerCase().endsWith('.pdf')) return 'Le fichier doit etre un PDF';
     if (file.size > this.MAX_SIZE) return 'Taille maximale 5MB';
     return null;
   }
@@ -108,19 +127,21 @@ export class CandidatureFormComponent implements OnInit {
     this.errorMessage = '';
 
     if (!this.selectedProject) {
-      this.errorMessage = 'Selectionnez un projet depuis la page projets avant de postuler.';
+      this.errorMessage = 'Veuillez selectionner un projet avant de soumettre.';
       return;
     }
 
     if (this.form.invalid) {
-      this.errorMessage = 'Merci de remplir tous les champs requis et de corriger les erreurs indiquees.';
+      this.errorMessage = 'Merci de remplir tous les champs obligatoires.';
       return;
     }
 
-    this.cvError = this.validatePdf(this.cvFile) ?? '';
-    this.lettreError = this.validatePdf(this.lettreFile) ?? '';
-    if (this.cvError || this.lettreError) {
-      this.errorMessage = 'Les pieces jointes doivent etre des PDF valides de moins de 5 Mo.';
+    if (this.cvFile && this.validatePdf(this.cvFile)) {
+      this.cvError = this.validatePdf(this.cvFile)!;
+      return;
+    }
+    if (this.lettreFile && this.validatePdf(this.lettreFile)) {
+      this.lettreError = this.validatePdf(this.lettreFile)!;
       return;
     }
 
@@ -136,20 +157,23 @@ export class CandidatureFormComponent implements OnInit {
       anneeExperience: val.anneeExperience ?? 0,
       dateCandidature: new Date().toISOString().split('T')[0],
       projectId: val.projectId ?? '',
+      projectTitle: this.selectedProject.title,
+      projectType: this.selectedProject.type ?? 'PROJET',
+      companyId: this.selectedProject.companyId ?? '',
+      companyName: this.selectedProject.companyName ?? '',
       statutCandidature: 'En cours'
     };
 
-    this.service.createWithFiles(dto, this.cvFile!, this.lettreFile!).subscribe({
-      next: () => {
-        this.success = true;
-        this.submitted = false;
-        this.cvFile = undefined;
-        this.lettreFile = undefined;
-        this.form.patchValue({ projectId: this.selectedProject?.id ?? '', statutCandidature: 'En cours' });
-      },
-      error: err => {
-        this.errorMessage = `Erreur lors de l'envoi de la candidature (${err.status}): ${err.error?.message || err.message || 'Bad Request'}`;
-      }
-    });
+    if (this.cvFile || this.lettreFile) {
+      this.service.createWithFiles(dto, this.cvFile!, this.lettreFile!).subscribe({
+        next: () => { this.success = true; this.submitted = false; },
+        error: err => { this.errorMessage = `Erreur (${err.status}): ${err.error?.message ?? 'Veuillez reessayer.'}`; }
+      });
+    } else {
+      this.service.create(dto).subscribe({
+        next: () => { this.success = true; this.submitted = false; },
+        error: err => { this.errorMessage = `Erreur (${err.status}): ${err.error?.message ?? 'Veuillez reessayer.'}`; }
+      });
+    }
   }
 }

@@ -2,32 +2,52 @@
   <div class="cand-card">
     <div class="cand-header">
       <h1>Soumettre une candidature</h1>
-      <p>La candidature est rattachee au projet que vous avez choisi.</p>
+      <p>Remplissez le formulaire et choisissez le projet pour lequel vous postulez.</p>
     </div>
 
     <div class="success-banner" *ngIf="success">
-      Votre candidature a ete soumise avec succes.
+      ✅ Votre candidature a ete soumise avec succes !
     </div>
 
-    <div class="error-banner" *ngIf="errorMessage">
-      {{ errorMessage }}
+    <div class="error-banner" *ngIf="errorMessage && !success">
+      ⚠️ {{ errorMessage }}
     </div>
 
-    <a class="back-projects" routerLink="/app/projects" *ngIf="!selectedProject">
-      Choisir un projet
-    </a>
-
-    <section class="selected-project" *ngIf="selectedProject">
-      <div>
-        <span>{{ selectedProject.type || 'PROJET' }}</span>
-        <h2>{{ selectedProject.title }}</h2>
-        <p>{{ selectedProject.companyName || 'Entreprise' }}</p>
-      </div>
-    </section>
-
-    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate *ngIf="!success">
       <input type="hidden" formControlName="projectId" />
+      <input type="hidden" formControlName="statutCandidature" />
 
+      <!-- Projet sélectionné ou sélecteur -->
+      <section class="form-section">
+        <h2 class="section-title">Projet visé *</h2>
+
+        <div class="selected-project" *ngIf="selectedProject">
+          <span class="proj-type">{{ selectedProject.type || 'PROJET' }}</span>
+          <strong>{{ selectedProject.title }}</strong>
+          <span class="proj-company">{{ selectedProject.companyName }}</span>
+          <button type="button" class="btn-change" (click)="selectedProject = undefined; loadAllProjects()">Changer</button>
+        </div>
+
+        <div *ngIf="!selectedProject">
+          <div *ngIf="loadingProjects" class="loading-txt">Chargement des projets...</div>
+          <div *ngIf="!loadingProjects && allProjects.length === 0" class="no-proj">
+            Aucun projet disponible. <a routerLink="/app/projects">Voir les projets</a>
+          </div>
+          <div class="proj-list" *ngIf="!loadingProjects && allProjects.length > 0">
+            <div class="proj-item" *ngFor="let p of allProjects" (click)="selectProject(p.id)">
+              <div>
+                <span class="proj-type">{{ p.type || 'PROJET' }}</span>
+                <strong>{{ p.title }}</strong>
+                <span class="proj-company">{{ p.companyName }}</span>
+              </div>
+              <span class="select-arrow">→</span>
+            </div>
+          </div>
+          <span class="err" *ngIf="submitted && f['projectId'].errors?.['required']">Veuillez selectionner un projet</span>
+        </div>
+      </section>
+
+      <!-- Infos personnelles -->
       <section class="form-section">
         <h2 class="section-title">Informations personnelles</h2>
         <div class="form-grid">
@@ -58,6 +78,7 @@
         </div>
       </section>
 
+      <!-- Formation -->
       <section class="form-section">
         <h2 class="section-title">Formation et experience</h2>
         <div class="form-grid">
@@ -80,27 +101,28 @@
         </div>
       </section>
 
+      <!-- Pièces jointes optionnelles -->
       <section class="form-section">
-        <h2 class="section-title">Pieces jointes</h2>
+        <h2 class="section-title">Pieces jointes <span class="optional">(optionnel)</span></h2>
         <div class="form-grid">
           <div class="field full">
             <label>CV (PDF, max 5MB)</label>
             <input type="file" accept=".pdf,application/pdf" (change)="onCvSelected($event)" />
-            <div class="file-info" *ngIf="cvFile">Fichier: {{ cvFile.name }}</div>
+            <div class="file-info" *ngIf="cvFile">{{ cvFile.name }}</div>
             <div class="err" *ngIf="cvError">{{ cvError }}</div>
           </div>
-
           <div class="field full">
             <label>Lettre de motivation (PDF, max 5MB)</label>
             <input type="file" accept=".pdf,application/pdf" (change)="onLettreSelected($event)" />
-            <div class="file-info" *ngIf="lettreFile">Fichier: {{ lettreFile.name }}</div>
+            <div class="file-info" *ngIf="lettreFile">{{ lettreFile.name }}</div>
             <div class="err" *ngIf="lettreError">{{ lettreError }}</div>
           </div>
         </div>
       </section>
 
       <div class="form-actions">
-        <button type="submit" class="btn-primary" [disabled]="!selectedProject">Soumettre la candidature</button>
+        <a routerLink="/app/projects" class="btn-secondary">Annuler</a>
+        <button type="submit" class="btn-primary">Soumettre la candidature</button>
       </div>
     </form>
   </div>

@@ -199,6 +199,13 @@ export const routes: Routes = [
             .then(m => m.EquipeEntreprise)
       },
 
+      // ✅ PROJETS COMPANY
+      {
+        path: 'projects',
+        loadChildren: () =>
+          import('./features/projects/projects.routes')
+            .then(m => m.PROJECTS_ROUTES)
+      },
 
       { path: '', redirectTo: 'candidatures', pathMatch: 'full' }
 

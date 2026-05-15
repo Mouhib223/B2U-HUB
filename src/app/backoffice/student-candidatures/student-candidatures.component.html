@@ -215,7 +215,21 @@
             <mat-icon>analytics</mat-icon>
             Voir le matching
           </button>
+          <button
+            *ngIf="isRefused(c.statutCandidature)"
+            class="btn feedback"
+            type="button"
+            [disabled]="feedbackMap[c.idCandidature!]?.loading"
+            (click)="generateFeedback(c)">
+            <mat-icon>{{ feedbackMap[c.idCandidature!]?.loading ? 'sync' : 'auto_awesome' }}</mat-icon>
+            {{ feedbackMap[c.idCandidature!]?.loading ? '...' : 'Feedback IA' }}
+          </button>
         </footer>
+
+        <div class="ai-feedback-panel" *ngIf="feedbackMap[c.idCandidature!]?.text">
+          <mat-icon>lightbulb</mat-icon>
+          <p>{{ feedbackMap[c.idCandidature!]?.text }}</p>
+        </div>
       </article>
     </div>
 

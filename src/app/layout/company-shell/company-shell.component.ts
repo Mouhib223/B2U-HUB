@@ -24,11 +24,14 @@ import { AuthService } from '../../core/services/auth.service';
             <mat-icon>work</mat-icon><span *ngIf="!collapsed">Work Post</span>
           </a>
 
+          <a routerLink="/company/projects" routerLinkActive="active">
+            <mat-icon>folder_open</mat-icon><span *ngIf="!collapsed">Projets</span>
+          </a>
+
           <a routerLink="/company/attendance" routerLinkActive="active">
             <mat-icon>how_to_reg</mat-icon><span *ngIf="!collapsed">Présences</span>
           </a>
-         
-           <!-- ✅ AJOUT DU LIEN ÉQUIPES & TÂCHES -->
+
           <a routerLink="/company/equipes" routerLinkActive="active">
             <mat-icon>groups</mat-icon><span *ngIf="!collapsed">Équipes & Tâches</span>
           </a>
