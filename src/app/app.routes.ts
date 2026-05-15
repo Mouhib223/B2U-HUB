@@ -24,7 +24,7 @@ export const routes: Routes = [
         .then(m => m.AUTH_ROUTES)
   },
 
-  // 🟦 APP
+  // 🟦 APP (Layout principal avec sidebar)
   {
     path: 'app',
     loadComponent: () =>
@@ -37,11 +37,59 @@ export const routes: Routes = [
         loadChildren: () =>
           import('./features/dashboard/dashboard.routes')
             .then(m => m.DASHBOARD_ROUTES)
-      }
+      },
+      {
+        path: 'projects',
+        loadChildren: () =>
+          import('./features/projects/projects.routes')
+            .then(m => m.PROJECTS_ROUTES)
+      },
+      {
+        path: 'scoring',
+        loadComponent: () =>
+          import('./features/ai-scoring/scoring-dashboard/scoring-dashboard')
+            .then(m => m.ScoringDashboardComponent)
+      },
+      {
+        path: 'candidatures',
+        loadComponent: () =>
+          import('./backoffice/student-candidatures/student-candidatures.component')
+            .then(m => m.StudentCandidaturesComponent)
+      },
+      {
+        path: 'profile',
+        loadComponent: () =>
+          import('./features/users/my-profile/my-profile')
+            .then(m => m.MyProfile)
+      },
+      {
+        path: 'edit-profile',
+        loadComponent: () =>
+          import('./features/users/edit-profile/edit-profile')
+            .then(m => m.EditProfile)
+      },
+      {
+        path: 'my-company',
+        loadComponent: () =>
+          import('./backoffice/student-company/student-company.component')
+            .then(m => m.StudentCompanyComponent)
+      },
+      {
+        path: 'my-workpost/:companyId',
+        loadComponent: () =>
+          import('./backoffice/student-workpost/student-workpost')
+            .then(m => m.StudentWorkpost)
+      },
+      // ✅ ROUTE ÉQUIPES POUR ÉTUDIANT (dans app)
+      {
+        path: 'equipes',
+        component: EquipeFront
+      },
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   },
 
-  // 🎓 STUDENT (FIX PRINCIPAL ICI)
+  // 🎓 STUDENT SHELL
   {
     path: 'student',
     loadComponent: () =>
@@ -49,47 +97,47 @@ export const routes: Routes = [
         .then(m => m.StudentShellComponent),
     canActivate: [AuthGuard],
     children: [
-
       {
         path: 'candidatures',
         loadComponent: () =>
           import('./backoffice/student-candidatures/student-candidatures.component')
             .then(m => m.StudentCandidaturesComponent)
       },
-
       {
         path: 'new-candidature',
         loadComponent: () =>
           import('./features/candidatures/candidature-form')
             .then(m => m.CandidatureFormComponent)
       },
-
       {
         path: 'my-company',
         loadComponent: () =>
           import('./backoffice/student-company/student-company.component')
             .then(m => m.StudentCompanyComponent)
       },
-
-      // 👇 EQUIPES
+      {
+        path: 'my-workpost/:companyId',
+        loadComponent: () =>
+          import('./backoffice/student-workpost/student-workpost')
+            .then(m => m.StudentWorkpost)
+      },
+      // ✅ ROUTE ÉQUIPES POUR ÉTUDIANT
       {
         path: 'equipes',
         component: EquipeFront
       },
-
-      // 💬 CHAT (IMPORTANT FIX)
+      // ✅ ROUTE CHAT POUR ÉTUDIANT
       {
         path: 'chat/:roomId',
         loadComponent: () =>
           import('./features/chat/chat.component')
             .then(m => m.ChatComponent)
       },
-
       { path: '', redirectTo: 'candidatures', pathMatch: 'full' }
     ]
   },
 
-  // 🏢 COMPANY
+  // 🏢 COMPANY SHELL
   {
     path: 'company',
     loadComponent: () =>
@@ -103,11 +151,36 @@ export const routes: Routes = [
           import('./backoffice/company-candidatures/company-candidatures.component')
             .then(m => m.CompanyCandidaturesComponent)
       },
+      {
+        path: 'work-post',
+        loadComponent: () =>
+          import('./backoffice/work-post/work-post')
+            .then(m => m.WorkPost)
+      },
+      {
+        path: 'work-post/:id',
+        loadComponent: () =>
+          import('./backoffice/work-post-detail/work-post-detail')
+            .then(m => m.WorkPostDetail)
+      },
+      {
+        path: 'attendance',
+        loadComponent: () =>
+          import('./backoffice/attendance/attendance')
+            .then(m => m.AttendanceComponent)
+      },
+      // ✅ ROUTE ÉQUIPES POUR ENTREPRISE
+      {
+        path: 'equipes',
+        loadComponent: () =>
+          import('./equipe-entreprise/equipe-entreprise')
+            .then(m => m.EquipeEntreprise)
+      },
       { path: '', redirectTo: 'candidatures', pathMatch: 'full' }
     ]
   },
 
-  // 🛠 ADMIN
+  // 🛠 ADMIN SHELL
   {
     path: 'admin',
     loadComponent: () =>
@@ -151,7 +224,12 @@ export const routes: Routes = [
           import('./backoffice/candidatures-crud/candidatures-crud.component')
             .then(m => m.CandidaturesCrudComponent)
       },
-
+      {
+        path: 'equipes',
+        loadComponent: () =>
+          import('./backoffice/equipe-crud/equipe-crud')
+            .then(m => m.EquipeCrudComponent)
+      },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   },

@@ -27,11 +27,11 @@
         <mat-icon>analytics</mat-icon>
         <span *ngIf="!sidebarCollapsed">AI Score</span>
       </a>
+      <!-- ✅ LIEN ÉQUIPES -->
       <a routerLink="/app/equipes" routerLinkActive="active">
         <mat-icon>groups</mat-icon>
         <span *ngIf="!sidebarCollapsed">Équipes</span>
       </a>
-      
       <a routerLink="/app/profile" routerLinkActive="active">
         <mat-icon>person</mat-icon>
         <span *ngIf="!sidebarCollapsed">Mon Profil</span>
@@ -47,6 +47,19 @@
       <a routerLink="/company/candidatures" routerLinkActive="active">
         <mat-icon>people</mat-icon>
         <span *ngIf="!sidebarCollapsed">Candidatures reçues</span>
+      </a>
+      <a routerLink="/company/work-post" routerLinkActive="active">
+        <mat-icon>work</mat-icon>
+        <span *ngIf="!sidebarCollapsed">Offres</span>
+      </a>
+      <a routerLink="/company/attendance" routerLinkActive="active">
+        <mat-icon>event</mat-icon>
+        <span *ngIf="!sidebarCollapsed">Présences</span>
+      </a>
+      <!-- ✅ LIENT ÉQUIPES POUR ENTREPRISE -->
+      <a routerLink="/company/equipes" routerLinkActive="active">
+        <mat-icon>groups</mat-icon>
+        <span *ngIf="!sidebarCollapsed">Équipes & Tâches</span>
       </a>
       <a routerLink="/app/profile" routerLinkActive="active">
         <mat-icon>business</mat-icon>
@@ -76,7 +89,8 @@
       </div>
     </header>
     <main class="page-content">
-      <router-outlet></router-outlet>  <!-- ← ESSENTIEL pour afficher les pages enfants -->
+      <!-- ✅ ESSENTIEL : router-outlet pour afficher les pages enfants -->
+      <router-outlet></router-outlet>
     </main>
   </div>
 </div>

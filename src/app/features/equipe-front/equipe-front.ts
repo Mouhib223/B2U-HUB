@@ -165,7 +165,7 @@ export class EquipeFront implements OnInit {
 
   // ── Navigation ───────────────────────────────────────
   joinTeam(equipe: Equipe) {
-    this.router.navigate(['/app/chat', equipe.idEquipe]);
+    this.router.navigate(['/student/chat', equipe.idEquipe]);
   }
 
   // ── Board Jira ───────────────────────────────────────
