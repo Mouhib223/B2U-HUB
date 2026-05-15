@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { Router, RouterLink } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService } from '../../../core/services/auth.service';
 
@@ -16,6 +17,7 @@ import { AuthService } from '../../../core/services/auth.service';
     RouterLink,
     MatFormFieldModule,
     MatInputModule,
+    MatIconModule,
     MatProgressSpinnerModule,
   ],
   templateUrl: './login.component.html',
@@ -59,7 +61,7 @@ export class LoginComponent {
         else this.router.navigate(['/app/dashboard/student']);
       },
       error: (err: any) => {
-        this.error = err.error?.message || 'Login failed.';
+        this.error = err.error?.message || 'Email ou mot de passe incorrect.';
         this.loading = false;
       }
     });

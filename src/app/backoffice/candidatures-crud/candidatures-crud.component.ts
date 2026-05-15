@@ -35,9 +35,7 @@ export class CandidaturesCrudComponent implements OnInit {
     specialite:        [''],
     anneeExperience:   [0, Validators.min(0)],
     statutCandidature: ['En cours', Validators.required],
-    competences:       [''],
-    cvLien:            [''],
-    lettreMotivation:  ['']
+    competences:       ['']
   });
 
   get f() { return this.form.controls; }
@@ -89,9 +87,7 @@ export class CandidaturesCrudComponent implements OnInit {
       anneeExperience:   val.anneeExperience ?? 0,
       dateCandidature:   new Date().toISOString().split('T')[0],
       statutCandidature: val.statutCandidature ?? 'En cours',
-      competences:       val.competences ? val.competences.split(',').map((s: string) => s.trim()) : [],
-      cvLien:            val.cvLien ?? '',
-      lettreMotivation:  val.lettreMotivation ?? ''
+      competences:       val.competences ? val.competences.split(',').map((s: string) => s.trim()) : []
     };
 
     const op = this.editingId

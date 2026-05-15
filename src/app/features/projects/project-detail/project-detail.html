@@ -29,6 +29,14 @@
             <span class="status-badge" [class.open]="project.status === 'open'">
               {{ project.status }}
             </span>
+            <a
+              class="apply-btn"
+              [routerLink]="['/app/candidatures']"
+              [queryParams]="{ projectId: project.id }"
+            >
+              <mat-icon>send</mat-icon>
+              Postuler Ã  ce projet
+            </a>
           </div>
         </div>
       </div>
@@ -43,7 +51,7 @@
       <div class="detail-section">
         <h2><mat-icon>code</mat-icon> Compétences requises</h2>
         <div class="skills">
-          <span class="skill-chip" *ngFor="let s of project.requiredSkills">{{ s }}</span>
+          <span class="skill-chip" *ngFor="let s of projectSkills(project)">{{ s }}</span>
         </div>
       </div>
   

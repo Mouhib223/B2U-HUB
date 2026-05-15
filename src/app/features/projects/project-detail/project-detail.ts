@@ -37,4 +37,8 @@ export class ProjectDetailComponent implements OnInit {
       });
     }
   }
+
+  projectSkills(project: Project): string[] {
+    return project.requiredSkills?.length ? project.requiredSkills : project.technologies ?? [];
+  }
 }

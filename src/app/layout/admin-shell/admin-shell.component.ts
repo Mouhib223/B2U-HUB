@@ -54,7 +54,7 @@ export class AdminShellComponent {
     { label: 'Companies',    icon: ' corporate_fare', route: '/admin/companies'    },
 
 
-    { label: 'Applications', icon: 'assignment', route: '/admin/applications' },
+
     { label: 'Équipes',      icon: 'groups', route: '/admin/equipes' },
 
 

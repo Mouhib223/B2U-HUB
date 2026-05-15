@@ -38,6 +38,8 @@ export const routes: Routes = [
           import('./features/dashboard/dashboard.routes')
             .then(m => m.DASHBOARD_ROUTES)
       },
+
+      // ➕ added from second file
       {
         path: 'projects',
         loadChildren: () =>
@@ -80,16 +82,22 @@ export const routes: Routes = [
           import('./backoffice/student-workpost/student-workpost')
             .then(m => m.StudentWorkpost)
       },
+
       // ✅ ROUTE ÉQUIPES POUR ÉTUDIANT (dans app)
       {
         path: 'equipes',
         component: EquipeFront
       },
+
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   },
 
+
   // 🎓 STUDENT SHELL
+
+  // 🎓 STUDENT
+
   {
     path: 'student',
     loadComponent: () =>
@@ -115,18 +123,27 @@ export const routes: Routes = [
           import('./backoffice/student-company/student-company.component')
             .then(m => m.StudentCompanyComponent)
       },
+
+      // ➕ added from second file
+
       {
         path: 'my-workpost/:companyId',
         loadComponent: () =>
           import('./backoffice/student-workpost/student-workpost')
             .then(m => m.StudentWorkpost)
       },
+
       // ✅ ROUTE ÉQUIPES POUR ÉTUDIANT
+
+
       {
         path: 'equipes',
         component: EquipeFront
       },
+
       // ✅ ROUTE CHAT POUR ÉTUDIANT
+
+
       {
         path: 'chat/:roomId',
         loadComponent: () =>
@@ -151,6 +168,10 @@ export const routes: Routes = [
           import('./backoffice/company-candidatures/company-candidatures.component')
             .then(m => m.CompanyCandidaturesComponent)
       },
+
+
+      // ➕ added from second file
+
       {
         path: 'work-post',
         loadComponent: () =>
@@ -169,6 +190,7 @@ export const routes: Routes = [
           import('./backoffice/attendance/attendance')
             .then(m => m.AttendanceComponent)
       },
+
       // ✅ ROUTE ÉQUIPES POUR ENTREPRISE
       {
         path: 'equipes',
@@ -176,7 +198,11 @@ export const routes: Routes = [
           import('./equipe-entreprise/equipe-entreprise')
             .then(m => m.EquipeEntreprise)
       },
+
+
       { path: '', redirectTo: 'candidatures', pathMatch: 'full' }
+
+
     ]
   },
 
@@ -224,6 +250,10 @@ export const routes: Routes = [
           import('./backoffice/candidatures-crud/candidatures-crud.component')
             .then(m => m.CandidaturesCrudComponent)
       },
+
+
+      // ➕ added from second file
+
       {
         path: 'equipes',
         loadComponent: () =>

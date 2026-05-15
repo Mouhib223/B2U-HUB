@@ -1,131 +1,396 @@
 <div class="page">
-  <!-- Header -->
-  <div class="page-header">
+  <section class="page-header">
     <div>
-      <h1>Candidatures reçues</h1>
-      <p>Consultez, acceptez ou rejetez les candidatures</p>
+      <span class="eyebrow">Espace entreprise</span>
+      <h1><mat-icon>people</mat-icon> Candidatures reçues</h1>
+      <p>Analysez les profils, comparez les scores de matching et prenez une décision rapidement.</p>
+      <small *ngIf="lastUpdate">Dernière mise à jour : {{ lastUpdate | date: 'HH:mm:ss' }}</small>
     </div>
+
+  </section>
+
+  <div class="error-banner" *ngIf="errorMessage">
+    <mat-icon>error_outline</mat-icon>
+    <span>{{ errorMessage }}</span>
   </div>
 
-  <!-- Stats -->
-  <div class="stats-row">
-    <div class="stat-card">
-      <span class="stat-value">{{ stats.total }}</span>
-      <span class="stat-label">Total</span>
-    </div>
-    <div class="stat-card pending">
-      <span class="stat-value">{{ stats.enCours }}</span>
-      <span class="stat-label">En cours</span>
-    </div>
-    <div class="stat-card accepted">
-      <span class="stat-value">{{ stats.acceptes }}</span>
-      <span class="stat-label">Acceptées</span>
-    </div>
-    <div class="stat-card rejected">
-      <span class="stat-value">{{ stats.refuses }}</span>
-      <span class="stat-label">Refusées</span>
-    </div>
-  </div>
+  <section class="stats-grid">
+    <article class="stat-card">
+      <mat-icon>description</mat-icon>
+      <strong>{{ stats.total }}</strong>
+      <span>Total</span>
+    </article>
+    <article class="stat-card">
+      <mat-icon>schedule</mat-icon>
+      <strong>{{ stats.pending }}</strong>
+      <span>En cours</span>
+    </article>
+    <article class="stat-card">
+      <mat-icon>check_circle</mat-icon>
+      <strong>{{ stats.accepted }}</strong>
+      <span>Acceptées</span>
+    </article>
+    <article class="stat-card">
+      <mat-icon>cancel</mat-icon>
+      <strong>{{ stats.refused }}</strong>
+      <span>Refusées</span>
+    </article>
+    <article class="stat-card">
+      <mat-icon>star</mat-icon>
+      <strong>{{ stats.strongMatches }}</strong>
+      <span>Matchs forts</span>
+    </article>
+    <article class="stat-card">
+      <mat-icon>insights</mat-icon>
+      <strong>{{ stats.averageScore }}%</strong>
+      <span>Score moyen</span>
+    </article>
+    <article class="stat-card ai-criteria">
+      <mat-icon>psychology</mat-icon>
+      <strong>AI</strong>
+      <span>Type pris en compte dans le score</span>
+    </article>
+  </section>
 
-  <!-- Filters -->
-  <div class="filters">
-    <div class="search-bar">
-      <mat-icon>search</mat-icon>
-      <input [(ngModel)]="searchTerm" placeholder="Rechercher..." />
-    </div>
-    <select [(ngModel)]="filterStatut" class="filter-select">
-      <option value="">Tous les statuts</option>
-      <option value="En cours">En cours</option>
-      <option value="Acceptée">Acceptée</option>
-      <option value="Refusée">Refusée</option>
-    </select>
-  </div>
+  <section class="filters-section">
+    <div class="filters-top">
+      <label class="search-box">
+        <mat-icon>search</mat-icon>
+        <input
+          type="text"
+          placeholder="Rechercher par nom, email, projet, formation ou spécialité"
+          [(ngModel)]="searchTerm"
+          (input)="onFilterChange()"
+        />
+      </label>
 
-  <!-- Layout : table + detail -->
-  <div class="content-layout">
-    <!-- Table -->
+      <button class="btn filter" type="button" (click)="toggleFilters()" [class.active]="showFilters">
+        <mat-icon>tune</mat-icon>
+        Filtres
+        <span class="filter-count" *ngIf="activeFilterCount > 0">{{ activeFilterCount }}</span>
+      </button>
+
+      <button class="btn reset" type="button" *ngIf="activeFilterCount > 0" (click)="resetFilters()">
+        <mat-icon>close</mat-icon>
+        Réinitialiser
+      </button>
+
+      <span class="filter-result">{{ totalItems }} résultat(s)</span>
+    </div>
+
+    <div class="filter-panel" *ngIf="showFilters">
+      <div class="filter-group">
+        <h3><mat-icon>flag</mat-icon> Statut</h3>
+        <label class="check" *ngFor="let entry of statusChecks | keyvalue">
+          <input type="checkbox" [(ngModel)]="statusChecks[entry.key]" (change)="onFilterChange()" />
+          <span></span>
+          {{ entry.key }}
+        </label>
+      </div>
+
+      <div class="filter-group">
+        <h3><mat-icon>star_rate</mat-icon> Niveau de matching</h3>
+        <label class="check">
+          <input type="checkbox" [(ngModel)]="scoreChecks.excellent" (change)="onFilterChange()" />
+          <span class="excellent"></span>
+          Excellent, 80% et plus
+        </label>
+        <label class="check">
+          <input type="checkbox" [(ngModel)]="scoreChecks.good" (change)="onFilterChange()" />
+          <span class="good"></span>
+          Très bon, 65 à 79%
+        </label>
+        <label class="check">
+          <input type="checkbox" [(ngModel)]="scoreChecks.average" (change)="onFilterChange()" />
+          <span class="average"></span>
+          Bon, 50 à 64%
+        </label>
+        <label class="check">
+          <input type="checkbox" [(ngModel)]="scoreChecks.low" (change)="onFilterChange()" />
+          <span class="low"></span>
+          Faible, moins de 50%
+        </label>
+      </div>
+
+      <div class="filter-group">
+        <h3><mat-icon>linear_scale</mat-icon> Score</h3>
+        <label class="range-label">Minimum <strong>{{ scoreMin }}%</strong></label>
+        <input type="range" min="0" max="100" step="5" [(ngModel)]="scoreMin" (input)="onFilterChange()" />
+        <label class="range-label">Maximum <strong>{{ scoreMax }}%</strong></label>
+        <input type="range" min="0" max="100" step="5" [(ngModel)]="scoreMax" (input)="onFilterChange()" />
+      </div>
+    </div>
+  </section>
+
+  <section class="loading-card" *ngIf="loading">
+    <mat-icon>sync</mat-icon>
+    <p>Chargement des candidatures...</p>
+  </section>
+
+  <section class="content-layout" *ngIf="!loading">
     <div class="table-card">
-      <table>
-        <thead>
-          <tr>
-            <th>Candidat</th><th>Spécialité</th><th>Expérience</th><th>Statut</th><th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let c of filtered"
-              [class.selected-row]="selected?.idCandidature === c.idCandidature"
-              (click)="selected = c" style="cursor:pointer">
-            <td>
-              <div class="candidate-name">
-                <div class="avatar">{{ c.nomCandidat[0] }}{{ c.prenomCandidat[0] }}</div>
-                <div>
-                  <div class="name">{{ c.prenomCandidat }} {{ c.nomCandidat }}</div>
-                  <div class="email">{{ c.email }}</div>
-                </div>
-              </div>
-            </td>
-            <td>{{ c.specialite || '—' }}</td>
-            <td>{{ c.anneeExperience }} an(s)</td>
-            <td><span class="badge" [ngClass]="statusClass(c.statutCandidature)">{{ c.statutCandidature }}</span></td>
-            <td>
-              <div class="actions" (click)="$event.stopPropagation()">
-                <button class="btn-accept" (click)="accept(c)"
-                  [disabled]="c.statutCandidature === 'Acceptée'">
-                  <mat-icon>check</mat-icon> Accepter
-                </button>
-                <button class="btn-reject" (click)="reject(c)"
-                  [disabled]="c.statutCandidature === 'Refusée'">
-                  <mat-icon>close</mat-icon> Rejeter
-                </button>
-              </div>
-            </td>
-          </tr>
-          <tr *ngIf="filtered.length === 0">
-            <td colspan="5" class="empty">Aucune candidature trouvée</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Detail panel -->
-    <div class="detail-panel" *ngIf="selected">
-      <div class="detail-header">
-        <div class="detail-avatar">{{ selected.nomCandidat[0] }}{{ selected.prenomCandidat[0] }}</div>
+      <header class="table-header">
         <div>
-          <h3>{{ selected.prenomCandidat }} {{ selected.nomCandidat }}</h3>
-          <span class="badge" [ngClass]="statusClass(selected.statutCandidature)">{{ selected.statutCandidature }}</span>
+          <h2>Candidatures</h2>
+          <p>{{ totalItems }} profil(s) trouvé(s)</p>
         </div>
-        <button class="close-btn" (click)="selected=null"><mat-icon>close</mat-icon></button>
-      </div>
-      <div class="detail-body">
-        <div class="detail-row"><mat-icon>email</mat-icon><span>{{ selected.email }}</span></div>
-        <div class="detail-row"><mat-icon>phone</mat-icon><span>{{ selected.telephone }}</span></div>
-        <div class="detail-row" *ngIf="selected.adresse"><mat-icon>location_on</mat-icon><span>{{ selected.adresse }}</span></div>
-        <div class="detail-row" *ngIf="selected.formationActuelle"><mat-icon>school</mat-icon><span>{{ selected.formationActuelle }} — {{ selected.specialite }}</span></div>
-        <div class="detail-row"><mat-icon>work_history</mat-icon><span>{{ selected.anneeExperience }} an(s) d'expérience</span></div>
-        <div class="detail-row" *ngIf="selected.dateCandidature"><mat-icon>calendar_today</mat-icon><span>Candidature : {{ selected.dateCandidature }}</span></div>
 
-        <div class="competences" *ngIf="selected.competences?.length">
-          <p class="comp-title">Compétences</p>
-          <div class="tags">
-            <span class="tag" *ngFor="let comp of selected.competences">{{ comp }}</span>
+        <div class="table-actions">
+          <div class="mini-pagination" *ngIf="totalItems > pageSize">
+            <button class="page-btn" type="button" (click)="goToPage(pageIndex - 1)" [disabled]="pageIndex === 0" matTooltip="Précédent">
+              <mat-icon>chevron_left</mat-icon>
+            </button>
+            <span>{{ pageIndex + 1 }} / {{ totalPages }}</span>
+            <button class="page-btn" type="button" (click)="goToPage(pageIndex + 1)" [disabled]="pageIndex >= totalPages - 1" matTooltip="Suivant">
+              <mat-icon>chevron_right</mat-icon>
+            </button>
           </div>
+          <select class="page-size-select" [(ngModel)]="pageSize" (change)="onPageSizeChange()">
+            <option [ngValue]="5">5/page</option>
+            <option [ngValue]="10">10/page</option>
+            <option [ngValue]="25">25/page</option>
+            <option [ngValue]="50">50/page</option>
+          </select>
         </div>
+      </header>
 
-        <div class="motivation" *ngIf="selected.lettreMotivation">
-          <p class="comp-title">Lettre de motivation</p>
-          <p class="motivation-text">{{ selected.lettreMotivation }}</p>
-        </div>
+      <div class="table-responsive" *ngIf="filteredCandidatures.length > 0; else emptyState">
+        <table class="modern-table">
+          <thead>
+            <tr>
+              <th>Candidat</th>
+              <th>Projet</th>
+              <th>Formation</th>
+              <th>Expérience</th>
+              <th>Matching</th>
+              <th>Recommandation</th>
+              <th>Statut</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              *ngFor="let c of filteredCandidatures; trackBy: trackById"
+              class="table-row"
+              [class.selected-row]="selected?.idCandidature === c.idCandidature"
+              (click)="viewDetails(c)"
+            >
+              <td>
+                <div class="candidate-info">
+                  <div class="candidate-avatar">{{ c._initials || getInitials(c) }}</div>
+                  <div>
+                    <div class="candidate-name">{{ c.prenomCandidat }} {{ c.nomCandidat }}</div>
+                    <div class="candidate-email">{{ c.email }}</div>
+                  </div>
+                </div>
+              </td>
 
-        <div class="detail-actions">
-          <button class="btn-accept" (click)="accept(selected)" [disabled]="selected.statutCandidature === 'Acceptée'">
-            <mat-icon>check</mat-icon> Accepter
-          </button>
-          <button class="btn-reject" (click)="reject(selected)" [disabled]="selected.statutCandidature === 'Refusée'">
-            <mat-icon>close</mat-icon> Rejeter
-          </button>
-        </div>
+              <td>
+                <div class="project-cell">
+                  <span class="badge-gray">{{ c._projectTitle || c.projectTitle || c.projectId || 'N/A' }}</span>
+                  <span class="type-chip">{{ normalizeProjectType(c.projectType) }}</span>
+                </div>
+              </td>
+              <td><span class="badge-gray">{{ c.formationActuelle || 'N/A' }}</span></td>
+              <td><span class="badge-gray">{{ c.anneeExperience || 0 }} an(s)</span></td>
+
+              <td>
+                <div class="score-cell">
+                  <div
+                    class="score-ring"
+                    [style.--pct]="(c.scoreMatching ?? 0) + '%'"
+                    [style.--clr]="getScoreColor(c.scoreMatching)"
+                  >
+                    <span>{{ c.scoreMatching ?? 0 }}%</span>
+                  </div>
+                  <div class="score-meta">
+                    <div class="score-bar">
+                      <div class="score-fill" [style.width.%]="c.scoreMatching ?? 0" [style.background]="getScoreColor(c.scoreMatching)"></div>
+                    </div>
+                    <span class="score-lbl" [style.color]="getScoreColor(c.scoreMatching)">
+                      {{ getScoreLabel(c.scoreMatching) }}
+                    </span>
+                  </div>
+                </div>
+              </td>
+
+              <td>
+                <span class="reco-badge" [ngClass]="getRecoClass(c.scoreMatching)">
+                  <mat-icon>{{ getRecoIcon(c.scoreMatching) }}</mat-icon>
+                  {{ getRecoLabel(c.scoreMatching) }}
+                </span>
+              </td>
+
+              <td>
+                <span class="status-badge" [ngClass]="statusClass(c.statutCandidature)">
+                  <mat-icon>{{ getStatusIcon(c.statutCandidature) }}</mat-icon>
+                  {{ displayStatus(c.statutCandidature) }}
+                </span>
+              </td>
+
+              <td>
+                <div class="action-buttons">
+                  <button
+                    class="btn-icon success"
+                    type="button"
+                    (click)="accept(c); $event.stopPropagation()"
+                    [disabled]="displayStatus(c.statutCandidature) === 'Acceptée' || actionLoadingId === c.idCandidature"
+                    matTooltip="Accepter"
+                  >
+                    <mat-icon>check</mat-icon>
+                  </button>
+                  <button
+                    class="btn-icon danger"
+                    type="button"
+                    (click)="reject(c); $event.stopPropagation()"
+                    [disabled]="displayStatus(c.statutCandidature) === 'Refusée' || actionLoadingId === c.idCandidature"
+                    matTooltip="Refuser"
+                  >
+                    <mat-icon>close</mat-icon>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <footer class="pagination-bar" *ngIf="totalItems > pageSize">
+          <p>Page {{ pageIndex + 1 }} sur {{ totalPages }} · {{ totalItems }} candidature(s)</p>
+          <div class="pagination-controls">
+            <button class="page-btn" type="button" (click)="goToPage(0)" [disabled]="pageIndex === 0" matTooltip="Première">
+              <mat-icon>first_page</mat-icon>
+            </button>
+            <button class="page-btn" type="button" (click)="goToPage(pageIndex - 1)" [disabled]="pageIndex === 0" matTooltip="Précédent">
+              <mat-icon>chevron_left</mat-icon>
+            </button>
+            <button class="page-btn page-number" type="button" *ngFor="let p of pageNumbers" [class.active]="p === pageIndex" (click)="goToPage(p)">
+              {{ p + 1 }}
+            </button>
+            <button class="page-btn" type="button" (click)="goToPage(pageIndex + 1)" [disabled]="pageIndex >= totalPages - 1" matTooltip="Suivant">
+              <mat-icon>chevron_right</mat-icon>
+            </button>
+            <button class="page-btn" type="button" (click)="goToPage(totalPages - 1)" [disabled]="pageIndex >= totalPages - 1" matTooltip="Dernière">
+              <mat-icon>last_page</mat-icon>
+            </button>
+          </div>
+        </footer>
       </div>
+
+      <ng-template #emptyState>
+        <div class="empty-state">
+          <mat-icon>search_off</mat-icon>
+          <h3>Aucune candidature trouvée</h3>
+          <p>Modifiez la recherche ou les filtres.</p>
+        </div>
+      </ng-template>
     </div>
-  </div>
+
+    <aside class="detail-panel" *ngIf="selected; else noSelection">
+      <header class="detail-header">
+        <div class="detail-avatar">{{ selected._initials || getInitials(selected) }}</div>
+        <div class="detail-info">
+          <h3>{{ selected.prenomCandidat }} {{ selected.nomCandidat }}</h3>
+          <span class="status-badge" [ngClass]="statusClass(selected.statutCandidature)">
+            <mat-icon>{{ getStatusIcon(selected.statutCandidature) }}</mat-icon>
+            {{ displayStatus(selected.statutCandidature) }}
+          </span>
+        </div>
+        <button class="close-btn" type="button" (click)="closeDetails()" matTooltip="Fermer">
+          <mat-icon>close</mat-icon>
+        </button>
+      </header>
+
+      <div class="detail-body">
+        <section class="score-section">
+          <div
+            class="big-ring"
+            [style.--pct]="(selected.scoreMatching ?? 0) + '%'"
+            [style.--clr]="getScoreColor(selected.scoreMatching)"
+          >
+            <span [style.color]="getScoreColor(selected.scoreMatching)">{{ selected.scoreMatching ?? 0 }}%</span>
+          </div>
+
+          <div class="reco-card" [ngClass]="getRecoClass(selected.scoreMatching)">
+            <mat-icon>{{ getRecoIcon(selected.scoreMatching) }}</mat-icon>
+            <div>
+              <strong>{{ getRecoLabel(selected.scoreMatching) }}</strong>
+              <p>{{ getRecoDescription(selected.scoreMatching) }}</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="detail-section" *ngIf="selectedMatchingParts.length > 0">
+          <h4><mat-icon>analytics</mat-icon> Analyse du matching</h4>
+          <div class="matching-block" *ngFor="let part of selectedMatchingParts" [ngClass]="part.type">
+            <header>
+              <mat-icon>{{ part.type === 'matched' ? 'check_circle' : part.type === 'partial' ? 'sync_alt' : 'cancel' }}</mat-icon>
+              <span>{{ part.label }}</span>
+              <strong>{{ part.skillList.length }}</strong>
+            </header>
+            <div class="skill-chips">
+              <span class="skill-chip" *ngFor="let skill of part.skillList" [ngClass]="part.type">{{ skill }}</span>
+              <span class="no-skills" *ngIf="part.skillList.length === 0">Aucune donnée</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="detail-section" *ngIf="selected.recommendation">
+          <h4><mat-icon>tips_and_updates</mat-icon> Commentaire AI</h4>
+          <p class="ai-comment">{{ selected.recommendation }}</p>
+        </section>
+
+        <section class="detail-section interview-ai" *ngIf="getInterviewPreparationLines(selected).length > 0">
+          <h4><mat-icon>record_voice_over</mat-icon> Questions entretien AI</h4>
+          <div class="interview-ai-list">
+            <p
+              *ngFor="let line of getInterviewPreparationLines(selected)"
+              [class.heading]="isPreparationHeading(line)"
+              [class.answer]="isPreparationAnswer(line)"
+            >
+              {{ line }}
+            </p>
+          </div>
+        </section>
+
+        <section class="detail-section" *ngIf="selected.competences?.length">
+          <h4><mat-icon>psychology</mat-icon> Compétences extraites du CV</h4>
+          <div class="skill-chips-wrap">
+            <span class="skill-chip-cv" *ngFor="let skill of selected.competences">{{ skill }}</span>
+          </div>
+        </section>
+
+        <section class="detail-section">
+          <h4><mat-icon>person</mat-icon> Informations</h4>
+          <div class="info-grid">
+            <div><label>Email</label><span>{{ selected.email }}</span></div>
+            <div><label>Téléphone</label><span>{{ selected.telephone || 'N/A' }}</span></div>
+            <div><label>Formation</label><span>{{ selected.formationActuelle || 'N/A' }}</span></div>
+            <div><label>Spécialité</label><span>{{ selected.specialite || 'N/A' }}</span></div>
+            <div><label>Projet</label><span>{{ selected._projectTitle || selected.projectTitle || selected.projectId || 'N/A' }}</span></div>
+            <div><label>Type</label><span>{{ normalizeProjectType(selected.projectType) }}</span></div>
+            <div><label>Date</label><span>{{ selected.dateCandidature | date: 'dd/MM/yyyy' }}</span></div>
+          </div>
+        </section>
+
+        <footer class="detail-actions">
+          <button class="btn success" type="button" (click)="accept(selected)" [disabled]="displayStatus(selected.statutCandidature) === 'Acceptée' || actionLoadingId === selected.idCandidature">
+            <mat-icon>check</mat-icon>
+            Accepter
+          </button>
+          <button class="btn danger" type="button" (click)="reject(selected)" [disabled]="displayStatus(selected.statutCandidature) === 'Refusée' || actionLoadingId === selected.idCandidature">
+            <mat-icon>close</mat-icon>
+            Refuser
+          </button>
+        </footer>
+      </div>
+    </aside>
+
+    <ng-template #noSelection>
+      <aside class="detail-panel empty-detail">
+        <mat-icon>touch_app</mat-icon>
+        <h3>Sélectionnez une candidature</h3>
+        <p>Le détail du profil et l’analyse de matching apparaîtront ici.</p>
+      </aside>
+    </ng-template>
+  </section>
 </div>
