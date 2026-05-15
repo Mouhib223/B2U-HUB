@@ -82,10 +82,14 @@
       </button>
       <span class="topbar-title">B2U-HUB</span>
       <div class="topbar-right">
-        <div class="user-info" *ngIf="user">
-          <span class="user-name">{{ user.firstName }} {{ user.lastName }}</span>
-          <span class="role-badge" [ngClass]="user.role">{{ user.role }}</span>
+        <div class="user-info" *ngIf="user$ | async as u">
+          <span class="user-name">{{ u.firstName }} {{ u.lastName }}</span>
+          <span class="role-badge" [ngClass]="u.role">{{ u.role }}</span>
         </div>
+        <button class="topbar-logout-btn" (click)="logout()" title="Déconnexion">
+          <mat-icon>logout</mat-icon>
+          <span>Déconnexion</span>
+        </button>
       </div>
     </header>
     <main class="page-content">
