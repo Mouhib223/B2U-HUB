@@ -1,7 +1,7 @@
 <div class="form-page">
 
     <div class="form-header">
-      <a routerLink="/app/projects" class="back-link">
+      <a routerLink=".." class="back-link">
         <mat-icon>arrow_back</mat-icon> Retour aux projets
       </a>
       <h1>{{ isEditMode ? 'Modifier le projet' : 'Créer un projet' }}</h1>
@@ -14,7 +14,20 @@
         <label>Titre du projet</label>
         <input type="text" [(ngModel)]="project.title" placeholder="Ex: Application Web B2U" />
       </div>
-  
+
+      <!-- AI Generator -->
+      <div class="ai-generator">
+        <div class="ai-row">
+          <input type="text" [(ngModel)]="sector" placeholder="Secteur (ex: Technologie, Finance, Santé)" class="sector-input" />
+          <button type="button" class="btn-ai" (click)="generateWithAI()" [disabled]="aiLoading">
+            <mat-icon>{{ aiLoading ? 'sync' : 'auto_awesome' }}</mat-icon>
+            {{ aiLoading ? 'Génération...' : 'Générer avec IA' }}
+          </button>
+        </div>
+        <p class="ai-hint">Entrez le titre + secteur, l'IA génère la description et les compétences requises.</p>
+        <p class="ai-error" *ngIf="aiError">{{ aiError }}</p>
+      </div>
+
       <!-- Description -->
       <div class="form-group">
         <label>Description</label>
@@ -77,7 +90,7 @@
   
       <!-- Bouton submit -->
       <div class="form-actions">
-        <a routerLink="/app/projects" class="btn-cancel">Annuler</a>
+        <a routerLink=".." class="btn-cancel">Annuler</a>
         <button class="btn-submit" (click)="submit()">
           {{ isEditMode ? 'Modifier' : 'Créer' }}
         </button>

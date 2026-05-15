@@ -1,1 +1,130 @@
-<p>edit-profile works!</p>
+<div class="edit-profile-page" *ngIf="user">
+  <div class="edit-card">
+
+    <div class="card-header">
+      <a routerLink="/app/profile" class="back-btn"><mat-icon>arrow_back</mat-icon></a>
+      <h2>Modifier mon profil</h2>
+    </div>
+
+    <div class="success-banner" *ngIf="success">
+      <mat-icon>check_circle</mat-icon> Profil mis à jour avec succès !
+    </div>
+    <div class="error-banner" *ngIf="errorMsg">
+      <mat-icon>error</mat-icon> {{ errorMsg }}
+    </div>
+
+    <form (ngSubmit)="save()" #f="ngForm">
+
+      <!-- ── Informations de base (tous les rôles) ── -->
+      <section class="form-section">
+        <h3><mat-icon>person</mat-icon> Informations générales</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Prénom</label>
+            <input type="text" [(ngModel)]="base.firstName" name="firstName" required />
+          </div>
+          <div class="form-group">
+            <label>Nom</label>
+            <input type="text" [(ngModel)]="base.lastName" name="lastName" required />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nouveau mot de passe (optionnel)</label>
+            <input type="password" [(ngModel)]="base.password" name="password" placeholder="Laisser vide pour ne pas changer" />
+          </div>
+          <div class="form-group">
+            <label>Confirmer le mot de passe</label>
+            <input type="password" [(ngModel)]="base.confirmPassword" name="confirmPassword" />
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Étudiant ── -->
+      <ng-container *ngIf="user.role === 'student'">
+        <section class="form-section">
+          <h3><mat-icon>school</mat-icon> Profil Étudiant</h3>
+          <div class="form-group full">
+            <label>Bio</label>
+            <textarea [(ngModel)]="student.bio" name="bio" rows="3" placeholder="Décrivez-vous en quelques mots..."></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Université</label>
+              <input type="text" [(ngModel)]="student.university" name="university" />
+            </div>
+            <div class="form-group">
+              <label>Année de promotion</label>
+              <input type="text" [(ngModel)]="student.graduationYear" name="graduationYear" placeholder="ex: 2026" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Spécialité</label>
+              <input type="text" [(ngModel)]="student.specialite" name="specialite" />
+            </div>
+            <div class="form-group">
+              <label>Téléphone</label>
+              <input type="text" [(ngModel)]="student.phone" name="phone" />
+            </div>
+          </div>
+          <div class="form-group full">
+            <label>Compétences (séparées par des virgules)</label>
+            <input type="text" [(ngModel)]="student.skillsStr" name="skillsStr" placeholder="ex: Java, Spring Boot, Angular, MongoDB" />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>LinkedIn</label>
+              <input type="url" [(ngModel)]="student.linkedin" name="linkedin" placeholder="https://linkedin.com/in/..." />
+            </div>
+            <div class="form-group">
+              <label>GitHub</label>
+              <input type="url" [(ngModel)]="student.github" name="github" placeholder="https://github.com/..." />
+            </div>
+          </div>
+        </section>
+      </ng-container>
+
+      <!-- ── Company ── -->
+      <ng-container *ngIf="user.role === 'company'">
+        <section class="form-section">
+          <h3><mat-icon>business</mat-icon> Profil Entreprise</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Nom de l'entreprise</label>
+              <input type="text" [(ngModel)]="company.name" name="companyName" />
+            </div>
+            <div class="form-group">
+              <label>Secteur</label>
+              <input type="text" [(ngModel)]="company.sector" name="sector" />
+            </div>
+          </div>
+          <div class="form-group full">
+            <label>Description</label>
+            <textarea [(ngModel)]="company.description" name="description" rows="3"></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Adresse</label>
+              <input type="text" [(ngModel)]="company.address" name="address" />
+            </div>
+            <div class="form-group">
+              <label>Téléphone</label>
+              <input type="text" [(ngModel)]="company.phone" name="companyPhone" />
+            </div>
+          </div>
+        </section>
+      </ng-container>
+
+      <div class="form-actions">
+        <a routerLink="/app/profile" class="btn-cancel">Annuler</a>
+        <button type="submit" class="btn-save" [disabled]="loading">
+          <mat-icon *ngIf="!loading">save</mat-icon>
+          <mat-icon *ngIf="loading" class="spin">sync</mat-icon>
+          {{ loading ? 'Enregistrement...' : 'Sauvegarder' }}
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>

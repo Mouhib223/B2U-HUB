@@ -9,7 +9,7 @@ import { WorkPost } from '../models/workPost.model';
 export class WorkPostService  {
   
   private http = inject(HttpClient);
-  private baseUrl = 'http://localhost:8080/api/workpost';
+  private baseUrl = '/api/workpost';
 
   create(post: WorkPost): Observable<WorkPost> {
     return this.http.post<WorkPost>(`${this.baseUrl}/add`, post);
@@ -17,6 +17,10 @@ export class WorkPostService  {
   getAll(): Observable<WorkPost[]> {
     return this.http.get<WorkPost[]>(`${this.baseUrl}/all`);
   }
+  getMine(): Observable<WorkPost[]> {
+    return this.http.get<WorkPost[]>(`${this.baseUrl}/mine`);
+  }
+
   getByEntreprise(entrepriseId: string): Observable<WorkPost[]> {
     return this.http.get<WorkPost[]>(`${this.baseUrl}/entreprise/${entrepriseId}`);
   }

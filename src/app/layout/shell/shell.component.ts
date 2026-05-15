@@ -16,6 +16,8 @@ export class ShellComponent {
   private auth = inject(AuthService);
   sidebarCollapsed = false;
 
+  user$ = this.auth.currentUser$;
+
   get user() { return this.auth.getCurrentUser(); }
   get isStudent() { return this.user?.role === 'student'; }
   get isCompany() { return this.user?.role === 'company'; }

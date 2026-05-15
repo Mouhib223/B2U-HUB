@@ -4,11 +4,8 @@ import { AdminGuard } from './core/guards/admin.guard';
 import { EquipeFront } from './features/equipe-front/equipe-front';
 
 export const routes: Routes = [
-
-  // 🔵 DEFAULT
   { path: '', redirectTo: '/landing', pathMatch: 'full' },
 
-  // 🟢 LANDING
   {
     path: 'landing',
     loadComponent: () =>
@@ -16,7 +13,6 @@ export const routes: Routes = [
         .then(m => m.LandingPageComponent)
   },
 
-  // 🔐 AUTH
   {
     path: 'auth',
     loadChildren: () =>
@@ -24,7 +20,7 @@ export const routes: Routes = [
         .then(m => m.AUTH_ROUTES)
   },
 
-  // 🟦 APP
+  // 🟦 APP (Layout principal avec sidebar)
   {
     path: 'app',
     loadComponent: () =>
@@ -38,6 +34,7 @@ export const routes: Routes = [
           import('./features/dashboard/dashboard.routes')
             .then(m => m.DASHBOARD_ROUTES)
       },
+
       // ➕ added from second file
       {
         path: 'projects',
@@ -81,11 +78,22 @@ export const routes: Routes = [
           import('./backoffice/student-workpost/student-workpost')
             .then(m => m.StudentWorkpost)
       },
+
+      // ✅ ROUTE ÉQUIPES POUR ÉTUDIANT (dans app)
+      {
+        path: 'equipes',
+        component: EquipeFront
+      },
+
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   },
 
+
+  // 🎓 STUDENT SHELL
+
   // 🎓 STUDENT
+
   {
     path: 'student',
     loadComponent: () =>
@@ -111,17 +119,27 @@ export const routes: Routes = [
           import('./backoffice/student-company/student-company.component')
             .then(m => m.StudentCompanyComponent)
       },
+
       // ➕ added from second file
+
       {
         path: 'my-workpost/:companyId',
         loadComponent: () =>
           import('./backoffice/student-workpost/student-workpost')
             .then(m => m.StudentWorkpost)
       },
+
+      // ✅ ROUTE ÉQUIPES POUR ÉTUDIANT
+
+
       {
         path: 'equipes',
         component: EquipeFront
       },
+
+      // ✅ ROUTE CHAT POUR ÉTUDIANT
+
+
       {
         path: 'chat/:roomId',
         loadComponent: () =>
@@ -132,7 +150,7 @@ export const routes: Routes = [
     ]
   },
 
-  // 🏢 COMPANY
+  // 🏢 COMPANY SHELL
   {
     path: 'company',
     loadComponent: () =>
@@ -141,12 +159,21 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
     children: [
       {
+        path: 'dashboard',
+        loadComponent: () =>
+          import('./features/dashboard/company/company')
+            .then(m => m.CompanyDashboardComponent)
+      },
+      {
         path: 'candidatures',
         loadComponent: () =>
           import('./backoffice/company-candidatures/company-candidatures.component')
             .then(m => m.CompanyCandidaturesComponent)
       },
+
+
       // ➕ added from second file
+
       {
         path: 'work-post',
         loadComponent: () =>
@@ -165,11 +192,30 @@ export const routes: Routes = [
           import('./backoffice/attendance/attendance')
             .then(m => m.AttendanceComponent)
       },
+
+      // ✅ ROUTE ÉQUIPES POUR ENTREPRISE
+      {
+        path: 'equipes',
+        loadComponent: () =>
+          import('./equipe-entreprise/equipe-entreprise')
+            .then(m => m.EquipeEntreprise)
+      },
+
+      // ✅ PROJETS COMPANY
+      {
+        path: 'projects',
+        loadChildren: () =>
+          import('./features/projects/projects.routes')
+            .then(m => m.PROJECTS_ROUTES)
+      },
+
       { path: '', redirectTo: 'candidatures', pathMatch: 'full' }
+
+
     ]
   },
 
-  // 🛠 ADMIN
+  // 🛠 ADMIN SHELL
   {
     path: 'admin',
     loadComponent: () =>
@@ -198,8 +244,8 @@ export const routes: Routes = [
       {
         path: 'applications',
         loadComponent: () =>
-          import('./backoffice/applications-overview/applications-overview.component')
-            .then(m => m.ApplicationsOverviewComponent)
+          import('./backoffice/admin-candidatures/admin-candidatures.component')
+            .then(m => m.AdminCandidaturesComponent)
       },
       {
         path: 'companies',
@@ -210,10 +256,13 @@ export const routes: Routes = [
       {
         path: 'candidatures',
         loadComponent: () =>
-          import('./backoffice/candidatures-crud/candidatures-crud.component')
-            .then(m => m.CandidaturesCrudComponent)
+          import('./backoffice/admin-candidatures/admin-candidatures.component')
+            .then(m => m.AdminCandidaturesComponent)
       },
+
+
       // ➕ added from second file
+
       {
         path: 'equipes',
         loadComponent: () =>
@@ -224,6 +273,24 @@ export const routes: Routes = [
     ]
   },
 
-  // ❌ fallback
+  {
+    path: 'app',
+    canActivate: [AuthGuard],
+    children: [
+      { path: 'dashboard', redirectTo: '/student/dashboard', pathMatch: 'full' },
+      { path: 'dashboard/student', redirectTo: '/student/dashboard', pathMatch: 'full' },
+      { path: 'candidatures', redirectTo: '/student/candidatures', pathMatch: 'full' },
+      { path: 'new-candidature', redirectTo: '/student/new-candidature', pathMatch: 'full' },
+      { path: 'my-company', redirectTo: '/student/my-company', pathMatch: 'full' },
+      { path: 'my-workpost/:companyId', redirectTo: '/student/my-workpost/:companyId', pathMatch: 'full' },
+      { path: 'projects', redirectTo: '/student/projects', pathMatch: 'full' },
+      { path: 'projects/:id', redirectTo: '/student/projects/:id', pathMatch: 'full' },
+      { path: 'equipes', redirectTo: '/student/equipes', pathMatch: 'full' },
+      { path: 'chat/:roomId', redirectTo: '/student/chat/:roomId', pathMatch: 'full' },
+      { path: 'profile', redirectTo: '/student/profile', pathMatch: 'full' },
+      { path: '', redirectTo: '/student/dashboard', pathMatch: 'full' }
+    ]
+  },
+
   { path: '**', redirectTo: '/landing' }
 ];
