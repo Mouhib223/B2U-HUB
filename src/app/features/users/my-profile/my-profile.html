@@ -8,10 +8,19 @@
         <span class="role-badge" [ngClass]="user.role">{{ user.role }}</span>
         <p class="email"><mat-icon>email</mat-icon> {{ user.email }}</p>
       </div>
-      <a routerLink="/app/edit-profile" class="btn-edit">
-        <mat-icon>edit</mat-icon> Modifier
-      </a>
     </div>
+
+    <div class="hero-actions">
+      <a [routerLink]="primaryRoute(currentUser)" class="btn-primary">
+        <mat-icon>{{ primaryIcon(currentUser) }}</mat-icon>
+        {{ primaryLabel(currentUser) }}
+      </a>
+      <button type="button" class="btn-logout" (click)="logout()">
+        <mat-icon>logout</mat-icon>
+        Deconnexion
+      </button>
+    </div>
+  </section>
 
     <!-- ── Student ── -->
     <ng-container *ngIf="user.role === 'student'">

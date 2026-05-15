@@ -70,7 +70,7 @@ export class StudentWorkpost implements OnInit {
   }
 
   goBack(): void {
-    this.router.navigate(['/app/my-company']);
+    this.router.navigate(['/student/my-company']);
   }
 
   applyForPost(post: WorkPost): void {

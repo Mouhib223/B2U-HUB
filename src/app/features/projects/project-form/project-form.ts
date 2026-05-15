@@ -45,6 +45,10 @@ export class ProjectFormComponent implements OnInit {
     private aiService: AiAssistantService
   ) {}
 
+  get projectListRoute(): string {
+    return this.router.url.startsWith('/company') ? '/company/projects' : '/student/projects';
+  }
+
   ngOnInit(): void {
     this.projectId = this.route.snapshot.paramMap.get('id');
     if (this.projectId) {

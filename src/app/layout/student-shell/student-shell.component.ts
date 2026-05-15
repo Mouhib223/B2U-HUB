@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'b2u-student-shell',
@@ -34,7 +35,7 @@ import { MatIconModule } from '@angular/material/icon';
 
           <a routerLink="/student/my-company" routerLinkActive="active">
             <mat-icon>business</mat-icon>
-            <span *ngIf="!collapsed">Mon Entreprise</span>
+            <span *ngIf="!collapsed">Entreprises</span>
           </a>
 
           <!-- ✅ Lien Equipes corrigé -->
@@ -42,7 +43,18 @@ import { MatIconModule } from '@angular/material/icon';
             <mat-icon>groups</mat-icon>
             <span *ngIf="!collapsed">Equipes</span>
           </a>
+          <a routerLink="/student/profile" routerLinkActive="active">
+            <mat-icon>person</mat-icon>
+            <span *ngIf="!collapsed">Profil</span>
+          </a>
         </nav>
+
+        <div class="sidebar-footer">
+          <button class="logout-btn" (click)="logout()">
+            <mat-icon>logout</mat-icon>
+            <span *ngIf="!collapsed">Deconnexion</span>
+          </button>
+        </div>
 
       </aside>
 
@@ -102,9 +114,11 @@ import { MatIconModule } from '@angular/material/icon';
       flex-direction:column;
       gap:4px;
       padding:0 .5rem;
+      flex:1;
     }
 
-    nav a {
+    nav a,
+    .logout-btn {
       display:flex;
       align-items:center;
       gap:.6rem;
@@ -117,9 +131,22 @@ import { MatIconModule } from '@angular/material/icon';
     }
 
     nav a:hover,
-    nav a.active {
+    nav a.active,
+    .logout-btn:hover {
       background:#334155;
       color:#fff;
+    }
+
+    .sidebar-footer {
+      padding:.75rem .5rem;
+      border-top:1px solid rgba(255,255,255,.1);
+    }
+
+    .logout-btn {
+      width:100%;
+      border:none;
+      background:transparent;
+      cursor:pointer;
     }
 
     .main {
@@ -162,5 +189,11 @@ import { MatIconModule } from '@angular/material/icon';
   `]
 })
 export class StudentShellComponent {
+  constructor(private auth: AuthService) {}
+
   collapsed = false;
+
+  logout(): void {
+    this.auth.logout();
+  }
 }

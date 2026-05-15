@@ -4,11 +4,8 @@ import { AdminGuard } from './core/guards/admin.guard';
 import { EquipeFront } from './features/equipe-front/equipe-front';
 
 export const routes: Routes = [
-
-  // 🔵 DEFAULT
   { path: '', redirectTo: '/landing', pathMatch: 'full' },
 
-  // 🟢 LANDING
   {
     path: 'landing',
     loadComponent: () =>
@@ -16,7 +13,6 @@ export const routes: Routes = [
         .then(m => m.LandingPageComponent)
   },
 
-  // 🔐 AUTH
   {
     path: 'auth',
     loadChildren: () =>
@@ -163,6 +159,12 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
     children: [
       {
+        path: 'dashboard',
+        loadComponent: () =>
+          import('./features/dashboard/company/company')
+            .then(m => m.CompanyDashboardComponent)
+      },
+      {
         path: 'candidatures',
         loadComponent: () =>
           import('./backoffice/company-candidatures/company-candidatures.component')
@@ -242,8 +244,8 @@ export const routes: Routes = [
       {
         path: 'applications',
         loadComponent: () =>
-          import('./backoffice/applications-overview/applications-overview.component')
-            .then(m => m.ApplicationsOverviewComponent)
+          import('./backoffice/admin-candidatures/admin-candidatures.component')
+            .then(m => m.AdminCandidaturesComponent)
       },
       {
         path: 'companies',
@@ -254,8 +256,8 @@ export const routes: Routes = [
       {
         path: 'candidatures',
         loadComponent: () =>
-          import('./backoffice/candidatures-crud/candidatures-crud.component')
-            .then(m => m.CandidaturesCrudComponent)
+          import('./backoffice/admin-candidatures/admin-candidatures.component')
+            .then(m => m.AdminCandidaturesComponent)
       },
 
 
@@ -271,6 +273,24 @@ export const routes: Routes = [
     ]
   },
 
-  // ❌ fallback
+  {
+    path: 'app',
+    canActivate: [AuthGuard],
+    children: [
+      { path: 'dashboard', redirectTo: '/student/dashboard', pathMatch: 'full' },
+      { path: 'dashboard/student', redirectTo: '/student/dashboard', pathMatch: 'full' },
+      { path: 'candidatures', redirectTo: '/student/candidatures', pathMatch: 'full' },
+      { path: 'new-candidature', redirectTo: '/student/new-candidature', pathMatch: 'full' },
+      { path: 'my-company', redirectTo: '/student/my-company', pathMatch: 'full' },
+      { path: 'my-workpost/:companyId', redirectTo: '/student/my-workpost/:companyId', pathMatch: 'full' },
+      { path: 'projects', redirectTo: '/student/projects', pathMatch: 'full' },
+      { path: 'projects/:id', redirectTo: '/student/projects/:id', pathMatch: 'full' },
+      { path: 'equipes', redirectTo: '/student/equipes', pathMatch: 'full' },
+      { path: 'chat/:roomId', redirectTo: '/student/chat/:roomId', pathMatch: 'full' },
+      { path: 'profile', redirectTo: '/student/profile', pathMatch: 'full' },
+      { path: '', redirectTo: '/student/dashboard', pathMatch: 'full' }
+    ]
+  },
+
   { path: '**', redirectTo: '/landing' }
 ];

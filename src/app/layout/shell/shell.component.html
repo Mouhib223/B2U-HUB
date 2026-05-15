@@ -7,19 +7,19 @@
 
     <!-- Menu Student -->
     <nav class="sidebar-nav" *ngIf="isStudent">
-      <a routerLink="/app/dashboard" routerLinkActive="active">
+      <a routerLink="/student/candidatures" routerLinkActive="active">
         <mat-icon>dashboard</mat-icon>
         <span *ngIf="!sidebarCollapsed">Dashboard</span>
       </a>
-      <a routerLink="/app/my-company" routerLinkActive="active">
+      <a routerLink="/student/my-company" routerLinkActive="active">
         <mat-icon>business</mat-icon>
         <span *ngIf="!sidebarCollapsed">Mon Entreprise</span>
       </a>
-      <a routerLink="/app/projects" routerLinkActive="active">
+      <a routerLink="/student/projects" routerLinkActive="active">
         <mat-icon>work</mat-icon>
         <span *ngIf="!sidebarCollapsed">Offres / Projets</span>
       </a>
-      <a routerLink="/app/candidatures" routerLinkActive="active">
+      <a routerLink="/student/candidatures" routerLinkActive="active">
         <mat-icon>description</mat-icon>
         <span *ngIf="!sidebarCollapsed">Mes Candidatures</span>
       </a>
@@ -40,7 +40,7 @@
 
     <!-- Menu Company -->
     <nav class="sidebar-nav" *ngIf="isCompany">
-      <a routerLink="/app/dashboard" routerLinkActive="active">
+      <a routerLink="/company/dashboard" routerLinkActive="active">
         <mat-icon>dashboard</mat-icon>
         <span *ngIf="!sidebarCollapsed">Dashboard</span>
       </a>
