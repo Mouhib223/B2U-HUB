@@ -1,0 +1,117 @@
+<div class="users-page">
+
+  <div class="page-header">
+    <div>
+      <h1>Gestion des utilisateurs</h1>
+      <p>{{ users.length }} utilisateurs sur la plateforme</p>
+    </div>
+  </div>
+
+  <div class="error-banner" *ngIf="errorMsg">
+    <mat-icon>error</mat-icon> {{ errorMsg }}
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-bar">
+    <div class="search-box">
+      <mat-icon>search</mat-icon>
+      <input [(ngModel)]="searchQuery" (ngModelChange)="applyFilter()" placeholder="Rechercher par nom ou email...">
+    </div>
+    <div class="role-filters">
+      <button [class.active]="filterRole === 'all'"     (click)="filterRole='all';    applyFilter()">Tous</button>
+      <button [class.active]="filterRole === 'student'" (click)="filterRole='student'; applyFilter()">Étudiants</button>
+      <button [class.active]="filterRole === 'company'" (click)="filterRole='company'; applyFilter()">Entreprises</button>
+      <button [class.active]="filterRole === 'admin'"   (click)="filterRole='admin';   applyFilter()">Admins</button>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-state" *ngIf="loading">
+    <mat-icon class="spin">sync</mat-icon> Chargement...
+  </div>
+
+  <!-- Table -->
+  <div class="table-card" *ngIf="!loading">
+    <table>
+      <thead>
+        <tr>
+          <th>Utilisateur</th>
+          <th>Rôle</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let u of filtered">
+          <td>
+            <div class="user-cell">
+              <div class="avatar">{{ u.firstName?.[0] }}{{ u.lastName?.[0] }}</div>
+              <div>
+                <div class="user-name">{{ u.firstName }} {{ u.lastName }}</div>
+                <div class="user-email">{{ u.email }}</div>
+              </div>
+            </div>
+          </td>
+          <td><span class="role-badge" [ngClass]="normalizeRole(u.role)">{{ normalizeRole(u.role) }}</span></td>
+          <td class="actions-cell">
+            <button class="action-btn edit" (click)="openEdit(u)" title="Modifier">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button class="action-btn delete" (click)="confirmDelete(u)" title="Supprimer">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="empty-state" *ngIf="filtered.length === 0">
+      <mat-icon>search_off</mat-icon>
+      <p>Aucun utilisateur trouvé.</p>
+    </div>
+  </div>
+
+  <!-- Edit Modal -->
+  <div class="modal-overlay" *ngIf="showEditModal" (click)="showEditModal=false">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <h3><mat-icon>edit</mat-icon> Modifier l'utilisateur</h3>
+      <div class="modal-form" *ngIf="editingUser">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Prénom</label>
+            <input [(ngModel)]="editingUser.firstName" />
+          </div>
+          <div class="form-group">
+            <label>Nom</label>
+            <input [(ngModel)]="editingUser.lastName" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Rôle</label>
+          <select [(ngModel)]="editingUser.roleDisplay">
+            <option value="student">student</option>
+            <option value="company">company</option>
+            <option value="admin">admin</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-cancel" (click)="showEditModal=false">Annuler</button>
+        <button class="btn-save" (click)="saveEdit()">Sauvegarder</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirm Modal -->
+  <div class="modal-overlay" *ngIf="showDeleteConfirm" (click)="cancelDelete()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <mat-icon class="modal-icon warn">warning</mat-icon>
+      <h3>Supprimer l'utilisateur</h3>
+      <p>Confirmer la suppression de <strong>{{ selectedUser?.firstName }} {{ selectedUser?.lastName }}</strong> ? Cette action est irréversible.</p>
+      <div class="modal-actions">
+        <button class="btn-cancel" (click)="cancelDelete()">Annuler</button>
+        <button class="btn-delete" (click)="deleteUser()">Supprimer</button>
+      </div>
+    </div>
+  </div>
+
+</div>

@@ -1,8 +1,5 @@
 <div class="projects-page">
   <div class="page-header">
-    <h1>Browse Projects</h1>
-    <p>Find real-world missions that match your skills.</p>
-    <a routerLink="new" class="btn-add">
     <div>
       <h1>Projets disponibles</h1>
       <p>Parcourez les projets ouverts et postulez directement.</p>
@@ -17,20 +14,16 @@
     <input [(ngModel)]="searchQuery" placeholder="Rechercher par titre ou compétence...">
   </div>
 
-  <div class="projects-grid">
-    <div class="project-card" *ngFor="let p of filtered" [routerLink]="[p.id]">
-      <div class="card-top">
-        <div class="company-avatar">{{ p.companyName ? p.companyName[0] : '?' }}</div>        <b2u-badge [label]="p.status" [type]="p.status === 'open' ? 'open' : 'closed'"></b2u-badge>
   <div *ngIf="loading" class="loading-state">Chargement des projets...</div>
   <div *ngIf="error" class="error-state">{{ error }}</div>
 
   <div class="projects-grid" *ngIf="!loading && !error">
     <div class="project-card" *ngFor="let p of filtered">
-      <div class="card-top" [routerLink]="['/app/projects', p.id]" style="cursor:pointer">
+      <div class="card-top" [routerLink]="projectDetailLink(p)" style="cursor:pointer">
         <div class="company-avatar">{{ p.companyName ? p.companyName[0] : '?' }}</div>
         <b2u-badge [label]="p.status" [type]="p.status === 'open' ? 'open' : 'closed'"></b2u-badge>
       </div>
-      <h3 [routerLink]="['/app/projects', p.id]" style="cursor:pointer">{{ p.title }}</h3>
+      <h3 [routerLink]="projectDetailLink(p)" style="cursor:pointer">{{ p.title }}</h3>
       <p class="company-name">{{ p.companyName }}</p>
       <span class="type-chip">{{ p.type || 'PROJET' }}</span>
       <p class="description">{{ p.description }}</p>

@@ -37,4 +37,41 @@ export class MyProfile implements OnInit {
       });
     }
   }
+
+  primaryRoute(user: { role?: string } | null): string {
+    switch (user?.role) {
+      case 'company':
+        return '/company/work-post';
+      case 'admin':
+        return '/admin/dashboard';
+      default:
+        return '/app/edit-profile';
+    }
+  }
+
+  primaryIcon(user: { role?: string } | null): string {
+    switch (user?.role) {
+      case 'company':
+        return 'work';
+      case 'admin':
+        return 'dashboard';
+      default:
+        return 'edit';
+    }
+  }
+
+  primaryLabel(user: { role?: string } | null): string {
+    switch (user?.role) {
+      case 'company':
+        return 'Gerer mes offres';
+      case 'admin':
+        return 'Tableau de bord';
+      default:
+        return 'Modifier mon profil';
+    }
+  }
+
+  logout(): void {
+    this.auth.logout();
+  }
 }

@@ -1,0 +1,146 @@
+<div class="equipes-page">
+
+  <div class="page-header">
+    <div>
+      <h1>Gestion des équipes</h1>
+      <p>{{ equipes.length }} équipes sur la plateforme</p>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-bar">
+    <div class="search-box">
+      <mat-icon>search</mat-icon>
+      <input [(ngModel)]="searchQuery" placeholder="Rechercher par nom d'équipe...">
+    </div>
+  </div>
+
+  <!-- Add Button -->
+  <div class="add-button-container">
+    <button class="btn-add" (click)="openAddModal()">
+      <mat-icon>add</mat-icon>
+      Ajouter une équipe
+    </button>
+  </div>
+
+  <!-- Table -->
+  <div class="table-card">
+    <table>
+      <thead>
+        <tr>
+          <th>Équipe</th>
+          <th>Description</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let equipe of filteredEquipes">
+          <td>
+            <div class="team-cell">
+              <div class="avatar">{{ equipe.nomMembresEquipe[0] }}</div>
+              <div>
+                <div class="team-name">{{ equipe.nomMembresEquipe }}</div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div class="description-text">{{ equipe.descriptionProfil }}</div>
+          </td>
+          <td class="actions-cell">
+            <button class="action-btn edit" (click)="openEditModal(equipe)" title="Modifier">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button class="action-btn delete" (click)="confirmDelete(equipe)" title="Supprimer">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="empty-state" *ngIf="filteredEquipes.length === 0">
+      <mat-icon>search_off</mat-icon>
+      <p>Aucune équipe trouvée</p>
+    </div>
+  </div>
+
+  <!-- Modal Add -->
+  <div class="modal-overlay" *ngIf="showAddModal" (click)="closeAddModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <mat-icon class="modal-icon">group_add</mat-icon>
+      <h3>Ajouter une équipe</h3>
+      <div class="modal-form">
+        <div class="form-group">
+          <label>Nom de l'équipe</label>
+          <input 
+            [(ngModel)]="newEquipe.nomMembresEquipe" 
+            placeholder="Ex: Équipe Développement"
+            [class.invalid]="submitted && !newEquipe.nomMembresEquipe.trim()"
+          />
+          <small class="error-text" *ngIf="submitted && !newEquipe.nomMembresEquipe.trim()">Le nom est requis</small>
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea 
+            [(ngModel)]="newEquipe.descriptionProfil" 
+            placeholder="Description de l'équipe..." 
+            rows="3"
+            [class.invalid]="submitted && !newEquipe.descriptionProfil.trim()"
+          ></textarea>
+          <small class="error-text" *ngIf="submitted && !newEquipe.descriptionProfil.trim()">La description est requise</small>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-cancel" (click)="closeAddModal()">Annuler</button>
+        <button class="btn-submit" (click)="addEquipe()">Ajouter</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Edit -->
+  <div class="modal-overlay" *ngIf="showEditModal && selectedEquipe" (click)="closeEditModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <mat-icon class="modal-icon">edit</mat-icon>
+      <h3>Modifier l'équipe</h3>
+      <div class="modal-form">
+        <div class="form-group">
+          <label>Nom de l'équipe</label>
+          <input 
+            [(ngModel)]="selectedEquipe.nomMembresEquipe" 
+            placeholder="Nom de l'équipe"
+            [class.invalid]="submittedEdit && !selectedEquipe.nomMembresEquipe.trim()"
+          />
+          <small class="error-text" *ngIf="submittedEdit && !selectedEquipe.nomMembresEquipe.trim()">Le nom est requis</small>
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea 
+            [(ngModel)]="selectedEquipe.descriptionProfil" 
+            placeholder="Description de l'équipe..." 
+            rows="3"
+            [class.invalid]="submittedEdit && !selectedEquipe.descriptionProfil.trim()"
+          ></textarea>
+          <small class="error-text" *ngIf="submittedEdit && !selectedEquipe.descriptionProfil.trim()">La description est requise</small>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-cancel" (click)="closeEditModal()">Annuler</button>
+        <button class="btn-submit" (click)="updateEquipe()">Mettre à jour</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Delete -->
+  <div class="modal-overlay" *ngIf="showDeleteConfirm" (click)="cancelDelete()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <mat-icon class="modal-icon warning">warning</mat-icon>
+      <h3>Supprimer l'équipe</h3>
+      <p>Êtes-vous sûr de vouloir supprimer l'équipe <strong>{{ selectedEquipe?.nomMembresEquipe }}</strong> ? Cette action est irréversible.</p>
+      <div class="modal-actions">
+        <button class="btn-cancel" (click)="cancelDelete()">Annuler</button>
+        <button class="btn-delete" (click)="deleteEquipeConfirmed()">Supprimer</button>
+      </div>
+    </div>
+  </div>
+
+</div>
