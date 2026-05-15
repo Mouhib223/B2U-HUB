@@ -46,6 +46,15 @@ export class AdminShellComponent {
   sidebarCollapsed = false;
 
   menuItems = [
+  { label: 'Dashboard',    icon: 'dashboard',   route: '/admin/dashboard'    },
+  { label: 'Users',        icon: 'people',      route: '/admin/users'        },
+  { label: 'Projects',     icon: 'work',        route: '/admin/projects'     },
+  { label: 'Applications', icon: 'assignment',  route: '/admin/applications' },
+  { label: 'Companies',    icon: 'business',    route: '/admin/companies'    },
+  { label: 'Candidatures', icon: 'description', route: '/admin/candidatures' },
+  { label: 'Evaluations',  icon: 'analytics',   route: '/admin/evaluations'  }, // ← ADD THIS
+  ];
+  /*menuItems = [
     { label: 'Dashboard',    icon: 'dashboard',  route: '/admin/dashboard'    },
     { label: 'Users',        icon: 'people',     route: '/admin/users'        },
     { label: 'Projects',     icon: 'work',       route: '/admin/projects'     },
@@ -55,7 +64,7 @@ export class AdminShellComponent {
 
     { label: 'Candidatures',  icon: 'description', route: '/admin/candidatures'  },
 
-  ];
+  ];*/
 
   logout() {
     this.auth.logout();

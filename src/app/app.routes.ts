@@ -154,6 +154,11 @@ export const routes: Routes = [
           .then(m => m.CandidaturesCrudComponent)
 
       },
+      {
+      path: 'evaluations',
+      loadComponent: () => import('./backoffice/evaluations-crud/evaluations-crud.component')
+        .then(m => m.EvaluationsCrudComponent)
+      },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   },

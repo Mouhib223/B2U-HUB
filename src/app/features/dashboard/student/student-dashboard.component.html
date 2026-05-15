@@ -49,9 +49,9 @@
             stroke-dasharray="314" stroke-dashoffset="69"
             stroke-linecap="round" transform="rotate(-90 60 60)"/>
         </svg>
-        <div class="score-value">78</div>
+        <div class="score-value">{{ aiScore | number:'1.0-0' }}</div>
       </div>
-      <p class="score-rank">🥇 Gold Tier</p>
+      <p class="score-rank">{{ aiRank }} Tier</p>
       <a routerLink="/app/scoring" class="score-link">View full breakdown →</a>
     </div>
   </div>

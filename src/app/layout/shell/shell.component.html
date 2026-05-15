@@ -17,12 +17,19 @@
       <a routerLink="/app/projects" routerLinkActive="active">
         <mat-icon>work</mat-icon><span *ngIf="!sidebarCollapsed">Offres / Projets</span>
       </a>
+      
+      <!-- Add this inside the nav, after the Projects link -->
+      <a *ngIf="isStudent" routerLink="/app/scoring" routerLinkActive="active">
+        <mat-icon>analytics</mat-icon>
+        <span>AI Score</span>
+      </a>
+
       <a routerLink="/app/candidatures" routerLinkActive="active">
         <mat-icon>description</mat-icon><span *ngIf="!sidebarCollapsed">Mes Candidatures</span>
       </a>
-      <a routerLink="/app/scoring" routerLinkActive="active">
+      <!--<a routerLink="/app/scoring" routerLinkActive="active">
         <mat-icon>analytics</mat-icon><span *ngIf="!sidebarCollapsed">AI Score</span>
-      </a>
+      </a>-->
       <a routerLink="/app/profile" routerLinkActive="active">
         <mat-icon>person</mat-icon><span *ngIf="!sidebarCollapsed">Mon Profil</span>
       </a>
