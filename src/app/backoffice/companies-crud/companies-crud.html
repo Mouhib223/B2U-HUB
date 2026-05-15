@@ -18,15 +18,6 @@
     </div>
   </div>
 
-  <!-- SECTOR TABLE -->
-  <div class="table-card" style="margin-top: 1.5rem;">
-  <h3>Companies by Sector</h3>
-
-  <div class="chart-container">
-    <canvas id="sectorChart"></canvas>
-  </div>
-</div>
-
   <br>
 
   <!-- SEARCH + ADD -->
@@ -35,7 +26,6 @@
       <mat-icon>search</mat-icon>
       <input [(ngModel)]="searchQuery" placeholder="Search by name or email..." />
     </div>
-
     <button class="add-btn" (click)="openAddModal()">
       <mat-icon>add_business</mat-icon> Add Company
     </button>
@@ -55,12 +45,9 @@
           <th>Actions</th>
         </tr>
       </thead>
-
       <tbody>
-
         <ng-container *ngFor="let company of filteredCompanies">
 
-          <!-- COMPANY ROW -->
           <tr>
             <td class="user-cell">
               <div class="avatar">{{ company.name.charAt(0) }}</div>
@@ -69,22 +56,15 @@
                 <div class="user-email">{{ company.email }}</div>
               </div>
             </td>
-
             <td>{{ company.email }}</td>
             <td>{{ company.phone }}</td>
             <td>{{ company.address }}</td>
             <td>{{ company.sector }}</td>
-
-            <!-- EXPAND -->
             <td>
               <button (click)="toggleEquipes(company.id)">
-                <mat-icon>
-                  {{ expandedCompanyId === company.id ? 'expand_less' : 'expand_more' }}
-                </mat-icon>
+                <mat-icon>{{ expandedCompanyId === company.id ? 'expand_less' : 'expand_more' }}</mat-icon>
               </button>
             </td>
-
-            <!-- ACTIONS -->
             <td class="actions-cell">
               <button class="action-btn edit" (click)="openEditModal(company)">
                 <mat-icon>edit</mat-icon>
@@ -95,7 +75,6 @@
             </td>
           </tr>
 
-          <!-- TEAMS ROW (IMPORTANT: inside ngFor) -->
           <tr *ngIf="expandedCompanyId === company.id">
             <td colspan="7">
               <div class="equipes-container">
@@ -107,16 +86,13 @@
                     </tr>
                   </thead>
                   <tbody>
-
                     <tr *ngFor="let eq of equipesByCompany[company.id]">
                       <td>{{ eq.nomMembresEquipe }}</td>
                       <td>{{ eq.descriptionProfil }}</td>
                     </tr>
-
                     <tr *ngIf="!equipesByCompany[company.id]?.length">
                       <td colspan="2">No teams found</td>
                     </tr>
-
                   </tbody>
                 </table>
               </div>
@@ -125,14 +101,12 @@
 
         </ng-container>
 
-        <!-- EMPTY -->
         <tr *ngIf="filteredCompanies.length === 0">
           <td colspan="7" class="empty-state">
             <mat-icon>business_off</mat-icon>
             No companies found
           </td>
         </tr>
-
       </tbody>
     </table>
   </div>
@@ -140,31 +114,52 @@
   <!-- DELETE MODAL -->
   <div class="modal-overlay" *ngIf="showDeleteConfirm" (click)="cancelDelete()">
     <div class="modal" (click)="$event.stopPropagation()">
-      <mat-icon>warning</mat-icon>
+      <mat-icon class="modal-icon">warning</mat-icon>
       <h3>Delete Company</h3>
       <p>Are you sure you want to delete <strong>{{ selectedCompany?.name }}</strong>?</p>
       <div class="modal-actions">
-        <button (click)="cancelDelete()">Cancel</button>
-        <button (click)="deleteCompany()">Delete</button>
+        <button class="btn-cancel" (click)="cancelDelete()">Cancel</button>
+        <button class="btn-delete" (click)="deleteCompany()">Delete</button>
       </div>
     </div>
   </div>
 
   <!-- ADD MODAL -->
   <div class="modal-overlay" *ngIf="showAddModal" (click)="closeAddModal()">
-    <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal add-modal" (click)="$event.stopPropagation()">
       <h3>Add Company</h3>
       <form #addForm="ngForm" (ngSubmit)="addCompany()">
 
-        <input type="text" [(ngModel)]="newCompany.name" name="name" placeholder="Name" required />
-        <input type="email" [(ngModel)]="newCompany.email" name="email" placeholder="Email" required />
-        <input type="text" [(ngModel)]="newCompany.phone" name="phone" placeholder="Phone" required />
-        <input type="text" [(ngModel)]="newCompany.address" name="address" placeholder="Address" />
-        <input type="text" [(ngModel)]="newCompany.sector" name="sector" placeholder="Sector" />
+        <div class="form-row">
+          <div class="form-group">
+            <label>Name</label>
+            <input type="text" [(ngModel)]="newCompany.name" name="name" placeholder="Name" required />
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" [(ngModel)]="newCompany.email" name="email" placeholder="Email" required />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Phone</label>
+            <input type="text" [(ngModel)]="newCompany.phone" name="phone" placeholder="Phone" required />
+          </div>
+          <div class="form-group">
+            <label>Address</label>
+            <input type="text" [(ngModel)]="newCompany.address" name="address" placeholder="Address" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Sector</label>
+          <input type="text" [(ngModel)]="newCompany.sector" name="sector" placeholder="Sector" />
+        </div>
 
         <div class="modal-actions">
-          <button type="button" (click)="closeAddModal()">Cancel</button>
-          <button type="submit" [disabled]="addForm.invalid">Add</button>
+          <button type="button" class="btn-cancel" (click)="closeAddModal()">Cancel</button>
+          <button type="submit" class="btn-add" [disabled]="addForm.invalid">Add</button>
         </div>
 
       </form>
@@ -173,19 +168,40 @@
 
   <!-- EDIT MODAL -->
   <div class="modal-overlay" *ngIf="showEditModal" (click)="closeEditModal()">
-    <div class="modal" (click)="$event.stopPropagation()" *ngIf="editingCompany">
+    <div class="modal add-modal" (click)="$event.stopPropagation()" *ngIf="editingCompany">
       <h3>Edit Company</h3>
       <form #editForm="ngForm" (ngSubmit)="updateCompany()">
 
-        <input type="text" [(ngModel)]="editingCompany.name" name="name" required />
-        <input type="email" [(ngModel)]="editingCompany.email" name="email" required />
-        <input type="text" [(ngModel)]="editingCompany.phone" name="phone" required />
-        <input type="text" [(ngModel)]="editingCompany.address" name="address" />
-        <input type="text" [(ngModel)]="editingCompany.sector" name="sector" />
+        <div class="form-row">
+          <div class="form-group">
+            <label>Name</label>
+            <input type="text" [(ngModel)]="editingCompany.name" name="name" placeholder="Name" required />
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" [(ngModel)]="editingCompany.email" name="email" placeholder="Email" required />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Phone</label>
+            <input type="text" [(ngModel)]="editingCompany.phone" name="phone" placeholder="Phone" required />
+          </div>
+          <div class="form-group">
+            <label>Address</label>
+            <input type="text" [(ngModel)]="editingCompany.address" name="address" placeholder="Address" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Sector</label>
+          <input type="text" [(ngModel)]="editingCompany.sector" name="sector" placeholder="Sector" />
+        </div>
 
         <div class="modal-actions">
-          <button type="button" (click)="closeEditModal()">Cancel</button>
-          <button type="submit" [disabled]="editForm.invalid">Save</button>
+          <button type="button" class="btn-cancel" (click)="closeEditModal()">Cancel</button>
+          <button type="submit" class="btn-add" [disabled]="editForm.invalid">Save</button>
         </div>
 
       </form>

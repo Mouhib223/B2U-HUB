@@ -35,26 +35,25 @@
         </p>
 
         <!-- Projet associé -->
-        <div class="projet-section" *ngIf="post.id && projectMap[post.id]; else noProjet">
-          <div class="projet-badge">
-            <span class="projet-label">📁 Projet associé</span>
-            <div class="projet-info">
-              <span class="projet-title">{{ projectMap[post.id].title }}</span>
-              <span class="projet-status">{{ projectMap[post.id].status }}</span>
-            </div>
-            <p class="projet-desc">{{ projectMap[post.id].description }}</p>
-            <div class="projet-skills" *ngIf="projectMap[post.id].requiredSkills?.length">
-              <span class="skill-tag" *ngFor="let skill of projectMap[post.id].requiredSkills">
-                {{ skill }}
-              </span>
-            </div>
-          </div>
-        </div>
-        <ng-template #noProjet>
-          <div class="no-projet">
-            📁 Aucun projet associé
-          </div>
-        </ng-template>
+        <div class="projet-section">
+
+  <div *ngIf="post.projetTitle; else noProjet" class="projet-badge">
+    <span class="projet-label">📁 Projet associé</span>
+
+    <div class="projet-info">
+      <span class="projet-title">
+        {{ post.projetTitle }}
+      </span>
+    </div>
+  </div>
+
+  <ng-template #noProjet>
+    <div class="projet-badge">
+      📁 Aucun projet associé
+    </div>
+  </ng-template>
+
+</div>
 
       </div>
 
