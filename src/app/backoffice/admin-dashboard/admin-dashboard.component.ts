@@ -9,6 +9,9 @@ import { Project } from '../../core/models/project.model';
 import { CandidatureService } from '../../core/services/candidature.service';
 import { Entreprise, EntrepriseService } from '../../core/services/entreprise.service';
 import { ProjectService } from '../../core/services/project.service';
+import { Chart, registerables } from 'chart.js';
+Chart.register(...registerables);
+imports: [CommonModule, RouterLink, MatIconModule]
 
 type AdminStat = {
   label: string;
@@ -35,6 +38,9 @@ export class AdminDashboardComponent implements OnInit {
   recentCandidatures: Candidature[] = [];
   topProjects: Project[] = [];
 
+  sectorBreakdown: { sector: string; count: number }[] = [];
+  sectorChart: any;
+
   constructor(
     private candidatureService: CandidatureService,
     private projectService: ProjectService,
@@ -57,6 +63,7 @@ export class AdminDashboardComponent implements OnInit {
       this.companies = companies || [];
       this.computeDashboard();
       this.loading = false;
+      this.loadSectorChart();
       this.lastUpdate = new Date();
     });
   }
@@ -124,4 +131,34 @@ export class AdminDashboardComponent implements OnInit {
     const time = date ? new Date(date).getTime() : 0;
     return Number.isNaN(time) ? 0 : time;
   }
+
+  loadSectorChart(): void {
+  this.entrepriseService.getCountBySector().subscribe({
+    next: (sectors) => {
+      this.sectorBreakdown = Object.entries(sectors ?? {}).map(
+        ([sector, count]) => ({ sector, count: count as number })
+      );
+      setTimeout(() => this.createChart(), 0);
+    },
+    error: (err) => console.error('Sector chart failed', err)
+  });
+}
+
+createChart(): void {
+  const labels = this.sectorBreakdown.map(s => s.sector);
+  const data = this.sectorBreakdown.map(s => s.count);
+  if (this.sectorChart) this.sectorChart.destroy();
+  this.sectorChart = new Chart('sectorChart', {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{ label: 'Companies', data, borderWidth: 1 }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: true, position: 'bottom' } }
+    }
+  });
+}
 }
