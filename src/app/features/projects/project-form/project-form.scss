@@ -117,6 +117,48 @@
     }
   }
   
+  .ai-generator {
+    background: #f0f4ff;
+    border: 1px dashed #4c6ef5;
+    border-radius: 10px;
+    padding: 1rem 1.2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .ai-row {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+
+    .sector-input { flex: 1; }
+  }
+
+  .btn-ai {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: linear-gradient(135deg, #4c6ef5, #7950f2);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 0.65rem 1.2rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: opacity 0.2s;
+
+    &:hover:not(:disabled) { opacity: 0.88; }
+    &:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    mat-icon { font-size: 1.1rem; width: 20px; height: 20px; }
+  }
+
+  .ai-hint { font-size: 0.78rem; color: #6c7a9b; margin: 0; }
+  .ai-error { font-size: 0.8rem; color: #c92a2a; margin: 0; }
+
   .form-actions {
     display: flex;
     justify-content: flex-end;

@@ -25,15 +25,19 @@ import { AuthService } from '../../core/services/auth.service';
           </a>
 
           <a routerLink="/company/work-post" routerLinkActive="active">
-            <mat-icon>work</mat-icon><span *ngIf="!collapsed">Offres</span>
+            <mat-icon>work</mat-icon><span *ngIf="!collapsed">Work Post</span>
           </a>
 
           <a routerLink="/company/projects" routerLinkActive="active">
             <mat-icon>folder_open</mat-icon><span *ngIf="!collapsed">Projets</span>
           </a>
 
-          <a routerLink="/company/profile" routerLinkActive="active">
-            <mat-icon>business</mat-icon><span *ngIf="!collapsed">Profil</span>
+          <a routerLink="/company/attendance" routerLinkActive="active">
+            <mat-icon>how_to_reg</mat-icon><span *ngIf="!collapsed">Présences</span>
+          </a>
+
+          <a routerLink="/company/equipes" routerLinkActive="active">
+            <mat-icon>groups</mat-icon><span *ngIf="!collapsed">Équipes & Tâches</span>
           </a>
         </nav>
         <div class="sidebar-footer">

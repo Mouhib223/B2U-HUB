@@ -55,6 +55,14 @@ export class AuthService {
   getCurrentUser(): User | null { return this.currentUserSubject.value; }
   getToken(): string | null { return localStorage.getItem('b2u_token'); }
 
+  updateCurrentUser(partial: Partial<User>): void {
+    const current = this.currentUserSubject.value;
+    if (!current) return;
+    const updated = { ...current, ...partial };
+    localStorage.setItem('b2u_user', JSON.stringify(updated));
+    this.currentUserSubject.next(updated);
+  }
+
   // Convertit ROLE_ADMIN → 'admin', ROLE_COMPANY → 'company', ROLE_STUDENT → 'student'
   private mapRole(backendRole: string): string {
     switch (backendRole?.toUpperCase()) {

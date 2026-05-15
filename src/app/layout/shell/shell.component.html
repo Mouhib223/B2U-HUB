@@ -23,12 +23,16 @@
         <mat-icon>description</mat-icon>
         <span *ngIf="!sidebarCollapsed">Mes Candidatures</span>
       </a>
-      <a routerLink="/student/equipes" routerLinkActive="active">
+      <a routerLink="/app/scoring" routerLinkActive="active">
+        <mat-icon>analytics</mat-icon>
+        <span *ngIf="!sidebarCollapsed">AI Score</span>
+      </a>
+      <!-- ✅ LIEN ÉQUIPES -->
+      <a routerLink="/app/equipes" routerLinkActive="active">
         <mat-icon>groups</mat-icon>
         <span *ngIf="!sidebarCollapsed">Équipes</span>
       </a>
-      
-      <a routerLink="/student/profile" routerLinkActive="active">
+      <a routerLink="/app/profile" routerLinkActive="active">
         <mat-icon>person</mat-icon>
         <span *ngIf="!sidebarCollapsed">Mon Profil</span>
       </a>
@@ -44,7 +48,20 @@
         <mat-icon>people</mat-icon>
         <span *ngIf="!sidebarCollapsed">Candidatures reçues</span>
       </a>
-      <a routerLink="/company/profile" routerLinkActive="active">
+      <a routerLink="/company/work-post" routerLinkActive="active">
+        <mat-icon>work</mat-icon>
+        <span *ngIf="!sidebarCollapsed">Offres</span>
+      </a>
+      <a routerLink="/company/attendance" routerLinkActive="active">
+        <mat-icon>event</mat-icon>
+        <span *ngIf="!sidebarCollapsed">Présences</span>
+      </a>
+      <!-- ✅ LIENT ÉQUIPES POUR ENTREPRISE -->
+      <a routerLink="/company/equipes" routerLinkActive="active">
+        <mat-icon>groups</mat-icon>
+        <span *ngIf="!sidebarCollapsed">Équipes & Tâches</span>
+      </a>
+      <a routerLink="/app/profile" routerLinkActive="active">
         <mat-icon>business</mat-icon>
         <span *ngIf="!sidebarCollapsed">Mon Profil</span>
       </a>
@@ -65,14 +82,19 @@
       </button>
       <span class="topbar-title">B2U-HUB</span>
       <div class="topbar-right">
-        <div class="user-info" *ngIf="user">
-          <span class="user-name">{{ user.firstName }} {{ user.lastName }}</span>
-          <span class="role-badge" [ngClass]="user.role">{{ user.role }}</span>
+        <div class="user-info" *ngIf="user$ | async as u">
+          <span class="user-name">{{ u.firstName }} {{ u.lastName }}</span>
+          <span class="role-badge" [ngClass]="u.role">{{ u.role }}</span>
         </div>
+        <button class="topbar-logout-btn" (click)="logout()" title="Déconnexion">
+          <mat-icon>logout</mat-icon>
+          <span>Déconnexion</span>
+        </button>
       </div>
     </header>
     <main class="page-content">
-      <router-outlet></router-outlet>  <!-- ← ESSENTIEL pour afficher les pages enfants -->
+      <!-- ✅ ESSENTIEL : router-outlet pour afficher les pages enfants -->
+      <router-outlet></router-outlet>
     </main>
   </div>
 </div>

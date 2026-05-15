@@ -3,37 +3,103 @@
     <h1>Browse Projects</h1>
     <p>Find real-world missions that match your skills.</p>
     <a routerLink="new" class="btn-add">
+    <div>
+      <h1>Projets disponibles</h1>
+      <p>Parcourez les projets ouverts et postulez directement.</p>
+    </div>
+    <a routerLink="new" class="btn-add" *ngIf="!isStudent">
       <mat-icon>add</mat-icon> Ajouter un projet
     </a>
   </div>
 
   <div class="search-bar">
     <mat-icon>search</mat-icon>
-    <input [(ngModel)]="searchQuery" placeholder="Search by title or skill...">
+    <input [(ngModel)]="searchQuery" placeholder="Rechercher par titre ou compétence...">
   </div>
 
   <div class="projects-grid">
     <div class="project-card" *ngFor="let p of filtered" [routerLink]="[p.id]">
       <div class="card-top">
         <div class="company-avatar">{{ p.companyName ? p.companyName[0] : '?' }}</div>        <b2u-badge [label]="p.status" [type]="p.status === 'open' ? 'open' : 'closed'"></b2u-badge>
+  <div *ngIf="loading" class="loading-state">Chargement des projets...</div>
+  <div *ngIf="error" class="error-state">{{ error }}</div>
+
+  <div class="projects-grid" *ngIf="!loading && !error">
+    <div class="project-card" *ngFor="let p of filtered">
+      <div class="card-top" [routerLink]="['/app/projects', p.id]" style="cursor:pointer">
+        <div class="company-avatar">{{ p.companyName ? p.companyName[0] : '?' }}</div>
+        <b2u-badge [label]="p.status" [type]="p.status === 'open' ? 'open' : 'closed'"></b2u-badge>
       </div>
-      <h3>{{ p.title }}</h3>
-      <p>{{ p.companyName }}</p>
+      <h3 [routerLink]="['/app/projects', p.id]" style="cursor:pointer">{{ p.title }}</h3>
+      <p class="company-name">{{ p.companyName }}</p>
       <span class="type-chip">{{ p.type || 'PROJET' }}</span>
       <p class="description">{{ p.description }}</p>
       <div class="skills">
         <span class="skill-chip" *ngFor="let s of projectSkills(p)">{{ s }}</span>
       </div>
       <div class="card-footer">
-        <span><mat-icon>group</mat-icon> {{ p.teamSize }} members</span>
-        <span><mat-icon>people</mat-icon> {{ p.applicantsCount }} applicants</span>
+        <div class="meta">
+          <span><mat-icon>group</mat-icon> {{ p.teamSize }} membres</span>
+          <span><mat-icon>people</mat-icon> {{ p.applicantsCount }} candidatures</span>
+        </div>
+        <div class="card-actions" *ngIf="isStudent && p.status !== 'closed'">
+          <button class="btn-gap" (click)="analyzeGap(p, $event)" title="Analyser mes compétences">
+            <mat-icon>analytics</mat-icon>
+          </button>
+          <button class="btn-apply" (click)="apply(p, $event)">Postuler</button>
+        </div>
       </div>
     </div>
   </div>
 
-  <div class="empty-state" *ngIf="filtered.length === 0">
+  <!-- Skill Gap Modal -->
+  <div class="gap-overlay" *ngIf="gapModal.open" (click)="closeGapModal()">
+    <div class="gap-modal" (click)="$event.stopPropagation()">
+      <div class="gap-modal-header">
+        <h3><mat-icon>analytics</mat-icon> Analyse de compétences</h3>
+        <button class="gap-close" (click)="closeGapModal()"><mat-icon>close</mat-icon></button>
+      </div>
+      <p class="gap-project-title">{{ gapModal.projectTitle }}</p>
+
+      <div class="gap-loading" *ngIf="gapModal.loading">
+        <mat-icon class="spin">sync</mat-icon> Analyse en cours...
+      </div>
+
+      <div class="gap-error" *ngIf="gapModal.error">{{ gapModal.error }}</div>
+
+      <div *ngIf="gapModal.result && !gapModal.loading">
+        <div class="gap-score">
+          <div class="gap-percent" [style.color]="gapModal.result.matchPercent >= 60 ? '#0E9F6E' : gapModal.result.matchPercent >= 40 ? '#D97706' : '#DC2626'">
+            {{ gapModal.result.matchPercent }}%
+          </div>
+          <span>de compatibilité avec votre profil</span>
+        </div>
+
+        <div class="gap-section" *ngIf="gapModal.result.matchedSkills.length > 0">
+          <h4><mat-icon>check_circle</mat-icon> Compétences maîtrisées</h4>
+          <div class="gap-chips">
+            <span class="chip matched" *ngFor="let s of gapModal.result.matchedSkills">{{ s }}</span>
+          </div>
+        </div>
+
+        <div class="gap-section" *ngIf="gapModal.result.missingSkills.length > 0">
+          <h4><mat-icon>warning</mat-icon> Compétences manquantes</h4>
+          <div class="gap-chips">
+            <span class="chip missing" *ngFor="let s of gapModal.result.missingSkills">{{ s }}</span>
+          </div>
+        </div>
+
+        <div class="gap-advice">
+          <mat-icon>lightbulb</mat-icon>
+          <p>{{ gapModal.result.advice }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="empty-state" *ngIf="!loading && filtered.length === 0">
     <mat-icon>search_off</mat-icon>
-    <h3>No projects found</h3>
-    <p>Try a different search term or skill.</p>
+    <h3>Aucun projet trouvé</h3>
+    <p>Essayez un autre terme de recherche.</p>
   </div>
 </div>

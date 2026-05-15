@@ -52,23 +52,12 @@ export class WorkPost implements OnInit {
   }
 
   loadPosts(): void {
-  const user = this.auth.getCurrentUser();
-
-  if (!user) return;
-
-  this.isLoading = true;
-
-  this.workPostService.getByEntreprise(user.email).subscribe({
-    next: (data) => {
-      this.posts = data;
-      this.isLoading = false;
-    },
-    error: (err) => {
-      console.error('Failed to load posts', err);
-      this.isLoading = false;
-    }
-  });
-}
+    this.isLoading = true;
+    this.workPostService.getMine().subscribe({
+      next: (data) => { this.posts = data; this.isLoading = false; },
+      error: (err) => { console.error('Failed to load posts', err); this.isLoading = false; }
+    });
+  }
 
   get filteredPosts(): WorkPostModel[] {
     return this.posts.filter(post => {
@@ -86,15 +75,8 @@ export class WorkPost implements OnInit {
   get expiredPosts(): number { return this.posts.filter(p => p.status === 'EXPIRED').length; }
 
   createPost(): void {
-  const user = this.auth.getCurrentUser();
-
-  if (!user) return;
-
-  this.newPost.entrepriseId = user.email; // ✅ IMPORTANT
-
-  this.isLoading = true;
-
-  this.workPostService.create(this.newPost).subscribe({
+    this.isLoading = true;
+    this.workPostService.create(this.newPost).subscribe({
     next: (created: WorkPostModel) => {
       this.posts.unshift(created);
       this.newPost = this.emptyPost();

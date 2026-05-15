@@ -18,9 +18,9 @@ import { AuthService } from '../../core/services/auth.service';
         </div>
 
         <nav>
-          <a routerLink="/student/dashboard" routerLinkActive="active">
-            <mat-icon>dashboard</mat-icon>
-            <span *ngIf="!collapsed">Dashboard</span>
+          <a routerLink="/app/projects" routerLinkActive="active">
+            <mat-icon>work</mat-icon>
+            <span *ngIf="!collapsed">Offres / Projets</span>
           </a>
 
           <a routerLink="/student/candidatures" routerLinkActive="active">
@@ -28,9 +28,9 @@ import { AuthService } from '../../core/services/auth.service';
             <span *ngIf="!collapsed">Mes Candidatures</span>
           </a>
 
-          <a routerLink="/student/projects" routerLinkActive="active">
-            <mat-icon>work</mat-icon>
-            <span *ngIf="!collapsed">Projets</span>
+          <a routerLink="/student/new-candidature" routerLinkActive="active">
+            <mat-icon>add_circle</mat-icon>
+            <span *ngIf="!collapsed">Nouvelle candidature</span>
           </a>
 
           <a routerLink="/student/my-company" routerLinkActive="active">

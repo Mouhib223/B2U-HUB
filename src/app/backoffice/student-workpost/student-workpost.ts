@@ -74,7 +74,11 @@ export class StudentWorkpost implements OnInit {
   }
 
   applyForPost(post: WorkPost): void {
-    this.router.navigate(['/student/new-candidature'], {
+    if (!post.projetId) {
+      alert('Cette offre n\'a pas encore de projet associé. Revenez plus tard.');
+      return;
+    }
+    this.router.navigate(['/app/candidatures'], {
       queryParams: { projectId: post.projetId },
       state: {
         projectId: post.projetId,
