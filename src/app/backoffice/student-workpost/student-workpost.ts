@@ -70,11 +70,11 @@ export class StudentWorkpost implements OnInit {
   }
 
   goBack(): void {
-    this.router.navigate(['/app/my-company']);
+    this.router.navigate(['/student/my-company']);
   }
 
   applyForPost(post: WorkPost): void {
-    this.router.navigate(['/app/candidatures'], {
+    this.router.navigate(['/student/new-candidature'], {
       queryParams: { projectId: post.projetId },
       state: {
         projectId: post.projetId,

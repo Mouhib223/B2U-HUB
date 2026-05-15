@@ -40,6 +40,10 @@ export class ProjectFormComponent implements OnInit {
     private authService: AuthService
   ) {}
 
+  get projectListRoute(): string {
+    return this.router.url.startsWith('/company') ? '/company/projects' : '/student/projects';
+  }
+
   ngOnInit(): void {
     this.projectId = this.route.snapshot.paramMap.get('id');
     if (this.projectId) {
@@ -70,11 +74,11 @@ export class ProjectFormComponent implements OnInit {
   submit(): void {
     if (this.isEditMode && this.projectId) {
       this.projetService.updateProjet(this.projectId, this.project as Project).subscribe({
-        next: () => this.router.navigate(['/app/projects'])
+        next: () => this.router.navigate([this.projectListRoute])
       });
     } else {
       this.projetService.createProjet(this.project as Project).subscribe({
-        next: () => this.router.navigate(['/app/projects'])
+        next: () => this.router.navigate([this.projectListRoute])
       });
     }
   }
