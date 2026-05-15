@@ -14,6 +14,10 @@ export const PROJECTS_ROUTES: Routes = [
     loadComponent: () => import('./project-form/project-form').then(m => m.ProjectFormComponent)
   },
   {
+    path: ':id/manage',
+    loadComponent: () => import('./project-management/project-management').then(m => m.ProjectManagementComponent)
+  },
+  {
     path: ':id',
     loadComponent: () => import('./project-detail/project-detail').then(m => m.ProjectDetailComponent)
   }

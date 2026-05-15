@@ -1,0 +1,268 @@
+.management-page {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1.5rem;
+  }
+  
+  .back-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #3b5bdb;
+    text-decoration: none;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+    &:hover { text-decoration: underline; }
+  }
+  
+  .page-header h1 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+  }
+  
+  .tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    border-bottom: 2px solid #e9ecef;
+  
+    button {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.8rem 1.5rem;
+      border: none;
+      background: none;
+      cursor: pointer;
+      font-size: 0.95rem;
+      color: #666;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+  
+      &.active {
+        color: #3b5bdb;
+        border-bottom-color: #3b5bdb;
+        font-weight: 600;
+      }
+      &:hover { color: #3b5bdb; }
+    }
+  }
+  
+  .btn-generate {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.7rem 1.5rem;
+    background: #3b5bdb;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    &:hover { background: #2f4cc0; }
+  }
+  
+  // KANBAN
+  .kanban-board {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+  }
+  
+  .kanban-column {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 1rem;
+    min-height: 400px;
+  }
+  
+  .column-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    border-radius: 8px;
+  
+    &.todo { background: #e9ecef; color: #495057; }
+    &.in-progress { background: #fff3bf; color: #e67700; }
+    &.done { background: #d3f9d8; color: #2f9e44; }
+  }
+  
+  .task-card {
+    background: white;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 0.8rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+  
+    h4 { margin: 0.5rem 0; font-size: 0.95rem; }
+    p { font-size: 0.8rem; color: #666; margin: 0 0 0.8rem; }
+  }
+  
+  .task-priority {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  
+    &.priority-high { background: #ffe3e3; color: #c92a2a; }
+    &.priority-medium { background: #fff3bf; color: #e67700; }
+    &.priority-low { background: #d3f9d8; color: #2f9e44; }
+  }
+  
+  .task-actions {
+    display: flex;
+    gap: 0.5rem;
+  
+    button {
+      padding: 0.3rem 0.6rem;
+      border: 1px solid #dee2e6;
+      border-radius: 6px;
+      background: white;
+      cursor: pointer;
+      font-size: 0.8rem;
+      &:hover { background: #f8f9fa; }
+    }
+  }
+  
+  .empty-column {
+    text-align: center;
+    color: #aaa;
+    font-size: 0.9rem;
+    margin-top: 2rem;
+  }
+  
+  // SPRINTS
+  .sprint-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  
+  .sprint-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  
+    h3 { margin: 0; font-size: 1.1rem; }
+  }
+  
+  .sprint-status {
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+  
+    &.active { background: #d3f9d8; color: #2f9e44; }
+    &.planned { background: #e7f5ff; color: #1971c2; }
+    &.completed { background: #e9ecef; color: #495057; }
+  }
+  
+  .sprint-dates {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: #666;
+    font-size: 0.9rem;
+  
+    span { display: flex; align-items: center; gap: 0.3rem; }
+  }
+  
+  // AI
+  .ai-card {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  
+    h2 { margin-bottom: 1.5rem; }
+  }
+  
+  .ai-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .ai-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 8px;
+  
+    label { font-size: 0.8rem; color: #666; display: block; }
+    span { font-weight: 600; font-size: 1rem; }
+  }
+  
+  .difficulty {
+    &.facile { color: #2f9e44; }
+    &.moyen { color: #e67700; }
+    &.difficile { color: #c92a2a; }
+  }
+  
+  .ai-skills {
+    margin-bottom: 1.5rem;
+  
+    label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 600;
+      margin-bottom: 0.8rem;
+    }
+  }
+  
+  .skills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  
+  .skill-chip {
+    background: #e7f5ff;
+    color: #1971c2;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+  }
+  
+  .ai-summary {
+    label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 600;
+      margin-bottom: 0.8rem;
+    }
+  
+    pre {
+      background: #f8f9fa;
+      padding: 1rem;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+  }
+  
+  .empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: #aaa;
+  
+    mat-icon { font-size: 3rem; width: 3rem; height: 3rem; }
+    p { margin-top: 1rem; }
+  }
