@@ -27,7 +27,10 @@ import { AuthService } from '../../core/services/auth.service';
             <mat-icon>description</mat-icon>
             <span *ngIf="!collapsed">Mes Candidatures</span>
           </a>
-
+<a routerLink="/student/scoring" routerLinkActive="active">
+  <mat-icon>analytics</mat-icon>
+  <span *ngIf="!collapsed">AI Scoring</span>
+</a>
           <a routerLink="/student/new-candidature" routerLinkActive="active">
             <mat-icon>add_circle</mat-icon>
             <span *ngIf="!collapsed">Nouvelle candidature</span>

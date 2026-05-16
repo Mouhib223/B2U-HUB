@@ -128,7 +128,12 @@ export const routes: Routes = [
           import('./backoffice/student-workpost/student-workpost')
             .then(m => m.StudentWorkpost)
       },
-
+{
+  path: 'scoring',
+  loadComponent: () =>
+    import('./features/ai-scoring/scoring-dashboard/scoring-dashboard')
+      .then(m => m.ScoringDashboardComponent)
+},
       // ✅ ROUTE ÉQUIPES POUR ÉTUDIANT
 
 
