@@ -269,6 +269,11 @@ export const routes: Routes = [
           import('./backoffice/equipe-crud/equipe-crud')
             .then(m => m.EquipeCrudComponent)
       },
+      {
+      path: 'evaluations',
+      loadComponent: () => import('./backoffice/evaluations-crud/evaluations-crud.component')
+        .then(m => m.EvaluationsCrudComponent)
+      },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   },

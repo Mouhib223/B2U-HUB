@@ -1,1 +1,587 @@
-<p>scoring-dashboard works!</p>
+<div class="scoring-page">
+
+  <!-- ═══════════════════════════════════════════════════
+       SECTION 1: AI SCORE CARD (latest evaluation)
+  ════════════════════════════════════════════════════ -->
+  <div class="section-header">
+    <h1>Your AI Score</h1>
+    <p>Evaluated by B2U-HUB's intelligent scoring system</p>
+  </div>
+
+  <!-- Skeleton -->
+  <div class="hero-card skeleton-card" *ngIf="scoreLoading">
+    <div class="sk sk-ring"></div>
+    <div class="sk-info"><div class="sk sk-line"></div><div class="sk sk-line short"></div></div>
+  </div>
+
+  <!-- Score Hero -->
+  <div class="hero-card" *ngIf="!scoreLoading && score">
+    <div class="score-ring-wrap">
+      <svg width="140" height="140" viewBox="0 0 140 140">
+        <circle cx="70" cy="70" r="54" fill="none" stroke="#E5E7EB" stroke-width="12"/>
+        <circle cx="70" cy="70" r="54" fill="none"
+          [attr.stroke]="rankConfig.color" stroke-width="12" stroke-linecap="round"
+          [attr.stroke-dasharray]="scoreCircumference"
+          [attr.stroke-dashoffset]="scoreOffset"
+          transform="rotate(-90 70 70)"
+          style="transition: stroke-dashoffset 1.2s ease"/>
+      </svg>
+      <div class="score-center">
+        <div class="score-number" [style.color]="rankConfig.color">
+          {{ score.overallScore | number:'1.0-0' }}
+        </div>
+        <div class="score-outof">/100</div>
+      </div>
+    </div>
+
+    <div class="hero-right">
+      <div class="rank-badge" [style.background]="rankConfig.bg" [style.color]="rankConfig.color">
+        {{ rankConfig.emoji }} {{ rankConfig.label }} Tier
+      </div>
+      <h2>{{ score.nomEtudiant }}</h2>
+      <div class="mini-stats" *ngIf="stats">
+        <div class="mini-stat">
+          <span class="ms-value">{{ stats.totalEvaluations }}</span>
+          <span class="ms-label">Evaluations</span>
+        </div>
+        <div class="mini-stat">
+          <span class="ms-value">{{ stats.averageScore | number:'1.0-1' }}</span>
+          <span class="ms-label">Average</span>
+        </div>
+        <div class="mini-stat">
+          <span class="ms-value">{{ stats.bestScore | number:'1.0-0' }}</span>
+          <span class="ms-label">Best</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick skill bars -->
+    <div class="hero-skills" *ngIf="score.skillScores">
+      <div class="quick-skill" *ngFor="let s of score.skillScores">
+        <span class="qs-label">{{ s.category }}</span>
+        <div class="qs-bar">
+          <div class="qs-fill" [style.width.%]="s.score" [style.background]="getScoreColor(s.score)"></div>
+        </div>
+        <span class="qs-val" [style.color]="getScoreColor(s.score)">{{ s.score }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- No score yet -->
+  <div class="no-score-card" *ngIf="!scoreLoading && !score">
+    <mat-icon>analytics</mat-icon>
+    <h3>No evaluation yet</h3>
+    <p>Fill in your profile below and click "Save & Evaluate" to get your first AI score.</p>
+  </div>
+
+  <!-- Tabs for score details -->
+  <div class="tabs" *ngIf="!scoreLoading && score">
+    <button [class.active]="activeTab==='overview'"    (click)="activeTab='overview'">Overview</button>
+    <button [class.active]="activeTab==='details'"     (click)="activeTab='details'">Skill Details</button>
+    <button [class.active]="activeTab==='evolution'"   (click)="activeTab='evolution'">📈 Progress</button>
+    <button [class.active]="activeTab==='leaderboard'" (click)="activeTab='leaderboard'">🏆 Rankings</button>
+    <button [class.active]="activeTab==='ai'"          (click)="activeTab='ai'">🤖 AI Insights</button>
+  </div>
+
+  <div class="tab-content" *ngIf="!scoreLoading && score">
+
+    <!-- OVERVIEW -->
+    <ng-container *ngIf="activeTab==='overview'">
+      <div class="skills-card">
+        <h3>Skill Breakdown</h3>
+        <div class="skill-row" *ngFor="let s of score.skillScores">
+          <span class="skill-label">{{ s.category }}</span>
+          <div class="bar-track"><div class="bar-fill" [style.width.%]="s.score" [style.background]="getScoreColor(s.score)"></div></div>
+          <span class="skill-value" [style.color]="getScoreColor(s.score)">{{ s.score }}</span>
+          <span class="skill-grade" [style.background]="getScoreColor(s.score)+'22'" [style.color]="getScoreColor(s.score)">{{ getScoreLabel(s.score) }}</span>
+        </div>
+      </div>
+      <div class="two-col">
+        <div class="info-card strengths-card">
+          <h3>💪 Strengths</h3>
+          <ul><li *ngFor="let s of score.strengths">{{ s }}</li></ul>
+          <p class="empty-note" *ngIf="!score.strengths?.length">Save profile to see strengths</p>
+        </div>
+        <div class="info-card improvements-card">
+          <h3>📈 Areas to Improve</h3>
+          <ul><li *ngFor="let i of score.improvements">{{ i }}</li></ul>
+          <p class="empty-note" *ngIf="!score.improvements?.length">Save profile to see improvements</p>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- SKILL DETAILS -->
+    <ng-container *ngIf="activeTab==='details'">
+      <div class="detail-grid">
+        <div class="detail-card" *ngFor="let s of score.skillScores">
+          <div class="dc-header" [style.background]="getScoreColor(s.score)+'18'">
+            <span class="dc-label">{{ s.category }}</span>
+          </div>
+          <div class="dc-body">
+            <div class="dc-score" [style.color]="getScoreColor(s.score)">{{ s.score }}<span>/100</span></div>
+            <div class="dc-bar"><div class="dc-fill" [style.width.%]="s.score" [style.background]="getScoreColor(s.score)"></div></div>
+            <div class="dc-grade" [style.color]="getScoreColor(s.score)" [style.background]="getScoreColor(s.score)+'22'">{{ getScoreLabel(s.score) }}</div>
+            <div class="dc-weight">Weight: {{ s.weight * 100 | number:'1.0-0' }}%</div>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- PROGRESS / EVOLUTION -->
+    <ng-container *ngIf="activeTab==='evolution'">
+      <div class="evo-card">
+        <h3>Score Evolution Timeline</h3>
+        <p class="evo-sub">Your score journey over time</p>
+        <div class="evo-list">
+          <div class="evo-item" *ngFor="let e of evolutionData; let i = index">
+            <div class="evo-dot" [style.background]="getRankColor(e.rank ?? 'BRONZE')">
+              {{ getRankEmoji(e.rank ?? 'BRONZE') }}
+            </div>
+            <div class="evo-info">
+              <div class="evo-score" [style.color]="getRankColor(e.rank ?? 'BRONZE')">{{ e.overallScore | number:'1.0-0' }}</div>
+              <div class="evo-date">{{ e.createdAt ? (e.createdAt | date:'MMM yyyy') : 'Evaluation ' + (i+1) }}</div>
+            </div>
+            <div class="evo-bar-wrap">
+              <div class="evo-bar-fill" [style.width.%]="e.overallScore" [style.background]="getRankColor(e.rank ?? 'BRONZE')"></div>
+            </div>
+            <div class="evo-pct">{{ e.overallScore | number:'1.0-0' }}%</div>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- LEADERBOARD -->
+    <ng-container *ngIf="activeTab==='leaderboard'">
+      <div class="lb-card">
+        <h3>🏆 Top Performers</h3>
+        <div class="lb-row" *ngFor="let s of leaderboard; let i = index">
+          <div class="lb-pos">{{ i < 3 ? ['🥇','🥈','🥉'][i] : '#'+(i+1) }}</div>
+          <div class="lb-name">{{ s.nomEtudiant }}</div>
+          <div class="lb-project">{{ s.nomProjet }}</div>
+          <div class="lb-score" [style.color]="getRankColor(s.rank)">{{ s.overallScore | number:'1.0-0' }} {{ getRankEmoji(s.rank) }}</div>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- AI INSIGHTS -->
+    <ng-container *ngIf="activeTab==='ai'">
+      <div class="recs-card">
+        <h3>🤖 AI Recommendations</h3>
+        <div class="rec-item" *ngFor="let r of score.recommendations; let i = index">
+          <div class="rec-num">{{ i + 1 }}</div>
+          <p>{{ r }}</p>
+        </div>
+        <p class="empty-note" *ngIf="!score.recommendations?.length">Save your profile to get personalized recommendations.</p>
+      </div>
+    </ng-container>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       SECTION 2: PROFILE CRUD
+  ════════════════════════════════════════════════════ -->
+  <div class="section-divider">
+    <div class="divider-line"></div>
+    <span>My Profile & Skills</span>
+    <div class="divider-line"></div>
+  </div>
+
+  <div class="profile-section">
+    <div class="profile-header">
+      <div>
+        <h2>Complete Your Profile</h2>
+        <p>Your skills and experience are used to calculate your AI score automatically.</p>
+      </div>
+      <button class="btn-save-eval" (click)="saveAndEvaluate()" [disabled]="profileLoading">
+        <mat-icon>{{ profileLoading ? 'hourglass_empty' : 'auto_awesome' }}</mat-icon>
+        {{ profileLoading ? 'Saving...' : 'Save & Evaluate' }}
+      </button>
+    </div>
+
+    <div class="save-success" *ngIf="profileSaved">
+      <mat-icon>check_circle</mat-icon>
+      Profile saved! Evaluation updated below.
+    </div>
+
+    <!-- Profile Tabs -->
+    <div class="profile-tabs">
+      <button [class.active]="activeProfileTab==='technical'" (click)="activeProfileTab='technical'">
+        <mat-icon>code</mat-icon> Technical Skills
+        <span class="count-badge">{{ profile.technicalSkills?.length || 0 }}</span>
+      </button>
+      <button [class.active]="activeProfileTab==='soft'" (click)="activeProfileTab='soft'">
+        <mat-icon>psychology</mat-icon> Soft Skills
+        <span class="count-badge">{{ profile.softSkills?.length || 0 }}</span>
+      </button>
+      <button [class.active]="activeProfileTab==='education'" (click)="activeProfileTab='education'">
+        <mat-icon>school</mat-icon> Education
+        <span class="count-badge">{{ profile.education?.length || 0 }}</span>
+      </button>
+      <button [class.active]="activeProfileTab==='experience'" (click)="activeProfileTab='experience'">
+        <mat-icon>work</mat-icon> Experience
+        <span class="count-badge">{{ profile.workExperience?.length || 0 }}</span>
+      </button>
+    </div>
+
+    <!-- ── TECHNICAL SKILLS ── -->
+    <div class="profile-tab-content" *ngIf="activeProfileTab==='technical'">
+      <!-- Add form -->
+      <div class="add-card">
+        <h4><mat-icon>add_circle</mat-icon> Add Technical Skill</h4>
+        <div class="add-form">
+          <div class="form-field">
+            <label>Skill Name</label>
+            <input [(ngModel)]="newTechSkill.name" placeholder="React, Java, Python..." (keydown.enter)="addTechSkill()">
+          </div>
+          <div class="form-field">
+            <label>Level</label>
+            <select [(ngModel)]="newTechSkill.level">
+              <option *ngFor="let l of techLevels" [value]="l">{{ levelLabel(l) }}</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label>Category</label>
+            <select [(ngModel)]="newTechSkill.category">
+              <option *ngFor="let c of techCategories" [value]="c">{{ c }}</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label>Years</label>
+            <input type="number" [(ngModel)]="newTechSkill.yearsOfExperience" min="0" max="20">
+          </div>
+          <button class="btn-add" (click)="addTechSkill()">
+            <mat-icon>add</mat-icon> Add
+          </button>
+        </div>
+      </div>
+
+      <!-- Existing skills -->
+      <div class="skills-chips" *ngIf="profile.technicalSkills?.length">
+        <div class="skill-chip" *ngFor="let s of profile.technicalSkills"
+          [style.borderColor]="levelColor(s.level)">
+          <div class="chip-main">
+            <span class="chip-name">{{ s.name }}</span>
+            <span class="chip-cat">{{ s.category }}</span>
+          </div>
+          <div class="chip-level-bar">
+            <div class="chip-level-fill" [style.width.%]="levelWidth(s.level)" [style.background]="levelColor(s.level)"></div>
+          </div>
+          <div class="chip-meta">
+            <span [style.color]="levelColor(s.level)">{{ levelLabel(s.level) }}</span>
+            <span *ngIf="s.yearsOfExperience">{{ s.yearsOfExperience }}yr</span>
+          </div>
+          <button class="chip-remove" (click)="removeTechSkill(s.id!)">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <div class="empty-tab" *ngIf="!profile.technicalSkills?.length">
+        <mat-icon>code_off</mat-icon>
+        <p>No technical skills added yet. Add your first skill above.</p>
+      </div>
+    </div>
+
+    <!-- ── SOFT SKILLS ── -->
+    <div class="profile-tab-content" *ngIf="activeProfileTab==='soft'">
+      <div class="add-card">
+        <h4><mat-icon>add_circle</mat-icon> Add Soft Skill</h4>
+        <div class="add-form">
+          <div class="form-field wide">
+            <label>Skill Name</label>
+            <input [(ngModel)]="newSoftSkill.name" placeholder="Leadership, Communication, Teamwork..." (keydown.enter)="addSoftSkill()">
+          </div>
+          <div class="form-field">
+            <label>Level (1–5)</label>
+            <div class="star-select">
+              <button
+              *ngFor="let s of [1,2,3,4,5]"
+              class="star-btn"
+              [class.active]="newSoftSkill.level >= s"
+              (click)="newSoftSkill.level = $any(s)">
+              ★
+            </button>
+            </div>
+          </div>
+          <button class="btn-add" (click)="addSoftSkill()">
+            <mat-icon>add</mat-icon> Add
+          </button>
+        </div>
+      </div>
+
+      <div class="soft-skills-list" *ngIf="profile.softSkills?.length">
+        <div class="soft-skill-row" *ngFor="let s of profile.softSkills">
+          <span class="ss-name">{{ s.name }}</span>
+          <div class="ss-stars">
+            <span *ngFor="let i of [1,2,3,4,5]"
+              class="star" [class.filled]="i <= s.level">★</span>
+          </div>
+          <span class="ss-level">{{ ['','Faible','Passable','Moyen','Bon','Excellent'][s.level] }}</span>
+          <button class="remove-btn" (click)="removeSoftSkill(s.id!)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <div class="empty-tab" *ngIf="!profile.softSkills?.length">
+        <mat-icon>psychology_alt</mat-icon>
+        <p>No soft skills added yet.</p>
+      </div>
+    </div>
+
+    <!-- ── EDUCATION ── -->
+    <div class="profile-tab-content" *ngIf="activeProfileTab==='education'">
+      <div class="add-card">
+        <h4><mat-icon>add_circle</mat-icon> Add Education</h4>
+        <div class="add-form wrap">
+          <div class="form-field">
+            <label>Degree</label>
+            <select [(ngModel)]="newEducation.degree">
+              <option *ngFor="let d of degrees" [value]="d">{{ d }}</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label>Field of Study</label>
+            <input [(ngModel)]="newEducation.field" placeholder="Computer Science...">
+          </div>
+          <div class="form-field wide">
+            <label>Institution</label>
+            <input [(ngModel)]="newEducation.institution" placeholder="ESPRIT, INSAT...">
+          </div>
+          <div class="form-field">
+            <label>Start Year</label>
+            <input type="number" [(ngModel)]="newEducation.startYear" min="1990" max="2030">
+          </div>
+          <div class="form-field">
+            <label>End Year</label>
+            <input type="number" [(ngModel)]="newEducation.endYear" min="1990" max="2030" [disabled]="newEducation.current">
+          </div>
+          <div class="form-field check-field">
+            <label>
+              <input type="checkbox" [(ngModel)]="newEducation.current"> Currently studying
+            </label>
+          </div>
+          <button class="btn-add" (click)="addEducation()">
+            <mat-icon>add</mat-icon> Add
+          </button>
+        </div>
+      </div>
+
+      <div class="edu-list" *ngIf="profile.education?.length">
+        <div class="edu-card" *ngFor="let e of profile.education">
+          <div class="edu-icon"><mat-icon>school</mat-icon></div>
+          <div class="edu-info">
+            <div class="edu-degree">{{ e.degree }} — {{ e.field }}</div>
+            <div class="edu-institution">{{ e.institution }}</div>
+            <div class="edu-years">
+              {{ e.startYear }} — {{ e.current ? 'Present' : (e.endYear ?? '?') }}
+              <span class="current-badge" *ngIf="e.current">En cours</span>
+            </div>
+          </div>
+          <button class="remove-btn" (click)="removeEducation(e.id!)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <div class="empty-tab" *ngIf="!profile.education?.length">
+        <mat-icon>school</mat-icon>
+        <p>No education added yet.</p>
+      </div>
+    </div>
+
+    <!-- ── WORK EXPERIENCE ── -->
+    <div class="profile-tab-content" *ngIf="activeProfileTab==='experience'">
+      <div class="add-card">
+        <h4><mat-icon>add_circle</mat-icon> Add Experience</h4>
+        <div class="add-form wrap">
+          <div class="form-field">
+            <label>Job Title</label>
+            <input [(ngModel)]="newExperience.title" placeholder="Frontend Developer...">
+          </div>
+          <div class="form-field">
+            <label>Company</label>
+            <input [(ngModel)]="newExperience.company" placeholder="TechCorp...">
+          </div>
+          <div class="form-field">
+            <label>Type</label>
+            <select [(ngModel)]="newExperience.type">
+              <option *ngFor="let t of expTypes" [value]="t">{{ t }}</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label>Start (YYYY-MM)</label>
+            <input [(ngModel)]="newExperience.startDate" placeholder="2023-01" type="month">
+          </div>
+          <div class="form-field">
+            <label>End (YYYY-MM)</label>
+            <input [(ngModel)]="newExperience.endDate" type="month" [disabled]="newExperience.current">
+          </div>
+          <div class="form-field check-field">
+            <label>
+              <input type="checkbox" [(ngModel)]="newExperience.current"> Current job
+            </label>
+          </div>
+          <div class="form-field wide">
+            <label>Technologies (comma separated)</label>
+            <input [(ngModel)]="techInput" placeholder="React, Node.js, MongoDB...">
+          </div>
+          <button class="btn-add" (click)="addExperienceWithTech()">
+            <mat-icon>add</mat-icon> Add
+          </button>
+        </div>
+      </div>
+
+      <div class="exp-list" *ngIf="profile.workExperience?.length">
+        <div class="exp-card" *ngFor="let e of profile.workExperience">
+          <div class="exp-icon"><mat-icon>work</mat-icon></div>
+          <div class="exp-info">
+            <div class="exp-title">{{ e.title }}</div>
+            <div class="exp-company">{{ e.company }} <span class="exp-type">{{ e.type }}</span></div>
+            <div class="exp-dates">
+              {{ e.startDate }} — {{ e.current ? 'Present' : (e.endDate ?? '?') }}
+              <span class="current-badge" *ngIf="e.current">En cours</span>
+            </div>
+            <div class="exp-techs" *ngIf="e.technologies?.length">
+              <span class="tech-tag" *ngFor="let t of e.technologies">{{ t }}</span>
+            </div>
+          </div>
+          <button class="remove-btn" (click)="removeExperience(e.id!)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <div class="empty-tab" *ngIf="!profile.workExperience?.length">
+        <mat-icon>work_off</mat-icon>
+        <p>No experience added yet.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       SECTION 3: EVALUATION RESULT
+  ════════════════════════════════════════════════════ -->
+  <div class="section-divider">
+    <div class="divider-line"></div>
+    <span>Detailed Evaluation</span>
+    <div class="divider-line"></div>
+  </div>
+
+  <!-- Loading -->
+  <div class="eval-loading" *ngIf="evalLoading">
+    <div class="loading-spinner"></div>
+    <p>Generating your personalized evaluation...</p>
+  </div>
+
+  <!-- Error -->
+  <div class="eval-error" *ngIf="evalError">
+    <mat-icon>info</mat-icon> {{ evalError }}
+  </div>
+
+  <!-- Empty -->
+  <div class="eval-empty" *ngIf="!evalLoading && !evaluation">
+    <div class="eval-empty-inner">
+      <mat-icon>auto_awesome</mat-icon>
+      <h3>No evaluation yet</h3>
+      <p>Fill in your profile above and click <strong>"Save & Evaluate"</strong> to generate your personalized AI evaluation based on your skills and experience.</p>
+      <button class="btn-save-eval-large" (click)="saveAndEvaluate()">
+        <mat-icon>auto_awesome</mat-icon> Generate My Evaluation
+      </button>
+    </div>
+  </div>
+
+  <!-- EVALUATION RESULT CARD -->
+  <div class="eval-result" *ngIf="!evalLoading && evaluation">
+    <div class="eval-header">
+      <div class="eval-score-badge" [style.background]="rankConfig.bg" [style.color]="rankConfig.color">
+        {{ rankConfig.emoji }} {{ rankConfig.label }} — {{ evaluation.overallScore | number:'1.0-1' }}/100
+      </div>
+      <span class="eval-date">{{ evaluation.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+    </div>
+
+    <!-- Score breakdown grid -->
+    <div class="eval-dimensions">
+      <div class="dim-card" *ngFor="let dim of [
+        {label:'Technical Skills',   val:evaluation.technicalSkills,   icon:'code',         weight:'25%'},
+        {label:'Communication',      val:evaluation.communication,      icon:'chat_bubble',  weight:'15%'},
+        {label:'Project Experience', val:evaluation.projectExperience,  icon:'rocket_launch',weight:'20%'},
+        {label:'Problem Solving',    val:evaluation.problemSolving,     icon:'psychology',   weight:'15%'},
+        {label:'Teamwork',           val:evaluation.teamwork,           icon:'people',       weight:'10%'},
+        {label:'Punctuality',        val:evaluation.punctuality,        icon:'alarm',        weight:'10%'},
+        {label:'Creativity',         val:evaluation.creativity,         icon:'lightbulb',    weight:'5%'}
+      ]">
+        <div class="dim-icon" [style.background]="getScoreColor(dim.val)+'18'">
+          <mat-icon [style.color]="getScoreColor(dim.val)">{{ dim.icon }}</mat-icon>
+        </div>
+        <div class="dim-info">
+          <div class="dim-label">{{ dim.label }}</div>
+          <div class="dim-score" [style.color]="getScoreColor(dim.val)">{{ dim.val }}</div>
+          <div class="dim-bar">
+            <div class="dim-fill" [style.width.%]="dim.val" [style.background]="getScoreColor(dim.val)"></div>
+          </div>
+          <div class="dim-meta">
+            <span class="dim-grade"
+              [style.color]="getScoreColor(dim.val)"
+              [style.background]="getScoreColor(dim.val)+'18'">
+              {{ getScoreLabel(dim.val) }}
+            </span>
+            <span class="dim-weight">{{ dim.weight }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Profile summary used for evaluation -->
+    <div class="eval-profile-summary">
+      <h4>📋 Based on your profile</h4>
+      <div class="summary-grid">
+        <div class="summary-item">
+          <mat-icon>code</mat-icon>
+          <span><strong>{{ profile.technicalSkills?.length || 0 }}</strong> technical skills</span>
+        </div>
+        <div class="summary-item">
+          <mat-icon>psychology</mat-icon>
+          <span><strong>{{ profile.softSkills?.length || 0 }}</strong> soft skills</span>
+        </div>
+        <div class="summary-item">
+          <mat-icon>school</mat-icon>
+          <span><strong>{{ profile.education?.length || 0 }}</strong> education entries</span>
+        </div>
+        <div class="summary-item">
+          <mat-icon>work</mat-icon>
+          <span>
+            <strong>{{ totalExperienceMonths }}</strong> months of experience
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recommendations -->
+    <div class="eval-recs" *ngIf="evaluation.recommendations?.length">
+      <h4>🤖 AI Recommendations</h4>
+      <div class="rec-pill" *ngFor="let r of evaluation.recommendations; let i = index">
+        <span class="rec-n">{{ i+1 }}</span>
+        {{ r }}
+      </div>
+    </div>
+
+    <!-- Strengths and improvements -->
+    <div class="eval-two-col" *ngIf="evaluation.strengths?.length || evaluation.improvements?.length">
+      <div class="eval-col green" *ngIf="evaluation.strengths?.length">
+        <h4>💪 Strengths</h4>
+        <ul><li *ngFor="let s of evaluation.strengths">{{ s }}</li></ul>
+      </div>
+      <div class="eval-col amber" *ngIf="evaluation.improvements?.length">
+        <h4>🎯 To Improve</h4>
+        <ul><li *ngFor="let i of evaluation.improvements">{{ i }}</li></ul>
+      </div>
+    </div>
+
+    <div class="re-eval-btn-wrap">
+      <button class="btn-save-eval" (click)="saveAndEvaluate()">
+        <mat-icon>refresh</mat-icon> Re-evaluate
+      </button>
+    </div>
+  </div>
+
+</div>

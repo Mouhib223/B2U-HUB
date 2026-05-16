@@ -10,7 +10,7 @@ import { ProfileService, EtudiantProfile } from '../../../core/services/profile.
   standalone: true,
   imports: [CommonModule, RouterLink, MatIconModule],
   templateUrl: './my-profile.html',
-  styleUrl: './my-profile.scss'
+  styleUrls: ['./my-profile.scss']
 })
 export class MyProfile implements OnInit {
   private auth    = inject(AuthService);
@@ -19,6 +19,10 @@ export class MyProfile implements OnInit {
   user = this.auth.getCurrentUser();
   studentProfile: EtudiantProfile | null = null;
   companyProfile: any = null;
+
+  get currentUser() {
+    return this.user;
+  }
 
   ngOnInit() {
     if (!this.user) return;
@@ -36,5 +40,30 @@ export class MyProfile implements OnInit {
         error: () => {}
       });
     }
+  }
+
+  primaryRoute(user: any): string {
+    if (!user) return '/';
+    if (user.role === 'student') return '/app/projects';
+    if (user.role === 'company') return '/company/work-post';
+    return '/admin/users';
+  }
+
+  primaryIcon(user: any): string {
+    if (!user) return 'home';
+    if (user.role === 'student') return 'work';
+    if (user.role === 'company') return 'business';
+    return 'admin_panel_settings';
+  }
+
+  primaryLabel(user: any): string {
+    if (!user) return 'Accueil';
+    if (user.role === 'student') return 'Voir les offres';
+    if (user.role === 'company') return 'Mes offres';
+    return 'Gérer les utilisateurs';
+  }
+
+  logout(): void {
+    this.auth.logout();
   }
 }

@@ -25,12 +25,14 @@
             <span class="status-badge" [class.open]="project.status === 'open'">
               {{ project.status }}
             </span>
-            
+
+            <a
               class="apply-btn"
               [routerLink]="['/student/new-candidature']"
-              [queryParams]="{ projectId: project.id }">
+              [queryParams]="{ projectId: project.id }"
+              *ngIf="project.status !== 'closed'">
               <mat-icon>send</mat-icon>
-              Postuler a ce projet
+              Postuler à ce projet
             </a>
           </div>
         </div>
@@ -47,7 +49,7 @@
           <span class="skill-chip" *ngFor="let s of projectSkills(project)">{{ s }}</span>
         </div>
       </div>
-  
+
       <div class="detail-section info-grid">
         <div class="info-card">
           <mat-icon>group</mat-icon>
@@ -65,4 +67,10 @@
   
       <!-- Bouton Gérer le projet -->
       <div class="manage-btn-container">
-        <button class="btn-manage" (click)="goToManag
+        <button class="btn-manage" (click)="goToManage()">
+          <mat-icon>settings</mat-icon>
+          Gérer le projet
+        </button>
+      </div>
+    </div>
+  </div>

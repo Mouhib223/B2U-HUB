@@ -1,0 +1,145 @@
+<div class="page">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h1>Evaluation Management</h1>
+      <p>AI Scoring system — all student evaluations</p>
+    </div>
+  </div>
+
+  <!-- Platform Stats -->
+  <div class="stats-grid" *ngIf="platformStats">
+    <div class="stat-card">
+      <mat-icon style="color:#3B82F6">assignment</mat-icon>
+      <div>
+        <div class="stat-val">{{ platformStats.totalEvaluations }}</div>
+        <div class="stat-lbl">Total</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <mat-icon style="color:#F59E0B">grade</mat-icon>
+      <div>
+        <div class="stat-val">{{ platformStats.averageScore | number:'1.0-1' }}</div>
+        <div class="stat-lbl">Avg Score</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <mat-icon style="color:#6366F1">workspace_premium</mat-icon>
+      <div>
+        <div class="stat-val">{{ platformStats.platinumCount }}</div>
+        <div class="stat-lbl">Platinum</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <mat-icon style="color:#F59E0B">emoji_events</mat-icon>
+      <div>
+        <div class="stat-val">{{ platformStats.goldCount }}</div>
+        <div class="stat-lbl">Gold</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <mat-icon style="color:#10B981">check_circle</mat-icon>
+      <div>
+        <div class="stat-val">{{ platformStats.validatedCount }}</div>
+        <div class="stat-lbl">Validated</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-bar">
+    <div class="search-box">
+      <mat-icon>search</mat-icon>
+      <input [(ngModel)]="searchQuery" placeholder="Search by student or project...">
+    </div>
+    <div class="rank-filters">
+      <button [class.active]="filterRank==='all'"      (click)="filterRank='all'">All</button>
+      <button [class.active]="filterRank==='PLATINUM'" (click)="filterRank='PLATINUM'">💎 Platinum</button>
+      <button [class.active]="filterRank==='GOLD'"     (click)="filterRank='GOLD'">🥇 Gold</button>
+      <button [class.active]="filterRank==='SILVER'"   (click)="filterRank='SILVER'">🥈 Silver</button>
+      <button [class.active]="filterRank==='BRONZE'"   (click)="filterRank='BRONZE'">🥉 Bronze</button>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-row" *ngIf="loading">
+    <mat-icon>hourglass_empty</mat-icon> Loading evaluations...
+  </div>
+
+  <!-- Table -->
+  <div class="table-card" *ngIf="!loading">
+    <table>
+      <thead>
+        <tr>
+          <th>Student</th>
+          <th>Project</th>
+          <th>Score</th>
+          <th>Rank</th>
+          <th>Type</th>
+          <th>Status</th>
+          <th>Date</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let e of filtered">
+          <td>
+            <div class="student-cell">
+              <div class="avatar">{{ (e.nomEtudiant ?? 'U')[0] }}</div>
+              <span>{{ e.nomEtudiant ?? e.idEtudiant }}</span>
+            </div>
+          </td>
+          <td>{{ e.nomProjet ?? '—' }}</td>
+          <td>
+            <span class="score-badge" [style.color]="getRankColor(e.rank)">
+              {{ e.overallScore | number:'1.0-1' }}
+            </span>
+          </td>
+          <td>
+            <span class="rank-badge"
+              [style.background]="getRankBg(e.rank)"
+              [style.color]="getRankColor(e.rank)">
+              {{ e.rank ?? '—' }}
+            </span>
+          </td>
+          <td><span class="type-badge">{{ e.type }}</span></td>
+          <td>
+            <span class="status-badge" [ngClass]="e.status?.toLowerCase()">
+              {{ e.status }}
+            </span>
+          </td>
+          <td>{{ e.createdAt ? (e.createdAt | date:'dd/MM/yyyy') : '—' }}</td>
+          <td class="actions-cell">
+            <button class="action-btn validate"
+              *ngIf="e.status !== 'VALIDATED'"
+              (click)="validate(e)" title="Validate">
+              <mat-icon>check_circle</mat-icon>
+            </button>
+            <button class="action-btn delete" (click)="confirmDelete(e)" title="Delete">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="filtered.length === 0">
+          <td colspan="8" class="empty">No evaluations found.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Delete Modal -->
+  <div class="modal-overlay" *ngIf="showDeleteConfirm" (click)="cancelDelete()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <mat-icon class="modal-icon">warning</mat-icon>
+      <h3>Delete Evaluation</h3>
+      <p>Are you sure you want to delete this evaluation for
+        <strong>{{ selectedEval?.nomEtudiant }}</strong>?
+      </p>
+      <div class="modal-actions">
+        <button class="btn-cancel" (click)="cancelDelete()">Cancel</button>
+        <button class="btn-delete" (click)="deleteEval()">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -11,16 +11,15 @@
     </div>
 
     <div class="hero-actions">
-      <a [routerLink]="primaryRoute(currentUser)" class="btn-primary">
-        <mat-icon>{{ primaryIcon(currentUser) }}</mat-icon>
-        {{ primaryLabel(currentUser) }}
+      <a [routerLink]="primaryRoute(user)" class="btn-primary" *ngIf="user">
+        <mat-icon>{{ primaryIcon(user) }}</mat-icon>
+        {{ primaryLabel(user) }}
       </a>
       <button type="button" class="btn-logout" (click)="logout()">
         <mat-icon>logout</mat-icon>
         Deconnexion
       </button>
     </div>
-  </section>
 
     <!-- ── Student ── -->
     <ng-container *ngIf="user.role === 'student'">
