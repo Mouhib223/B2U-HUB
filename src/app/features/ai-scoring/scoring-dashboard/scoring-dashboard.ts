@@ -222,11 +222,22 @@ techInput = '';
   evolutionData: AIScore[] = [];
   leaderboard: any[] = [];
 
+  // Skill picklists
+  techNames = ['JavaScript', 'TypeScript', 'React', 'Angular', 'Vue.js', 'Node.js', 'Python', 'Java', 'C#', 'Docker', 'Kubernetes', 'AWS', 'SQL', 'NoSQL', 'Git'];
+  softSkillNames = ['Communication', 'Leadership', 'Teamwork', 'Problem Solving', 'Adaptability', 'Critical Thinking', 'Creativity', 'Time Management', 'Collaboration', 'Emotional Intelligence'];
+
   // Skill levels
   techLevels = ['beginner', 'intermediate', 'advanced', 'expert'];
   techCategories = ['frontend', 'backend', 'devops', 'mobile', 'data', 'other'];
   expTypes = ['stage', 'freelance', 'cdi', 'cdd', 'projet'];
   degrees = ['Licence', 'Master', 'Ingénieur', 'Doctorat', 'BTS', 'DUT', 'Autre'];
+
+  formErrors = {
+    tech: '',
+    soft: '',
+    education: '',
+    experience: ''
+  };
 
   constructor(
     private scoringService: AIScoringService,
@@ -266,7 +277,11 @@ techInput = '';
   // TECH SKILLS CRUD
   // ────────────────────────────────────────
   addTechSkill() {
-    if (!this.newTechSkill.name.trim()) return;
+    this.formErrors.tech = '';
+    if (!this.isValidTechSkill()) {
+      this.formErrors.tech = 'Choose a technology from the dropdown and enter valid details.';
+      return;
+    }
     this.profile.technicalSkills = [...(this.profile.technicalSkills || []),
       { ...this.newTechSkill, id: Date.now().toString() }];
     this.newTechSkill = this.emptyTechSkill();
@@ -285,7 +300,11 @@ techInput = '';
   // SOFT SKILLS CRUD
   // ────────────────────────────────────────
   addSoftSkill() {
-    if (!this.newSoftSkill.name.trim()) return;
+    this.formErrors.soft = '';
+    if (!this.isValidSoftSkill()) {
+      this.formErrors.soft = 'Select a valid soft skill from the list and choose a rating.';
+      return;
+    }
     this.profile.softSkills = [...(this.profile.softSkills || []),
       { ...this.newSoftSkill, id: Date.now().toString() }];
     this.newSoftSkill = this.emptySoftSkill();
@@ -299,7 +318,14 @@ techInput = '';
   // EDUCATION CRUD
   // ────────────────────────────────────────
   addEducation() {
-    if (!this.newEducation.institution.trim()) return;
+    this.formErrors.education = '';
+    if (!this.isValidEducation()) {
+      this.formErrors.education = 'Enter valid education details and ensure end year is not before start year.';
+      return;
+    }
+    if (this.newEducation.current) {
+      delete this.newEducation.endYear;
+    }
     this.profile.education = [...(this.profile.education || []),
       { ...this.newEducation, id: Date.now().toString() }];
     this.newEducation = this.emptyEducation();
@@ -313,7 +339,14 @@ techInput = '';
   // EXPERIENCE CRUD
   // ────────────────────────────────────────
   addExperience() {
-    if (!this.newExperience.title.trim()) return;
+    this.formErrors.experience = '';
+    if (!this.isValidExperience()) {
+      this.formErrors.experience = 'Enter valid experience dates and ensure end month is not before start month.';
+      return;
+    }
+    if (this.newExperience.current) {
+      delete this.newExperience.endDate;
+    }
     this.profile.workExperience = [...(this.profile.workExperience || []),
       { ...this.newExperience, id: Date.now().toString() }];
     this.newExperience = this.emptyExperience();
@@ -372,11 +405,13 @@ techInput = '';
     this.evaluation = { ...evalDTO, ...scores, createdAt: new Date().toISOString() };
     this.score = this.evaluationToAIScore(this.evaluation);
 
+    const studentId = user?.id || user?.email || '1';
     this.evalService.create(evalDTO).subscribe({
       next: result => {
         this.evaluation = result;
         this.evalLoading = false;
         this.score = this.evaluationToAIScore(result);
+        this.refreshStudentHistory(studentId);
       },
       error: () => {
         this.evalLoading = false;
@@ -389,6 +424,50 @@ techInput = '';
   }
 
   // ─── Score computation from profile ───
+  private refreshStudentHistory(studentId: string) {
+    this.scoringService.getScoreEvolution(studentId).subscribe(d => this.evolutionData = d);
+    this.scoringService.getLeaderboard(5).subscribe(d => this.leaderboard = d);
+    this.scoringService.getStudentStats(studentId).subscribe(s => this.stats = s);
+  }
+
+  isValidTechSkill(): boolean {
+    const name = this.newTechSkill.name.trim();
+    return this.techNames.includes(name)
+      && this.techLevels.includes(this.newTechSkill.level)
+      && this.techCategories.includes(this.newTechSkill.category)
+      && typeof this.newTechSkill.yearsOfExperience === 'number'
+      && this.newTechSkill.yearsOfExperience >= 0
+      && this.newTechSkill.yearsOfExperience <= 50;
+  }
+
+  isValidSoftSkill(): boolean {
+    const name = this.newSoftSkill.name.trim();
+    return this.softSkillNames.includes(name)
+      && this.newSoftSkill.level >= 1
+      && this.newSoftSkill.level <= 5;
+  }
+
+  isValidEducation(): boolean {
+    const inst = this.newEducation.institution.trim();
+    const field = this.newEducation.field.trim();
+    if (!inst || !field) return false;
+    if (this.newEducation.current) return true;
+    return !!this.newEducation.endYear && this.newEducation.endYear >= this.newEducation.startYear;
+  }
+
+  isValidExperience(): boolean {
+    const title = this.newExperience.title.trim();
+    const company = this.newExperience.company.trim();
+    if (!title || !company || !this.isMonthValid(this.newExperience.startDate)) return false;
+    if (this.newExperience.current) return true;
+    return !!this.newExperience.endDate && this.isMonthValid(this.newExperience.endDate)
+      && new Date(this.newExperience.endDate + '-01') >= new Date(this.newExperience.startDate + '-01');
+  }
+
+  private isMonthValid(value: string): boolean {
+    return /^\d{4}-\d{2}$/.test(value);
+  }
+
   private computeScoresFromProfile(): Pick<
   Evaluation,
   | 'technicalSkills'
