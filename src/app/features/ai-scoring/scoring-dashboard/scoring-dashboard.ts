@@ -169,7 +169,6 @@ export class ScoringDashboardComponent implements OnInit {
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { AIScoringService } from '../../../core/services/ai-scoring.service';
 import { EvaluationService } from '../../../core/services/evaluation.service';
@@ -182,7 +181,7 @@ import { Evaluation } from '../../../core/models/evaluation.model';
 @Component({
   selector: 'b2u-scoring-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterLink, MatIconModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, MatIconModule],
   templateUrl: './scoring-dashboard.html',
   styleUrls: ['./scoring-dashboard.scss']
 })
@@ -252,8 +251,13 @@ techInput = '';
 
     // Load profile
     this.profileService.getByUserId(userId).subscribe(p => {
-      this.profile = p || {
-        userId, education: [], workExperience: [], technicalSkills: [], softSkills: []
+      this.profile = {
+        ...p,
+        userId,
+        education: p?.education ?? [],
+        workExperience: p?.workExperience ?? [],
+        technicalSkills: p?.technicalSkills ?? [],
+        softSkills: p?.softSkills ?? []
       };
     });
   }
@@ -324,14 +328,16 @@ techInput = '';
   // ────────────────────────────────────────
   saveAndEvaluate() {
     const user = this.auth.getCurrentUser();
-    this.profile.userId = user?.id || user?.email || '1';
+    const userId = user?.id || user?.email || '1';
+    this.profile.userId = userId;
     this.profileLoading = true;
     this.profileSaved = false;
     this.evalError = '';
 
     this.profileService.save(this.profile).subscribe({
       next: savedProfile => {
-        this.profile = savedProfile;
+        this.profile = savedProfile || this.profile;
+        this.profile.userId = userId;
         this.profileLoading = false;
         this.profileSaved = true;
         this.generateEvaluation();
@@ -348,6 +354,7 @@ techInput = '';
   private generateEvaluation() {
     const user = this.auth.getCurrentUser();
     this.evalLoading = true;
+    this.evalError = '';
 
     // Compute scores from profile data
     const scores = this.computeScoresFromProfile();
@@ -361,20 +368,22 @@ techInput = '';
       ...scores
     };
 
+    // Update the local UI immediately so the score card reflects the current profile
+    this.evaluation = { ...evalDTO, ...scores, createdAt: new Date().toISOString() };
+    this.score = this.evaluationToAIScore(this.evaluation);
+
     this.evalService.create(evalDTO).subscribe({
       next: result => {
         this.evaluation = result;
         this.evalLoading = false;
-        // Update score display
-        if (result.overallScore) {
-          this.score = this.evaluationToAIScore(result);
-        }
+        this.score = this.evaluationToAIScore(result);
       },
       error: () => {
         this.evalLoading = false;
         this.evalError = 'Could not save evaluation. Showing local result.';
-        // Show local computed result even if backend fails
+        // Keep the locally computed result when backend fails
         this.evaluation = { ...evalDTO, ...scores };
+        this.score = this.evaluationToAIScore(this.evaluation);
       }
     });
   }
@@ -444,34 +453,88 @@ techInput = '';
     return { Doctorat: 15, Ingénieur: 12, Master: 12, Licence: 8, BTS: 5, DUT: 5, Autre: 3 }[degree] ?? 3;
   }
 
-  private evaluationToAIScore(e: Evaluation): AIScore {
-    return {
-      idEval: e.idEval,
-      nomEtudiant: e.nomEtudiant,
-      overallScore: e.overallScore ?? 0,
-      rank: e.rank ?? 'BRONZE',
-      technicalSkills:   e.technicalSkills,
-      communication:     e.communication,
-      projectExperience: e.projectExperience,
-      problemSolving:    e.problemSolving,
-      teamwork:          e.teamwork,
-      punctuality:       e.punctuality,
-      creativity:        e.creativity,
-      skillScores: [
-        { category: 'Technical Skills',   score: e.technicalSkills,   weight: 0.25 },
-        { category: 'Communication',      score: e.communication,      weight: 0.15 },
-        { category: 'Project Experience', score: e.projectExperience,  weight: 0.20 },
-        { category: 'Problem Solving',    score: e.problemSolving,     weight: 0.15 },
-        { category: 'Teamwork',           score: e.teamwork,           weight: 0.10 },
-        { category: 'Punctuality',        score: e.punctuality,        weight: 0.10 },
-        { category: 'Creativity',         score: e.creativity,         weight: 0.05 },
-      ],
-      strengths:       e.strengths ?? [],
-      improvements:    e.improvements ?? [],
-      recommendations: e.recommendations ?? [],
-      status: e.status
-    };
-  }
+  private evaluationToAIScore(e: any): AIScore {
+  // Compute weighted overall score locally
+  const overallScore = e.overallScore ?? (
+    e.technicalSkills   * 0.25 +
+    e.communication     * 0.15 +
+    e.projectExperience * 0.20 +
+    e.problemSolving    * 0.15 +
+    e.teamwork          * 0.10 +
+    e.punctuality       * 0.10 +
+    e.creativity        * 0.05
+  );
+
+  const rounded = Math.round(overallScore * 10) / 10;
+
+  const rank = rounded >= 85 ? 'PLATINUM'
+    : rounded >= 70 ? 'GOLD'
+    : rounded >= 50 ? 'SILVER' : 'BRONZE';
+
+  return {
+    idEval:         e.idEval ?? 'local',
+    nomEtudiant:    e.nomEtudiant ?? '',
+    overallScore:   rounded,
+    rank:           (e.rank ?? rank) as any,
+    technicalSkills:   e.technicalSkills,
+    communication:     e.communication,
+    projectExperience: e.projectExperience,
+    problemSolving:    e.problemSolving,
+    teamwork:          e.teamwork,
+    punctuality:       e.punctuality,
+    creativity:        e.creativity,
+    skillScores: [
+      { category: 'Technical Skills',   score: e.technicalSkills,   weight: 0.25 },
+      { category: 'Communication',      score: e.communication,      weight: 0.15 },
+      { category: 'Project Experience', score: e.projectExperience,  weight: 0.20 },
+      { category: 'Problem Solving',    score: e.problemSolving,     weight: 0.15 },
+      { category: 'Teamwork',           score: e.teamwork,           weight: 0.10 },
+      { category: 'Punctuality',        score: e.punctuality,        weight: 0.10 },
+      { category: 'Creativity',         score: e.creativity,         weight: 0.05 },
+    ],
+    strengths:       e.strengths       ?? this.computeLocalStrengths(e),
+    improvements:    e.improvements    ?? this.computeLocalImprovements(e),
+    recommendations: e.recommendations ?? this.computeLocalRecommendations(e),
+    status:          e.status          ?? 'SUBMITTED'
+  };
+}
+
+private computeLocalStrengths(e: any): string[] {
+  const s: string[] = [];
+  if (e.technicalSkills   >= 75) s.push('Strong technical foundation');
+  if (e.communication     >= 75) s.push('Excellent communication skills');
+  if (e.projectExperience >= 75) s.push('Solid project experience');
+  if (e.problemSolving    >= 75) s.push('Sharp analytical skills');
+  if (e.teamwork          >= 75) s.push('Collaborative team player');
+  if (e.punctuality       >= 75) s.push('Reliable and deadline-driven');
+  if (e.creativity        >= 75) s.push('Creative and innovative thinker');
+  return s.length ? s : ['Keep building your profile for detailed insights'];
+}
+
+private computeLocalImprovements(e: any): string[] {
+  const scores: [string, number][] = [
+    ['Technical Skills', e.technicalSkills],
+    ['Communication', e.communication],
+    ['Project Experience', e.projectExperience],
+    ['Problem Solving', e.problemSolving],
+    ['Teamwork', e.teamwork],
+    ['Punctuality', e.punctuality],
+    ['Creativity', e.creativity],
+  ];
+  return scores.sort((a, b) => a[1] - b[1])
+    .slice(0, 3)
+    .map(([name, val]) => `${name} (${val}/100)`);
+}
+
+private computeLocalRecommendations(e: any): string[] {
+  const r: string[] = [];
+  if (e.technicalSkills   < 70) r.push('Add more technical skills to boost your technical score');
+  if (e.projectExperience < 70) r.push('Add work experience or projects to improve experience score');
+  if (e.communication     < 70) r.push('Add soft skills like Communication and Leadership');
+  if (e.teamwork          < 70) r.push('Demonstrate teamwork through group projects or open source');
+  if (r.length === 0) r.push('Excellent profile! Keep your skills updated regularly.');
+  return r;
+}
 
   // ────────────────────────────────────────
   // DISPLAY HELPERS

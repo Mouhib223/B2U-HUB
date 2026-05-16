@@ -127,7 +127,11 @@ export class AIScoringService {
       `${this.api}/student/${studentId}/latest`
     ).pipe(
       map(e => this.toAIScore(e)),
-      catchError(() => of(MOCK_SCORE))
+      catchError(() => of({
+        ...MOCK_SCORE,
+        idEtudiant: studentId,
+        nomEtudiant: 'Current Student'
+      }))
     );
   }
 
