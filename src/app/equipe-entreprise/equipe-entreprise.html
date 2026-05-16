@@ -1,6 +1,5 @@
 <div class="page">
 
-  <!-- Header -->
   <div class="page-header">
     <div class="header-left">
       <div class="header-icon">🏢</div>
@@ -9,10 +8,8 @@
         <p>Associez vos équipes à des entreprises et gérez les tâches Jira</p>
       </div>
     </div>
-    
   </div>
 
-  <!-- Message feedback -->
   <div *ngIf="message" class="alert"
        [class.success]="message.includes('✅')"
        [class.error]="message.includes('❌')"
@@ -20,13 +17,11 @@
     {{ message }}
   </div>
 
-  <!-- Loading -->
   <div *ngIf="isLoading" class="loading-container">
     <div class="spinner"></div>
     <p>Chargement des données...</p>
   </div>
 
-  <!-- Tableau principal -->
   <div class="table-card" *ngIf="!isLoading">
     <table>
       <thead>
@@ -44,7 +39,7 @@
 
           <td>
             <div class="team-cell">
-<div class="team-avatar">{{ eq.nomMembresEquipe.charAt(0).toUpperCase() }}</div>
+              <div class="team-avatar">{{ eq.nomMembresEquipe.charAt(0).toUpperCase() }}</div>
               <span class="team-name">{{ eq.nomMembresEquipe }}</span>
             </div>
           </td>
@@ -64,15 +59,15 @@
 
           <td>
             <div class="action-group">
-              <select #selectEnt class="select-entreprise">
+              <select [(ngModel)]="selectedEntrepriseId[i]" class="select-entreprise">
                 <option value="">-- Choisir --</option>
                 <option *ngFor="let ent of entreprises" [value]="ent.id">
                   {{ ent.name }}
                 </option>
               </select>
               <button class="btn-associer"
-                      (click)="associer(eq.idEquipe, selectEnt.value)"
-                      [disabled]="!selectEnt.value">
+                      (click)="associer(eq.idEquipe, selectedEntrepriseId[i])"
+                      [disabled]="!selectedEntrepriseId[i]">
                 Associer
               </button>
             </div>
@@ -90,7 +85,7 @@
           </td>
 
           <td>
-            <button class="btn-tasks" 
+            <button class="btn-tasks"
                     (click)="openTaskModal(eq, i)"
                     [disabled]="!eq.jiraProjectKey">
               📋 Gérer les tâches
@@ -111,7 +106,6 @@
       </div>
 
       <div class="modal-body">
-        <!-- Formulaire création tâche -->
         <div class="create-task-section">
           <h3>➕ Nouvelle tâche</h3>
           <div class="form-row">
@@ -136,7 +130,6 @@
           </button>
         </div>
 
-        <!-- Liste des tâches -->
         <div class="tasks-section">
           <h3>📝 Tâches existantes</h3>
           
