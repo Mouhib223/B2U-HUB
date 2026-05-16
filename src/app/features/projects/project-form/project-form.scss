@@ -1,0 +1,195 @@
+.form-page {
+    max-width: 700px;
+    margin: 2rem auto;
+    padding: 0 1.5rem;
+  }
+  
+  .back-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #3b5bdb;
+    text-decoration: none;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+  
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+  
+  .form-header h1 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+  }
+  
+  .form-card {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+  }
+  
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  
+    label {
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: #333;
+    }
+  
+    input, textarea, select {
+      padding: 0.7rem 1rem;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+  
+      &:focus {
+        border-color: #3b5bdb;
+      }
+    }
+  
+    textarea {
+      resize: vertical;
+    }
+  }
+  
+  .skill-input {
+    display: flex;
+    gap: 0.5rem;
+  
+    input {
+      flex: 1;
+    }
+  
+    button {
+      background: #3b5bdb;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 0.5rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+  
+      &:hover {
+        background: #2f4cc0;
+      }
+    }
+  }
+  
+  .skills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+  
+  .skill-chip {
+    background: #e7f5ff;
+    color: #1971c2;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+  
+    mat-icon {
+      font-size: 0.9rem;
+      cursor: pointer;
+      width: 16px;
+      height: 16px;
+  
+      &:hover {
+        color: #c92a2a;
+      }
+    }
+  }
+  
+  .ai-generator {
+    background: #f0f4ff;
+    border: 1px dashed #4c6ef5;
+    border-radius: 10px;
+    padding: 1rem 1.2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .ai-row {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+
+    .sector-input { flex: 1; }
+  }
+
+  .btn-ai {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: linear-gradient(135deg, #4c6ef5, #7950f2);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 0.65rem 1.2rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: opacity 0.2s;
+
+    &:hover:not(:disabled) { opacity: 0.88; }
+    &:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    mat-icon { font-size: 1.1rem; width: 20px; height: 20px; }
+  }
+
+  .ai-hint { font-size: 0.78rem; color: #6c7a9b; margin: 0; }
+  .ai-error { font-size: 0.8rem; color: #c92a2a; margin: 0; }
+
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+  
+  .btn-cancel {
+    padding: 0.7rem 1.5rem;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+    color: #555;
+    text-decoration: none;
+    font-size: 0.95rem;
+  
+    &:hover {
+      background: #f8f9fa;
+    }
+  }
+  
+  .btn-submit {
+    padding: 0.7rem 1.5rem;
+    border-radius: 8px;
+    background: #3b5bdb;
+    color: white;
+    border: none;
+    font-size: 0.95rem;
+    cursor: pointer;
+    font-weight: 600;
+  
+    &:hover {
+      background: #2f4cc0;
+    }
+  }

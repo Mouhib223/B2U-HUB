@@ -63,6 +63,17 @@
 
 h3 { font-size: 1rem; margin-bottom: 0.25rem; }
 
+.type-chip {
+  display: inline-flex;
+  margin-top: .35rem;
+  padding: .22rem .58rem;
+  color: #065f46;
+  background: #d1fae5;
+  border-radius: 999px;
+  font-size: .72rem;
+  font-weight: 700;
+}
+
 .description {
   font-size: 0.85rem; color: var(--color-muted);
   margin: 0.5rem 0 1rem;
@@ -82,13 +93,138 @@ h3 { font-size: 1rem; margin-bottom: 0.25rem; }
 }
 
 .card-footer {
-  display: flex; gap: 1rem; padding-top: 1rem;
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 1rem; padding-top: 1rem;
   border-top: 1px solid var(--color-border);
   font-size: 0.8rem; color: var(--color-muted);
 
+  .meta { display: flex; gap: 1rem; }
   span { display: flex; align-items: center; gap: 4px; }
   mat-icon { font-size: 15px; width: 15px; height: 15px; }
 }
+
+.card-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-gap {
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 0.4rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: background 0.2s;
+  &:hover { background: #d1fae5; }
+  mat-icon { font-size: 18px; width: 18px; height: 18px; }
+}
+
+.btn-apply {
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  padding: 0.4rem 1rem;
+  border-radius: var(--radius-md);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  &:hover { opacity: 0.85; }
+}
+
+.btn-add {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--color-primary); color: white;
+  padding: 0.5rem 1.1rem; border-radius: var(--radius-md);
+  text-decoration: none; font-size: 0.88rem; font-weight: 600;
+}
+
+.page-header {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  margin-bottom: 1.5rem;
+}
+
+.loading-state, .error-state {
+  padding: 2rem; text-align: center; color: var(--color-muted);
+}
+
+.company-name { font-size: 0.82rem; color: var(--color-muted); margin: 0; }
+
+// ── Skill Gap Modal ───────────────────────────────────────────────────────
+.gap-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.45);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1000;
+}
+
+.gap-modal {
+  background: #fff;
+  border-radius: 16px;
+  padding: 1.75rem;
+  width: 100%; max-width: 520px;
+  max-height: 85vh; overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0,0,0,.2);
+}
+
+.gap-modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: .5rem;
+  h3 { display: flex; align-items: center; gap: 6px; font-size: 1.05rem; margin: 0; color: var(--color-dark); }
+}
+
+.gap-close {
+  background: none; border: none; cursor: pointer; padding: 4px;
+  color: var(--color-muted); border-radius: 50%;
+  &:hover { background: #f3f4f6; }
+}
+
+.gap-project-title {
+  font-size: .82rem; color: var(--color-muted); margin: 0 0 1.2rem;
+}
+
+.gap-loading {
+  display: flex; align-items: center; gap: 8px;
+  color: var(--color-muted); padding: 1.5rem 0; justify-content: center;
+}
+
+.gap-error { color: #DC2626; font-size: .85rem; padding: 1rem 0; }
+
+.gap-score {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 1.25rem;
+  .gap-percent { font-size: 2rem; font-weight: 800; }
+  span { font-size: .85rem; color: var(--color-muted); }
+}
+
+.gap-section {
+  margin-bottom: 1rem;
+  h4 { display: flex; align-items: center; gap: 5px; font-size: .82rem; font-weight: 700;
+       text-transform: uppercase; letter-spacing: .04em; color: var(--color-text); margin-bottom: .5rem;
+       mat-icon { font-size: 16px; width: 16px; height: 16px; } }
+}
+
+.gap-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.chip {
+  padding: 3px 10px; border-radius: 999px; font-size: .75rem; font-weight: 600;
+  &.matched { background: #d1fae5; color: #065f46; }
+  &.missing  { background: #fee2e2; color: #b91c1c; }
+}
+
+.gap-advice {
+  display: flex; gap: 10px; align-items: flex-start;
+  background: #fffbeb; border-left: 3px solid #f59e0b;
+  border-radius: 0 8px 8px 0; padding: .85rem 1rem; margin-top: 1rem;
+  mat-icon { color: #f59e0b; margin-top: 2px; flex-shrink: 0; }
+  p { margin: 0; font-size: .85rem; color: var(--color-text); line-height: 1.5; }
+}
+
+.spin { animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
 
 .empty-state {
   text-align: center; padding: 4rem 2rem;

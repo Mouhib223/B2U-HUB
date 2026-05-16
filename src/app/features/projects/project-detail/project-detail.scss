@@ -1,0 +1,62 @@
+.project-detail-page {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 0 1.5rem;
+  }
+  
+  .loading, .error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 4rem;
+    color: #666;
+  }
+  
+  .back-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #3b5bdb;
+    text-decoration: none;
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+  
+    &:hover { text-decoration: underline; }
+  }
+  
+  .header-top {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+  
+  .company-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+    background: #dbe4ff;
+    color: #3b5bdb;
+    font-size: 1.8rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .header-info h1 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin: 0;
+  }
+  
+  .header-info .company {
+    color: #666;
+    margin: 0.3rem 0;
+  }
+  
+  .status-badge {
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    fo

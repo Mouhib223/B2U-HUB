@@ -6,6 +6,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
@@ -13,7 +15,8 @@ import { AuthService } from '../../../core/services/auth.service';
   standalone: true,
   imports: [
     CommonModule, ReactiveFormsModule, RouterLink,
-    MatFormFieldModule, MatInputModule, MatSelectModule, MatButtonModule
+    MatFormFieldModule, MatInputModule, MatSelectModule, MatButtonModule,
+    MatIconModule, MatProgressSpinnerModule
   ],
   templateUrl: './register.html',
   styleUrls: ['./register.scss']
@@ -28,17 +31,21 @@ export class RegisterComponent {
       firstName: ['', Validators.required],
       lastName:  ['', Validators.required],
       email:     ['', [Validators.required, Validators.email]],
-      password:  ['', [Validators.required, Validators.minLength(6)]],
+      password:  ['', [Validators.required, Validators.pattern(/^(?=.*[A-Z])(?=.*\d).{8,}$/)]],
       role:      ['student', Validators.required],
     });
   }
 
   submit() {
-    if (this.form.invalid) return;
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
     this.loading = true;
+    this.error = '';
     this.auth.register(this.form.value).subscribe({
       next: () => this.router.navigate(['/auth/login']),
-      error: (err) => { this.error = err.error?.message || 'Registration failed.Please Verifiy'; this.loading = false; }
+      error: (err) => { this.error = err.error?.message || 'Inscription impossible. Verifiez les informations.'; this.loading = false; }
     });
   }
 }

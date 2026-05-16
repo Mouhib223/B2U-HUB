@@ -1,0 +1,75 @@
+<div class="workpost-container">
+  <div class="header">
+    <button class="back-btn" (click)="goBack()">← Retour aux entreprises</button>
+    <h2>Offres de stage / emploi – {{ companyName }}</h2>
+  </div>
+
+  <div *ngIf="loading" class="loading-spinner">
+    Chargement des offres...
+  </div>
+
+  <div *ngIf="errorMessage && !loading" class="error-message">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="!loading && !errorMessage && workPosts.length > 0" class="posts-grid">
+    <div class="post-card" *ngFor="let post of workPosts">
+
+      <div class="card-header">
+        <h3>{{ post.title }}</h3>
+        <span class="hours-badge">{{ post.hoursPerWeek }}h/semaine</span>
+      </div>
+
+      <div class="card-body">
+        <p *ngIf="post.requiredSkills" class="skills">
+          🛠️ Compétences requises : {{ post.requiredSkills }}
+        </p>
+        <p class="mode">
+          📍 Mode de travail : {{ post.workMode || 'NON DEFINI' }}
+        </p>
+        <p *ngIf="post.status" class="status" [class.active]="post.status === 'ACTIVE'">
+          Statut : {{ post.status }}
+        </p>
+        <p *ngIf="post.createdAt" class="date">
+          📅 Publié le : {{ post.createdAt | date:'mediumDate' }}
+        </p>
+
+        <!-- Projet associé -->
+        <div class="projet-section">
+
+  <div *ngIf="post.projetTitle; else noProjet" class="projet-badge">
+    <span class="projet-label">📁 Projet associé</span>
+
+    <div class="projet-info">
+      <span class="projet-title">
+        {{ post.projetTitle }}
+      </span>
+    </div>
+  </div>
+
+  <ng-template #noProjet>
+    <div class="projet-badge">
+      📁 Aucun projet associé
+    </div>
+  </ng-template>
+
+</div>
+
+      </div>
+
+      <div class="card-footer">
+        <button class="apply-btn" (click)="applyForPost(post)">
+          Postuler
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <div *ngIf="!loading && !errorMessage && workPosts.length === 0" class="no-data">
+    <p>Aucune offre disponible pour {{ companyName }} actuellement.</p>
+    <button class="back-btn-secondary" (click)="goBack()">
+      Explorer d'autres entreprises
+    </button>
+  </div>
+</div>

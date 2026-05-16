@@ -16,8 +16,28 @@ import { AuthService } from '../../core/services/auth.service';
           <span *ngIf="!collapsed" class="label">COMPANY</span>
         </div>
         <nav>
+          <a routerLink="/company/dashboard" routerLinkActive="active">
+            <mat-icon>dashboard</mat-icon><span *ngIf="!collapsed">Dashboard</span>
+          </a>
+
           <a routerLink="/company/candidatures" routerLinkActive="active">
             <mat-icon>people</mat-icon><span *ngIf="!collapsed">Candidatures</span>
+          </a>
+
+          <a routerLink="/company/work-post" routerLinkActive="active">
+            <mat-icon>work</mat-icon><span *ngIf="!collapsed">Work Post</span>
+          </a>
+
+          <a routerLink="/company/projects" routerLinkActive="active">
+            <mat-icon>folder_open</mat-icon><span *ngIf="!collapsed">Projets</span>
+          </a>
+
+          <a routerLink="/company/attendance" routerLinkActive="active">
+            <mat-icon>how_to_reg</mat-icon><span *ngIf="!collapsed">Présences</span>
+          </a>
+
+          <a routerLink="/company/equipes" routerLinkActive="active">
+            <mat-icon>groups</mat-icon><span *ngIf="!collapsed">Équipes & Tâches</span>
           </a>
         </nav>
         <div class="sidebar-footer">

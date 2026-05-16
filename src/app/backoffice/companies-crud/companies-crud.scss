@@ -320,3 +320,35 @@ td {
 .form-group input.ng-invalid.ng-touched {
   border-color: #d32f2f;
 }
+
+.inner-table {
+  width: 100%;
+  background: #f9fafb;
+  margin-top: 10px;
+}
+
+.equipes-container {
+  padding: 10px;
+}
+
+#sectorChart {
+  max-height: 300px;
+  width: 100% !important;
+}
+
+.chart-container {
+  position: relative;
+  height: 300px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.add-modal {
+  width: 520px;
+  max-width: 92vw;
+  text-align: left;
+}

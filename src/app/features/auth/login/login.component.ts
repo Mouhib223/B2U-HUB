@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { Router, RouterLink } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService } from '../../../core/services/auth.service';
 
@@ -16,6 +17,7 @@ import { AuthService } from '../../../core/services/auth.service';
     RouterLink,
     MatFormFieldModule,
     MatInputModule,
+    MatIconModule,
     MatProgressSpinnerModule,
   ],
   templateUrl: './login.component.html',
@@ -54,12 +56,12 @@ export class LoginComponent {
     this.auth.login(email, password).subscribe({
       next: () => {
         const user = this.auth.getCurrentUser();
-        if (user?.role === 'admin')   this.router.navigate(['/admin/dashboard']);
-        else if (user?.role === 'company') this.router.navigate(['/company/candidatures']);
-        else this.router.navigate(['/app/dashboard/student']);
+        if (user?.role === 'admin') this.router.navigate(['/admin/dashboard']);
+        else if (user?.role === 'company') this.router.navigate(['/company/dashboard']);
+        else this.router.navigate(['/student/dashboard']);
       },
       error: (err: any) => {
-        this.error = err.error?.message || 'Login failed.';
+        this.error = err.error?.message || 'Email ou mot de passe incorrect.';
         this.loading = false;
       }
     });

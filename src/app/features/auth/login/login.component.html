@@ -1,39 +1,51 @@
 <div class="auth-page">
   <div class="auth-brand">
     <div class="brand-logo">B2U</div>
-    <h1>Welcome to B2U-HUB</h1>
-    <p>The platform connecting student talent with real-world projects.</p>
+    <span class="eyebrow">Plateforme candidature intelligente</span>
+    <h1>Connectez les talents aux bons projets</h1>
+    <p>Suivi des candidatures, matching AI, recommandations et preparation d'entretien dans un seul espace.</p>
+    <div class="brand-points">
+      <span><mat-icon>psychology</mat-icon> Analyse AI</span>
+      <span><mat-icon>work</mat-icon> Projets reels</span>
+      <span><mat-icon>notifications</mat-icon> Notifications statut</span>
+    </div>
   </div>
 
   <div class="auth-form-wrap">
     <div class="auth-card">
-      <h2>Sign in</h2>
-      <p class="auth-sub">Enter your credentials to access your account</p>
+      <span class="form-kicker">Connexion</span>
+      <h2>Bienvenue</h2>
+      <p class="auth-sub">Accedez a votre espace selon votre role.</p>
 
-      <div class="error-banner" *ngIf="error">{{ error }}</div>
+      <div class="error-banner" *ngIf="error">
+        <mat-icon>error_outline</mat-icon>
+        <span>{{ error }}</span>
+      </div>
 
       <form [formGroup]="form" (ngSubmit)="submit()">
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Email</mat-label>
-          <input matInput formControlName="email" type="email" placeholder="you@example.com">
-          <mat-error *ngIf="form.get('email')?.hasError('required')">Email is required</mat-error>
-          <mat-error *ngIf="form.get('email')?.hasError('email')">Enter a valid email</mat-error>
+          <mat-icon matPrefix>mail</mat-icon>
+          <input matInput formControlName="email" type="email" placeholder="nom@example.com">
+          <mat-error *ngIf="form.get('email')?.hasError('required')">Email obligatoire</mat-error>
+          <mat-error *ngIf="form.get('email')?.hasError('email')">Email invalide</mat-error>
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Password</mat-label>
+          <mat-label>Mot de passe</mat-label>
+          <mat-icon matPrefix>lock</mat-icon>
           <input matInput formControlName="password" type="password">
-          <mat-error *ngIf="form.get('password')?.hasError('required')">Password is required</mat-error>
-          <mat-error *ngIf="form.get('password')?.hasError('minlength')">Minimum 6 characters</mat-error>
+          <mat-error *ngIf="form.get('password')?.hasError('required')">Mot de passe obligatoire</mat-error>
+          <mat-error *ngIf="form.get('password')?.hasError('minlength')">Minimum 6 caracteres</mat-error>
         </mat-form-field>
 
         <button class="btn-primary full-width" type="submit" [disabled]="loading">
           <mat-spinner diameter="18" *ngIf="loading"></mat-spinner>
-          <span *ngIf="!loading">Sign In</span>
+          <span *ngIf="!loading">Se connecter</span>
         </button>
       </form>
 
-      <p class="auth-link">Don't have an account? <a routerLink="/auth/register">Register</a></p>
+      <p class="auth-link">Pas encore de compte ? <a routerLink="/auth/register">Creer un compte</a></p>
     </div>
   </div>
 </div>

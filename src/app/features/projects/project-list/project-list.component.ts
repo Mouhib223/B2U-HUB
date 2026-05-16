@@ -1,10 +1,13 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { BadgeComponent } from '../../../shared/components/badge/badge.component';
 import { Project } from '../../../core/models/project.model';
+import { ProjetService } from '../../../core/services/projet';
+import { AuthService } from '../../../core/services/auth.service';
+import { AiAssistantService, SkillGapResult } from '../../../core/services/ai-assistant.service';
 
 @Component({
   selector: 'b2u-project-list',
@@ -13,42 +16,67 @@ import { Project } from '../../../core/models/project.model';
   templateUrl: './project-list.component.html',
   styleUrls: ['./project-list.component.scss']
 })
-export class ProjectListComponent {
-  searchQuery = '';
+export class ProjectListComponent implements OnInit {
+  private projetService = inject(ProjetService);
+  private auth = inject(AuthService);
+  private router = inject(Router);
+  private aiService = inject(AiAssistantService);
 
-  projects: Project[] = [
-    {
-      id: '1', title: 'React Dashboard for FinTech Startup',
-      description: 'Build an analytics dashboard with real-time data visualization.',
-      companyId: 'c1', companyName: 'FinTech Corp',
-      requiredSkills: ['React', 'TypeScript', 'Chart.js'],
-      teamSize: 3, deadline: new Date('2025-08-01'),
-      status: 'open', applicantsCount: 8, createdAt: new Date()
-    },
-    {
-      id: '2', title: 'AI Chatbot Integration',
-      description: 'Integrate an NLP-powered chatbot into an existing e-commerce platform.',
-      companyId: 'c2', companyName: 'ShopAI',
-      requiredSkills: ['Python', 'NLP', 'REST API'],
-      teamSize: 2, deadline: new Date('2025-07-15'),
-      status: 'open', applicantsCount: 12, createdAt: new Date()
-    },
-    {
-      id: '3', title: 'Mobile App for University Events',
-      description: 'Design and develop a cross-platform mobile app for campus events.',
-      companyId: 'c3', companyName: 'UniTech',
-      requiredSkills: ['Flutter', 'Dart', 'Firebase'],
-      teamSize: 4, deadline: new Date('2025-09-01'),
-      status: 'open', applicantsCount: 5, createdAt: new Date()
-    },
-  ];
+  searchQuery = '';
+  projects: Project[] = [];
+  loading = true;
+  error = '';
+
+  gapModal: {
+    open: boolean;
+    loading: boolean;
+    projectId?: string;
+    projectTitle?: string;
+    result?: SkillGapResult;
+    error?: string;
+  } = { open: false, loading: false };
+
+  get isStudent(): boolean {
+    return this.auth.getCurrentUser()?.role === 'student';
+  }
+
+  ngOnInit(): void {
+    this.projetService.getAllProjets().subscribe({
+      next: (data) => { this.projects = data; this.loading = false; },
+      error: () => { this.error = 'Erreur lors du chargement des projets.'; this.loading = false; }
+    });
+  }
 
   get filtered() {
     if (!this.searchQuery) return this.projects;
     const q = this.searchQuery.toLowerCase();
     return this.projects.filter(p =>
-      p.title.toLowerCase().includes(q) ||
-      p.requiredSkills.some(s => s.toLowerCase().includes(q))
+      p.title?.toLowerCase().includes(q) ||
+      this.projectSkills(p).some(s => s.toLowerCase().includes(q))
     );
+  }
+
+  projectSkills(project: Project): string[] {
+    return project.requiredSkills?.length ? project.requiredSkills : project.technologies ?? [];
+  }
+
+  apply(project: Project, event: Event): void {
+    event.stopPropagation();
+    this.router.navigate(['/app/candidatures'], {
+      queryParams: { projectId: project.id }
+    });
+  }
+
+  analyzeGap(project: Project, event: Event): void {
+    event.stopPropagation();
+    this.gapModal = { open: true, loading: true, projectId: project.id, projectTitle: project.title };
+    this.aiService.analyzeSkillGap(project.id!).subscribe({
+      next: (result) => { this.gapModal = { ...this.gapModal, loading: false, result }; },
+      error: () => { this.gapModal = { ...this.gapModal, loading: false, error: 'Erreur IA. Réessayez.' }; }
+    });
+  }
+
+  closeGapModal(): void {
+    this.gapModal = { open: false, loading: false };
   }
 }

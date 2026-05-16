@@ -43,4 +43,12 @@ export class EntrepriseService {
   getCountBySector(): Observable<Record<string, number>> {
     return this.http.get<Record<string, number>>(`${this.apiUrl}/stats/by-sector`);
   }
+
+  getEquipesByEntreprise(id: string): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/${id}/equipes`);
+  }
+
+  getSimilar(id: string): Observable<Entreprise[]> {
+    return this.http.get<Entreprise[]>(`${this.apiUrl}/${id}/similar`);
+  }
 }
