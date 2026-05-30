@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { AttendanceService } from '../../core/services/attendanceService';
 import { AuthService } from '../../core/services/auth.service';
-import { AttendanceModel } from '../../core/models/Attendance.model';
+import { AttendanceModel } from '../../core/models/attendance.model';
 
 @Component({
   selector: 'app-attendance',

@@ -1,13 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 
-import { ProjectAi } from './project-ai';
+import { ProjectAiService } from './project-ai';
 
-describe('ProjectAi', () => {
-  let service: ProjectAi;
+describe('ProjectAiService', () => {
+  let service: ProjectAiService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(ProjectAi);
+    service = TestBed.inject(ProjectAiService);
   });
 
   it('should be created', () => {
