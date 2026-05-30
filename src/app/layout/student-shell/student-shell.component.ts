@@ -21,14 +21,18 @@ import { AuthService } from '../../core/services/auth.service';
             <mat-icon>business</mat-icon>
             <span *ngIf="!collapsed">Projets</span>
           </a>
-          <a routerLink="/app/my-company" routerLinkActive="active">
-            <mat-icon>work</mat-icon>
-            <span *ngIf="!collapsed">Entreprises / Offres</span>
-          </a>
+
           <a routerLink="/app/candidatures" routerLinkActive="active">
             <mat-icon>description</mat-icon>
             <span *ngIf="!collapsed">Mes candidatures</span>
           </a>
+
+          <a routerLink="/student/my-company" routerLinkActive="active">
+            <mat-icon>business</mat-icon>
+            <span *ngIf="!collapsed">Entreprises</span>
+          </a>
+
+          <!-- ✅ Lien Equipes corrigé -->
           <a routerLink="/app/equipes" routerLinkActive="active">
             <mat-icon>groups</mat-icon>
             <span *ngIf="!collapsed">Equipes</span>

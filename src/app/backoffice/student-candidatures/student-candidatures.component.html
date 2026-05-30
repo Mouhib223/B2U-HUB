@@ -389,34 +389,25 @@
             <p>{{ getRecoDescription(detailSelected.scoreMatching) }}</p>
           </div>
         </div>
-      </section>
-
-      <section class="kpi-row">
-        <div><strong>{{ getScoreLabel(detailSelected.scoreMatching) }}</strong><span>Niveau</span></div>
-        <div><strong>{{ detailSelected.anneeExperience || 0 }} an(s)</strong><span>Expérience</span></div>
-        <div><strong>{{ detailSelected.competences?.length || 0 }}</strong><span>Compétences</span></div>
-        <div><strong>{{ displayStatus(detailSelected.statutCandidature) }}</strong><span>Statut</span></div>
-      </section>
-
-      <section class="detail-section" *ngIf="detailMatchingParts.length > 0">
-        <h3><mat-icon>compare_arrows</mat-icon> Analyse du matching</h3>
-        <div class="matching-block" *ngFor="let part of detailMatchingParts" [ngClass]="part.type">
-          <header>
-            <mat-icon>{{ part.type === 'matched' ? 'check_circle' : 'cancel' }}</mat-icon>
-            {{ part.label }}
-            <span>{{ part.skillList.length }}</span>
-          </header>
-          <div>
-            <span class="chip" *ngFor="let skill of part.skillList">{{ skill }}</span>
-            <span class="empty-chip" *ngIf="part.skillList.length === 0">Aucune donnée</span>
-          </div>
+        <div class="field full">
+          <label>CV (PDF)</label>
+          <input type="file" accept=".pdf,application/pdf" (change)="onCvSelected($event)" />
+          <div class="file-info" *ngIf="cvFile">Fichier: {{ cvFile.name }}</div>
+          <div class="err" *ngIf="cvError">{{ cvError }}</div>
         </div>
-      </section>
-
-      <section class="detail-section" *ngIf="detailSelected.competences?.length">
-        <h3><mat-icon>psychology</mat-icon> Compétences extraites du CV</h3>
-        <div class="skill-list">
-          <span *ngFor="let skill of detailSelected.competences">{{ skill }}</span>
+        <div class="field full">
+          <label>Lettre de motivation (PDF)</label>
+          <input type="file" accept=".pdf,application/pdf" (change)="onLettreSelected($event)" />
+          <div class="file-info" *ngIf="lettreFile">Fichier: {{ lettreFile.name }}</div>
+          <div class="err" *ngIf="lettreError">{{ lettreError }}</div>
+        </div>
+        <div class="field full">
+          <label>Lien CV (optionnel)</label>
+          <input formControlName="cvLien" />
+        </div>
+        <div class="field full">
+          <label>Lettre de motivation</label>
+          <textarea formControlName="lettreMotivation" rows="3"></textarea>
         </div>
       </section>
       <section class="detail-section interview-prep" *ngIf="getInterviewPreparationLines(detailSelected).length > 0">

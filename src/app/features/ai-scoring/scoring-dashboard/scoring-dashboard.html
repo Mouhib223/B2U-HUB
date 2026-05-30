@@ -134,15 +134,15 @@
         <p class="evo-sub">Your score journey over time</p>
         <div class="evo-list">
           <div class="evo-item" *ngFor="let e of evolutionData; let i = index">
-            <div class="evo-dot" [style.background]="getRankColor(e.rank ?? 'BRONZE')">
-              {{ getRankEmoji(e.rank ?? 'BRONZE') }}
+            <div class="evo-dot" [style.background]="getRankColor(e.rank)">
+              {{ getRankEmoji(e.rank) }}
             </div>
             <div class="evo-info">
-              <div class="evo-score" [style.color]="getRankColor(e.rank ?? 'BRONZE')">{{ e.overallScore | number:'1.0-0' }}</div>
+              <div class="evo-score" [style.color]="getRankColor(e.rank)">{{ e.overallScore | number:'1.0-0' }}</div>
               <div class="evo-date">{{ e.createdAt ? (e.createdAt | date:'MMM yyyy') : 'Evaluation ' + (i+1) }}</div>
             </div>
             <div class="evo-bar-wrap">
-              <div class="evo-bar-fill" [style.width.%]="e.overallScore" [style.background]="getRankColor(e.rank ?? 'BRONZE')"></div>
+              <div class="evo-bar-fill" [style.width.%]="e.overallScore" [style.background]="getRankColor(e.rank)"></div>
             </div>
             <div class="evo-pct">{{ e.overallScore | number:'1.0-0' }}%</div>
           </div>
@@ -206,19 +206,19 @@
     <div class="profile-tabs">
       <button [class.active]="activeProfileTab==='technical'" (click)="activeProfileTab='technical'">
         <mat-icon>code</mat-icon> Technical Skills
-        <span class="count-badge">{{ profile.technicalSkills?.length || 0 }}</span>
+        <span class="count-badge">{{ profile.technicalSkills.length || 0 }}</span>
       </button>
       <button [class.active]="activeProfileTab==='soft'" (click)="activeProfileTab='soft'">
         <mat-icon>psychology</mat-icon> Soft Skills
-        <span class="count-badge">{{ profile.softSkills?.length || 0 }}</span>
+        <span class="count-badge">{{ profile.softSkills.length || 0 }}</span>
       </button>
       <button [class.active]="activeProfileTab==='education'" (click)="activeProfileTab='education'">
         <mat-icon>school</mat-icon> Education
-        <span class="count-badge">{{ profile.education?.length || 0 }}</span>
+        <span class="count-badge">{{ profile.education.length || 0 }}</span>
       </button>
       <button [class.active]="activeProfileTab==='experience'" (click)="activeProfileTab='experience'">
         <mat-icon>work</mat-icon> Experience
-        <span class="count-badge">{{ profile.workExperience?.length || 0 }}</span>
+        <span class="count-badge">{{ profile.workExperience.length || 0 }}</span>
       </button>
     </div>
 
@@ -230,7 +230,10 @@
         <div class="add-form">
           <div class="form-field">
             <label>Skill Name</label>
-            <input [(ngModel)]="newTechSkill.name" placeholder="React, Java, Python..." (keydown.enter)="addTechSkill()">
+            <input list="techNames" [(ngModel)]="newTechSkill.name" placeholder="React, Java, Python..." (keydown.enter)="addTechSkill()">
+            <datalist id="techNames">
+              <option *ngFor="let tech of techNames" [value]="tech"></option>
+            </datalist>
           </div>
           <div class="form-field">
             <label>Level</label>
@@ -246,16 +249,17 @@
           </div>
           <div class="form-field">
             <label>Years</label>
-            <input type="number" [(ngModel)]="newTechSkill.yearsOfExperience" min="0" max="20">
+            <input type="number" [(ngModel)]="newTechSkill.yearsOfExperience" min="0" max="50">
           </div>
-          <button class="btn-add" (click)="addTechSkill()">
+          <button class="btn-add" (click)="addTechSkill()" [disabled]="!isValidTechSkill()">
             <mat-icon>add</mat-icon> Add
           </button>
+          <p class="field-error" *ngIf="formErrors.tech">{{ formErrors.tech }}</p>
         </div>
       </div>
 
       <!-- Existing skills -->
-      <div class="skills-chips" *ngIf="profile.technicalSkills?.length">
+      <div class="skills-chips" *ngIf="profile.technicalSkills.length">
         <div class="skill-chip" *ngFor="let s of profile.technicalSkills"
           [style.borderColor]="levelColor(s.level)">
           <div class="chip-main">
@@ -275,7 +279,7 @@
         </div>
       </div>
 
-      <div class="empty-tab" *ngIf="!profile.technicalSkills?.length">
+      <div class="empty-tab" *ngIf="!profile.technicalSkills.length">
         <mat-icon>code_off</mat-icon>
         <p>No technical skills added yet. Add your first skill above.</p>
       </div>
@@ -288,7 +292,10 @@
         <div class="add-form">
           <div class="form-field wide">
             <label>Skill Name</label>
-            <input [(ngModel)]="newSoftSkill.name" placeholder="Leadership, Communication, Teamwork..." (keydown.enter)="addSoftSkill()">
+            <input list="softSkills" [(ngModel)]="newSoftSkill.name" placeholder="Leadership, Communication, Teamwork..." (keydown.enter)="addSoftSkill()">
+            <datalist id="softSkills">
+              <option *ngFor="let soft of softSkillNames" [value]="soft"></option>
+            </datalist>
           </div>
           <div class="form-field">
             <label>Level (1–5)</label>
@@ -302,13 +309,14 @@
             </button>
             </div>
           </div>
-          <button class="btn-add" (click)="addSoftSkill()">
+          <button class="btn-add" (click)="addSoftSkill()" [disabled]="!isValidSoftSkill()">
             <mat-icon>add</mat-icon> Add
           </button>
+          <p class="field-error" *ngIf="formErrors.soft">{{ formErrors.soft }}</p>
         </div>
       </div>
 
-      <div class="soft-skills-list" *ngIf="profile.softSkills?.length">
+      <div class="soft-skills-list" *ngIf="profile.softSkills.length">
         <div class="soft-skill-row" *ngFor="let s of profile.softSkills">
           <span class="ss-name">{{ s.name }}</span>
           <div class="ss-stars">
@@ -322,7 +330,7 @@
         </div>
       </div>
 
-      <div class="empty-tab" *ngIf="!profile.softSkills?.length">
+      <div class="empty-tab" *ngIf="!profile.softSkills.length">
         <mat-icon>psychology_alt</mat-icon>
         <p>No soft skills added yet.</p>
       </div>
@@ -353,20 +361,21 @@
           </div>
           <div class="form-field">
             <label>End Year</label>
-            <input type="number" [(ngModel)]="newEducation.endYear" min="1990" max="2030" [disabled]="newEducation.current">
+            <input type="number" [(ngModel)]="newEducation.endYear" [min]="newEducation.startYear" max="2030" [disabled]="newEducation.current">
           </div>
           <div class="form-field check-field">
             <label>
               <input type="checkbox" [(ngModel)]="newEducation.current"> Currently studying
             </label>
           </div>
-          <button class="btn-add" (click)="addEducation()">
+          <button class="btn-add" (click)="addEducation()" [disabled]="!isValidEducation()">
             <mat-icon>add</mat-icon> Add
           </button>
+          <p class="field-error" *ngIf="formErrors.education">{{ formErrors.education }}</p>
         </div>
       </div>
 
-      <div class="edu-list" *ngIf="profile.education?.length">
+      <div class="edu-list" *ngIf="profile.education.length">
         <div class="edu-card" *ngFor="let e of profile.education">
           <div class="edu-icon"><mat-icon>school</mat-icon></div>
           <div class="edu-info">
@@ -383,7 +392,7 @@
         </div>
       </div>
 
-      <div class="empty-tab" *ngIf="!profile.education?.length">
+      <div class="empty-tab" *ngIf="!profile.education.length">
         <mat-icon>school</mat-icon>
         <p>No education added yet.</p>
       </div>
@@ -414,7 +423,7 @@
           </div>
           <div class="form-field">
             <label>End (YYYY-MM)</label>
-            <input [(ngModel)]="newExperience.endDate" type="month" [disabled]="newExperience.current">
+            <input [(ngModel)]="newExperience.endDate" type="month" [min]="newExperience.startDate" [disabled]="newExperience.current">
           </div>
           <div class="form-field check-field">
             <label>
@@ -425,13 +434,14 @@
             <label>Technologies (comma separated)</label>
             <input [(ngModel)]="techInput" placeholder="React, Node.js, MongoDB...">
           </div>
-          <button class="btn-add" (click)="addExperienceWithTech()">
+          <button class="btn-add" (click)="addExperienceWithTech()" [disabled]="!isValidExperience()">
             <mat-icon>add</mat-icon> Add
           </button>
+          <p class="field-error" *ngIf="formErrors.experience">{{ formErrors.experience }}</p>
         </div>
       </div>
 
-      <div class="exp-list" *ngIf="profile.workExperience?.length">
+      <div class="exp-list" *ngIf="profile.workExperience.length">
         <div class="exp-card" *ngFor="let e of profile.workExperience">
           <div class="exp-icon"><mat-icon>work</mat-icon></div>
           <div class="exp-info">
@@ -451,7 +461,7 @@
         </div>
       </div>
 
-      <div class="empty-tab" *ngIf="!profile.workExperience?.length">
+      <div class="empty-tab" *ngIf="!profile.workExperience.length">
         <mat-icon>work_off</mat-icon>
         <p>No experience added yet.</p>
       </div>
@@ -537,15 +547,15 @@
       <div class="summary-grid">
         <div class="summary-item">
           <mat-icon>code</mat-icon>
-          <span><strong>{{ profile.technicalSkills?.length || 0 }}</strong> technical skills</span>
+          <span><strong>{{ profile.technicalSkills.length || 0 }}</strong> technical skills</span>
         </div>
         <div class="summary-item">
           <mat-icon>psychology</mat-icon>
-          <span><strong>{{ profile.softSkills?.length || 0 }}</strong> soft skills</span>
+          <span><strong>{{ profile.softSkills.length || 0 }}</strong> soft skills</span>
         </div>
         <div class="summary-item">
           <mat-icon>school</mat-icon>
-          <span><strong>{{ profile.education?.length || 0 }}</strong> education entries</span>
+          <span><strong>{{ profile.education.length || 0 }}</strong> education entries</span>
         </div>
         <div class="summary-item">
           <mat-icon>work</mat-icon>
