@@ -15,15 +15,22 @@ export class AdminShellComponent {
   private auth = inject(AuthService);
 
   sidebarCollapsed = false;
+  user$ = this.auth.currentUser$;
 
   menuItems = [
-    { label: 'Dashboard',    icon: 'dashboard',       route: '/admin/dashboard'    },
-    { label: 'Users',        icon: 'people',          route: '/admin/users'        },
-    { label: 'Projects',     icon: 'work',            route: '/admin/projects'     },
-    { label: 'Companies',    icon: 'corporate_fare',  route: '/admin/companies'    },
-    { label: 'Équipes',      icon: 'groups',          route: '/admin/equipes'      },
-    { label: 'Candidatures', icon: 'description',     route: '/admin/candidatures' },
+    { label: 'Dashboard',    icon: 'dashboard',   route: '/admin/dashboard'    },
+    { label: 'Utilisateurs', icon: 'people',      route: '/admin/users'        },
+    { label: 'Projets',      icon: 'work',        route: '/admin/projects'     },
+   // { label: 'Applications', icon: 'assignment',  route: '/admin/applications' },
+    { label: 'Entreprises',  icon: 'business',    route: '/admin/companies'    },
+    { label: 'Candidatures', icon: 'description', route: '/admin/candidatures' },
+    { label: 'Evaluations',  icon: 'analytics',   route: '/admin/evaluations'  },
+    { label: 'Equipes',      icon: 'groups',      route: '/admin/equipes'      },
   ];
+
+  initials(firstName?: string, lastName?: string): string {
+    return `${firstName?.[0] ?? ''}${lastName?.[0] ?? ''}`.toUpperCase() || 'AD';
+  }
 
   logout() {
     this.auth.logout();

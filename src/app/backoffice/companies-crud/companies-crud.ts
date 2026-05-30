@@ -2,9 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
-import { EntrepriseService, Entreprise } from '../../core/services/entreprise.service';
-import { Chart, registerables } from 'chart.js';
 import { forkJoin } from 'rxjs';
+import { Chart, registerables } from 'chart.js';
+import { EntrepriseService, Entreprise } from '../../core/services/entreprise.service';
+
 Chart.register(...registerables);
 
 @Component({
@@ -27,7 +28,6 @@ export class CompaniesCrudComponent implements OnInit {
   equipesByCompany: { [key: string]: any[] } = {};
   expandedCompanyId: string | null = null;
   sectorChart: any;
-
 
   newCompany = {
     name: '',
@@ -52,77 +52,67 @@ export class CompaniesCrudComponent implements OnInit {
   }
 
   loadStats(): void {
-  forkJoin({
-    total: this.entrepriseService.getTotalCount(),
-    sectors: this.entrepriseService.getCountBySector()
-  }).subscribe({
-    next: ({ total, sectors }) => {
-      const totalCompanies = total?.total ?? 0;
-      const sectorCounts = sectors ?? {};
-      const numberOfSectors = Object.keys(sectorCounts).length;
+    forkJoin({
+      total: this.entrepriseService.getTotalCount(),
+      sectors: this.entrepriseService.getCountBySector()
+    }).subscribe({
+      next: ({ total, sectors }) => {
+        const totalCompanies = total?.total ?? 0;
+        const sectorCounts = sectors ?? {};
+        const numberOfSectors = Object.keys(sectorCounts).length;
 
-      // ✅ Stats cards
-      this.stats = [
-        {
-          label: 'Total',
-          value: totalCompanies,
-          icon: 'business',
-          color: '#3B82F6',
-          bg: '#EFF6FF'
-        },
-        {
-          label: 'Sectors',
-          value: numberOfSectors,
-          icon: 'category',
-          color: '#10B981',
-          bg: '#ECFDF5'
+        this.stats = [
+          {
+            label: 'Entreprises',
+            value: totalCompanies,
+            icon: 'business',
+            color: '#3B82F6',
+            bg: '#EFF6FF'
+          },
+          {
+            label: 'Secteurs',
+            value: numberOfSectors,
+            icon: 'category',
+            color: '#10B981',
+            bg: '#ECFDF5'
+          }
+        ];
+
+        this.sectorBreakdown = Object.entries(sectorCounts).map(
+          ([sector, count]) => ({
+            sector,
+            count
+          })
+        );
+
+        setTimeout(() => this.createChart(), 0);
+      },
+      error: (err) => {
+        console.error('Failed to load stats', err);
+        this.stats = [
+          {
+            label: 'Entreprises',
+            value: 0,
+            icon: 'business',
+            color: '#3B82F6',
+            bg: '#EFF6FF'
+          },
+          {
+            label: 'Secteurs',
+            value: 0,
+            icon: 'category',
+            color: '#10B981',
+            bg: '#ECFDF5'
+          }
+        ];
+        this.sectorBreakdown = [];
+
+        if (this.sectorChart) {
+          this.sectorChart.destroy();
         }
-      ];
-
-      // ✅ Transformer en tableau pour le chart
-      this.sectorBreakdown = Object.entries(sectorCounts).map(
-        ([sector, count]) => ({
-          sector,
-          count
-        })
-      );
-
-      // ✅ Créer / refresh le graphique
-      setTimeout(() => {
-        this.createChart();
-      }, 0);
-    },
-
-    error: (err) => {
-      console.error('Failed to load stats', err);
-
-      // fallback UI
-      this.stats = [
-        {
-          label: 'Total',
-          value: 0,
-          icon: 'business',
-          color: '#3B82F6',
-          bg: '#EFF6FF'
-        },
-        {
-          label: 'Sectors',
-          value: 0,
-          icon: 'category',
-          color: '#10B981',
-          bg: '#ECFDF5'
-        }
-      ];
-
-      this.sectorBreakdown = [];
-
-      // éviter crash du chart
-      if (this.sectorChart) {
-        this.sectorChart.destroy();
       }
-    }
-  });
-}
+    });
+  }
 
   get filteredCompanies(): Entreprise[] {
     if (!this.searchQuery.trim()) return this.companies;
@@ -134,7 +124,6 @@ export class CompaniesCrudComponent implements OnInit {
     );
   }
 
-  // --- ADD ---
   openAddModal(): void {
     this.newCompany = { name: '', email: '', phone: '', address: '', sector: '' };
     this.showAddModal = true;
@@ -148,17 +137,16 @@ export class CompaniesCrudComponent implements OnInit {
     this.entrepriseService.add(this.newCompany).subscribe({
       next: () => {
         this.loadCompanies();
-        this.loadStats(); // refresh stats after add
+        this.loadStats();
         this.closeAddModal();
       },
       error: (err) => {
         console.error('Add failed', err);
-        alert('Failed to add company');
+        alert('Erreur lors de l ajout de l entreprise');
       }
     });
   }
 
-  // --- EDIT ---
   openEditModal(company: Entreprise): void {
     this.editingCompany = { ...company };
     this.showEditModal = true;
@@ -174,40 +162,39 @@ export class CompaniesCrudComponent implements OnInit {
     this.entrepriseService.update(this.editingCompany.id, this.editingCompany).subscribe({
       next: () => {
         this.loadCompanies();
-        this.loadStats(); // refresh stats after update
+        this.loadStats();
         this.closeEditModal();
       },
       error: (err) => {
         console.error('Update failed', err);
-        alert('Failed to update company');
+        alert('Erreur lors de la modification de l entreprise');
       }
     });
   }
 
-  // --- DELETE ---
   confirmDelete(company: Entreprise): void {
     this.selectedCompany = company;
     this.showDeleteConfirm = true;
   }
 
   deleteCompany(): void {
-    if (this.selectedCompany) {
-      this.entrepriseService.delete(this.selectedCompany.id).subscribe({
-        next: () => {
-          this.companies = this.companies.filter(
-            (c) => c.id !== this.selectedCompany!.id
-          );
-          this.loadStats(); // refresh stats after delete
-          this.showDeleteConfirm = false;
-          this.selectedCompany = null;
-        },
-        error: (err) => {
-          console.error('Delete failed', err);
-          this.showDeleteConfirm = false;
-          this.selectedCompany = null;
-        }
-      });
-    }
+    if (!this.selectedCompany) return;
+
+    this.entrepriseService.delete(this.selectedCompany.id).subscribe({
+      next: () => {
+        this.companies = this.companies.filter(
+          (c) => c.id !== this.selectedCompany!.id
+        );
+        this.loadStats();
+        this.showDeleteConfirm = false;
+        this.selectedCompany = null;
+      },
+      error: (err) => {
+        console.error('Delete failed', err);
+        this.showDeleteConfirm = false;
+        this.selectedCompany = null;
+      }
+    });
   }
 
   cancelDelete(): void {
@@ -216,53 +203,65 @@ export class CompaniesCrudComponent implements OnInit {
   }
 
   toggleEquipes(companyId: string): void {
-  if (this.expandedCompanyId === companyId) {
-    this.expandedCompanyId = null;
-    return;
-  }
+    if (this.expandedCompanyId === companyId) {
+      this.expandedCompanyId = null;
+      return;
+    }
 
-  this.expandedCompanyId = companyId;
+    this.expandedCompanyId = companyId;
 
-  if (!this.equipesByCompany[companyId]) {
-    this.entrepriseService.getEquipesByEntreprise(companyId).subscribe({
-      next: (data) => {
-        this.equipesByCompany[companyId] = data;
-      },
-      error: (err) => console.error('Failed to load equipes', err)
-    });
-  }
-}
-
-createChart(): void {
-  const labels = this.sectorBreakdown.map(s => s.sector);
-  const data = this.sectorBreakdown.map(s => s.count);
-
-  if (this.sectorChart) {
-    this.sectorChart.destroy(); // éviter duplication
-  }
-
-  this.sectorChart = new Chart('sectorChart', {
-    type: 'bar', // tu peux changer en 'pie' ou 'doughnut'
-    data: {
-      labels: labels,
-      datasets: [
-        {
-          label: 'Companies',
-          data: data,
-          borderWidth: 1
-        }
-      ]
-    },
-    options: {
-  responsive: true,
-  maintainAspectRatio: false, // 🔥 IMPORTANT
-  plugins: {
-    legend: {
-      display: true,
-      position: 'bottom'
+    if (!this.equipesByCompany[companyId]) {
+      this.entrepriseService.getEquipesByEntreprise(companyId).subscribe({
+        next: (data) => {
+          this.equipesByCompany[companyId] = data;
+        },
+        error: (err) => console.error('Failed to load equipes', err)
+      });
     }
   }
-}
-  });
-}
+
+  createChart(): void {
+    const canvas = document.getElementById('sectorChart');
+    if (!canvas) return;
+
+    const labels = this.sectorBreakdown.map(s => s.sector);
+    const data = this.sectorBreakdown.map(s => s.count);
+
+    if (this.sectorChart) {
+      this.sectorChart.destroy();
+    }
+
+    this.sectorChart = new Chart('sectorChart', {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [
+          {
+            label: 'Entreprises',
+            data,
+            borderWidth: 1,
+            backgroundColor: '#E11D48',
+            borderColor: '#BE123C'
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              precision: 0
+            }
+          }
+        }
+      }
+    });
+  }
 }

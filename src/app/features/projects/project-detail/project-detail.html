@@ -25,13 +25,7 @@
           <span class="status-badge" [class.open]="project.status === 'open'">
             {{ project.status }}
           </span>
-          <a
-            class="apply-btn"
-            [routerLink]="['/app/candidatures']"
-            [queryParams]="{ projectId: project.id }">
-            <mat-icon>send</mat-icon>
-            Postuler a ce projet
-          </a>
+
         </div>
       </div>
     </div>
@@ -61,6 +55,13 @@
         <mat-icon>calendar_today</mat-icon>
         <span>{{ project.deadline | date:'dd/MM/yyyy' }}</span>
       </div>
+    </div>
+
+    <div class="manage-btn-container" *ngIf="!isStudent">
+      <button class="btn-manage" (click)="goToManage()">
+        <mat-icon>settings</mat-icon>
+        Gerer le projet
+      </button>
     </div>
   </div>
 </div>

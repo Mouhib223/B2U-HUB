@@ -1,117 +1,130 @@
 <div class="users-page">
-
-  <div class="page-header">
+  <section class="page-hero">
     <div>
+      <span class="eyebrow">Administration</span>
       <h1>Gestion des utilisateurs</h1>
-      <p>{{ users.length }} utilisateurs sur la plateforme</p>
+      <p>{{ users.length }} utilisateurs sur la plateforme.</p>
     </div>
-  </div>
+  </section>
 
   <div class="error-banner" *ngIf="errorMsg">
-    <mat-icon>error</mat-icon> {{ errorMsg }}
+    <mat-icon>error_outline</mat-icon>
+    <span>{{ errorMsg }}</span>
   </div>
 
-  <!-- Filters -->
-  <div class="filters-bar">
-    <div class="search-box">
+  <section class="filters-bar">
+    <label class="search-box">
       <mat-icon>search</mat-icon>
-      <input [(ngModel)]="searchQuery" (ngModelChange)="applyFilter()" placeholder="Rechercher par nom ou email...">
-    </div>
+      <input [(ngModel)]="searchQuery" (ngModelChange)="applyFilter()" placeholder="Rechercher par nom ou email..." />
+    </label>
     <div class="role-filters">
-      <button [class.active]="filterRole === 'all'"     (click)="filterRole='all';    applyFilter()">Tous</button>
-      <button [class.active]="filterRole === 'student'" (click)="filterRole='student'; applyFilter()">Étudiants</button>
+      <button [class.active]="filterRole === 'all'" (click)="filterRole='all'; applyFilter()">Tous</button>
+      <button [class.active]="filterRole === 'student'" (click)="filterRole='student'; applyFilter()">Etudiants</button>
       <button [class.active]="filterRole === 'company'" (click)="filterRole='company'; applyFilter()">Entreprises</button>
-      <button [class.active]="filterRole === 'admin'"   (click)="filterRole='admin';   applyFilter()">Admins</button>
+      <button [class.active]="filterRole === 'admin'" (click)="filterRole='admin'; applyFilter()">Admins</button>
     </div>
-  </div>
+  </section>
 
-  <!-- Loading -->
-  <div class="loading-state" *ngIf="loading">
-    <mat-icon class="spin">sync</mat-icon> Chargement...
-  </div>
+  <section class="loading-state" *ngIf="loading">
+    <mat-icon class="spin">sync</mat-icon>
+    <span>Chargement...</span>
+  </section>
 
-  <!-- Table -->
-  <div class="table-card" *ngIf="!loading">
-    <table>
-      <thead>
-        <tr>
-          <th>Utilisateur</th>
-          <th>Rôle</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let u of filtered">
-          <td>
-            <div class="user-cell">
-              <div class="avatar">{{ u.firstName?.[0] }}{{ u.lastName?.[0] }}</div>
-              <div>
-                <div class="user-name">{{ u.firstName }} {{ u.lastName }}</div>
-                <div class="user-email">{{ u.email }}</div>
+  <section class="table-card" *ngIf="!loading">
+    <header class="table-header">
+      <div>
+        <h2>Utilisateurs</h2>
+        <p>{{ filtered.length }} resultat(s)</p>
+      </div>
+    </header>
+
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Utilisateur</th>
+            <th>Role</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let u of filtered">
+            <td>
+              <div class="user-cell">
+                <div class="avatar">{{ u.firstName?.[0] }}{{ u.lastName?.[0] }}</div>
+                <div>
+                  <div class="user-name">{{ u.firstName }} {{ u.lastName }}</div>
+                  <div class="user-email">{{ u.email }}</div>
+                </div>
               </div>
-            </div>
-          </td>
-          <td><span class="role-badge" [ngClass]="normalizeRole(u.role)">{{ normalizeRole(u.role) }}</span></td>
-          <td class="actions-cell">
-            <button class="action-btn edit" (click)="openEdit(u)" title="Modifier">
-              <mat-icon>edit</mat-icon>
-            </button>
-            <button class="action-btn delete" (click)="confirmDelete(u)" title="Supprimer">
-              <mat-icon>delete</mat-icon>
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+            </td>
+            <td><span class="role-badge" [ngClass]="normalizeRole(u.role)">{{ normalizeRole(u.role) }}</span></td>
+            <td class="actions-cell">
+              <button class="action-btn edit" (click)="openEdit(u)" title="Modifier">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button class="action-btn delete" (click)="confirmDelete(u)" title="Supprimer">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
     <div class="empty-state" *ngIf="filtered.length === 0">
       <mat-icon>search_off</mat-icon>
-      <p>Aucun utilisateur trouvé.</p>
+      <p>Aucun utilisateur trouve.</p>
     </div>
-  </div>
+  </section>
 
-  <!-- Edit Modal -->
   <div class="modal-overlay" *ngIf="showEditModal" (click)="showEditModal=false">
-    <div class="modal" (click)="$event.stopPropagation()">
-      <h3><mat-icon>edit</mat-icon> Modifier l'utilisateur</h3>
+    <section class="modal" (click)="$event.stopPropagation()">
+      <header class="modal-head">
+        <mat-icon>edit</mat-icon>
+        <div>
+          <h3>Modifier l'utilisateur</h3>
+          <p>Mettre a jour les informations du compte.</p>
+        </div>
+      </header>
+
       <div class="modal-form" *ngIf="editingUser">
         <div class="form-row">
-          <div class="form-group">
-            <label>Prénom</label>
+          <label class="form-group">
+            Prenom
             <input [(ngModel)]="editingUser.firstName" />
-          </div>
-          <div class="form-group">
-            <label>Nom</label>
+          </label>
+          <label class="form-group">
+            Nom
             <input [(ngModel)]="editingUser.lastName" />
-          </div>
+          </label>
         </div>
-        <div class="form-group">
-          <label>Rôle</label>
+        <label class="form-group">
+          Role
           <select [(ngModel)]="editingUser.roleDisplay">
             <option value="student">student</option>
             <option value="company">company</option>
             <option value="admin">admin</option>
           </select>
-        </div>
+        </label>
       </div>
-      <div class="modal-actions">
+
+      <footer class="modal-actions">
         <button class="btn-cancel" (click)="showEditModal=false">Annuler</button>
         <button class="btn-save" (click)="saveEdit()">Sauvegarder</button>
-      </div>
-    </div>
+      </footer>
+    </section>
   </div>
 
-  <!-- Delete Confirm Modal -->
   <div class="modal-overlay" *ngIf="showDeleteConfirm" (click)="cancelDelete()">
-    <div class="modal" (click)="$event.stopPropagation()">
+    <section class="modal confirm" (click)="$event.stopPropagation()">
       <mat-icon class="modal-icon warn">warning</mat-icon>
       <h3>Supprimer l'utilisateur</h3>
-      <p>Confirmer la suppression de <strong>{{ selectedUser?.firstName }} {{ selectedUser?.lastName }}</strong> ? Cette action est irréversible.</p>
+      <p>Confirmer la suppression de <strong>{{ selectedUser?.firstName }} {{ selectedUser?.lastName }}</strong> ? Cette action est irreversible.</p>
       <div class="modal-actions">
         <button class="btn-cancel" (click)="cancelDelete()">Annuler</button>
         <button class="btn-delete" (click)="deleteUser()">Supprimer</button>
       </div>
-    </div>
+    </section>
   </div>
-
 </div>

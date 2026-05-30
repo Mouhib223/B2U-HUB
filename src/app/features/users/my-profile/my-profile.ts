@@ -10,10 +10,10 @@ import { ProfileService, EtudiantProfile } from '../../../core/services/profile.
   standalone: true,
   imports: [CommonModule, RouterLink, MatIconModule],
   templateUrl: './my-profile.html',
-  styleUrl: './my-profile.scss'
+  styleUrls: ['./my-profile.scss']
 })
 export class MyProfile implements OnInit {
-  private auth    = inject(AuthService);
+  private auth = inject(AuthService);
   private profile = inject(ProfileService);
 
   user = this.auth.getCurrentUser();

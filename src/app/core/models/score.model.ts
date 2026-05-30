@@ -1,3 +1,4 @@
+// Kept for backward compatibility — actual data now comes from evaluation.model.ts
 export interface SkillScore {
   category: string;
   score: number;
@@ -5,12 +6,22 @@ export interface SkillScore {
 }
 
 export interface AIScore {
-  userId: string;
+  idEval?: string;
+  idEtudiant?: string;
+  nomEtudiant?: string;
   overallScore: number;
-  rank: 'Bronze' | 'Silver' | 'Gold' | 'Platinum';
+  rank: 'BRONZE' | 'SILVER' | 'GOLD' | 'PLATINUM';
   skillScores: SkillScore[];
-  strengths: string[];
-  improvements: string[];
-  recommendations: string[];
-  lastUpdated: Date;
+  technicalSkills?: number;
+  communication?: number;
+  projectExperience?: number;
+  problemSolving?: number;
+  teamwork?: number;
+  punctuality?: number;
+  creativity?: number;
+  strengths?: string[];
+  improvements?: string[];
+  recommendations?: string[];
+  status?: string;
+  createdAt?: string;
 }

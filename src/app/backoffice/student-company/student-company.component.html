@@ -1,124 +1,110 @@
 <div class="student-company-container">
-  <div class="header">
-    <h2>Available companies</h2>
-  </div>
+  <section class="page-hero">
+    <div>
+      <span class="eyebrow">Entreprises</span>
+      <h1>Entreprises et offres</h1>
+      <p>Choisissez une entreprise pour consulter ses offres ou trouver des alternatives similaires.</p>
+    </div>
+    <button class="refresh-btn" type="button" (click)="refreshData()">
+      <mat-icon>refresh</mat-icon>
+      Actualiser
+    </button>
+  </section>
 
-  <div class="loading" *ngIf="loading">Loading companies...</div>
+  <section class="loading" *ngIf="loading">
+    <mat-icon>sync</mat-icon>
+    <span>Chargement des entreprises...</span>
+  </section>
 
-  <div class="cards-grid" *ngIf="!loading">
-    <div class="company-card" *ngFor="let company of companies">
-
-      <div class="card-top">
-        <div class="card-row">
-          <h3>{{ company.name }}</h3>
-          <span class="sector-badge">{{ company.sector }}</span>
-        </div>
-      </div>
+  <section class="cards-grid" *ngIf="!loading">
+    <article class="company-card" *ngFor="let company of companies">
+      <header class="card-top">
+        <div class="company-avatar">{{ company.name ? company.name[0] : '?' }}</div>
+        <span class="sector-badge">{{ company.sector || 'Secteur non defini' }}</span>
+      </header>
 
       <div class="card-body">
+        <h3>{{ company.name }}</h3>
         <div class="info-row">
-          <i class="ti ti-mail"></i>
-          {{ company.email }}
+          <mat-icon>mail</mat-icon>
+          <span>{{ company.email || 'Email non renseigne' }}</span>
         </div>
         <div class="info-row">
-          <i class="ti ti-phone"></i>
-          {{ company.phone }}
+          <mat-icon>phone</mat-icon>
+          <span>{{ company.phone || 'Telephone non renseigne' }}</span>
         </div>
         <div class="info-row">
-          <i class="ti ti-map-pin"></i>
-          {{ company.address }}
+          <mat-icon>location_on</mat-icon>
+          <span>{{ company.address || 'Adresse non renseignee' }}</span>
         </div>
       </div>
 
-      <div class="card-actions">
-        <button class="apply-btn" (click)="apply(company)">
-          <i class="ti ti-briefcase"></i> Work posts
+      <footer class="card-actions">
+        <button class="apply-btn" type="button" (click)="apply(company)">
+          <mat-icon>work</mat-icon>
+          Offres
         </button>
-        <button class="ai-btn" (click)="openSimilarModal(company)">
-          <i class="ti ti-search"></i> Similar
+        <button class="ai-btn" type="button" (click)="openSimilarModal(company)">
+          <mat-icon>travel_explore</mat-icon>
+          Similaires
         </button>
-      </div>
-
-    </div>
+      </footer>
+    </article>
 
     <div *ngIf="companies.length === 0" class="no-data">
-      No companies found.
+      <mat-icon>business</mat-icon>
+      <span>Aucune entreprise trouvee.</span>
     </div>
-  </div>
+  </section>
 </div>
 
-
-<!-- SIMILAR COMPANIES MODAL -->
 <div class="modal-overlay" *ngIf="showSimilarModal" (click)="closeSimilarModal()">
-  <div class="modal" (click)="$event.stopPropagation()">
-
-    <!-- Header -->
-    <div class="modal-header">
-      <h3>Similar to {{ selectedCompanyName }}</h3>
-      <button class="close-modal-btn" (click)="closeSimilarModal()">
-        <i class="ti ti-x"></i>
+  <section class="modal" (click)="$event.stopPropagation()">
+    <header class="modal-header">
+      <div>
+        <span class="eyebrow">Suggestions</span>
+        <h3>Similaires a {{ selectedCompanyName }}</h3>
+      </div>
+      <button class="close-modal-btn" type="button" (click)="closeSimilarModal()">
+        <mat-icon>close</mat-icon>
       </button>
-    </div>
+    </header>
 
-    <!-- Body -->
     <div class="modal-body">
-
-      <!-- Loading -->
       <div *ngIf="similarLoading" class="modal-loading">
-        Loading similar companies...
+        <mat-icon>sync</mat-icon>
+        <span>Recherche des entreprises similaires...</span>
       </div>
 
-      <!-- Result count -->
       <div *ngIf="!similarLoading && similarList.length > 0" class="result-count">
-        {{ similarList.length }} companies found
+        {{ similarList.length }} entreprise(s) trouvee(s)
       </div>
 
-      <!-- List -->
-      <div *ngIf="!similarLoading && similarList.length > 0">
-        <div class="similar-item-modal" *ngFor="let similar of similarList">
-
-          <!-- Left: info -->
-          <div class="similar-info">
-            <p class="similar-name">{{ similar.name }}</p>
-            <p class="similar-sector">{{ similar.sector }}</p>
-            
-
-            <div class="contact-chips">
-              <span class="chip">
-                <i class="ti ti-mail"></i>
-                {{ similar.email }}
-              </span>
-              <span class="chip">
-                <i class="ti ti-phone"></i>
-                {{ similar.phone }}
-              </span>
-              <span class="chip">
-                <i class="ti ti-map-pin"></i>
-                {{ similar.address }}
-              </span>
-            </div>
+      <article class="similar-item-modal" *ngFor="let similar of similarList">
+        <div class="similar-avatar">{{ similar.name ? similar.name[0] : '?' }}</div>
+        <div class="similar-info">
+          <p class="similar-name">{{ similar.name }}</p>
+          <p class="similar-sector">{{ similar.sector }}</p>
+          <div class="contact-chips">
+            <span class="chip"><mat-icon>mail</mat-icon>{{ similar.email }}</span>
+            <span class="chip"><mat-icon>phone</mat-icon>{{ similar.phone }}</span>
           </div>
-
-          <!-- Right: actions -->
-          <div class="similar-actions">
-            <button class="apply-similar-btn" (click)="apply(similar)">Apply</button>
-            <button class="subject-similar-btn" (click)="subject(similar)">Project</button>
-          </div>
-
         </div>
-      </div>
 
-      <!-- Empty -->
+        <div class="similar-actions">
+          <button class="apply-similar-btn" type="button" (click)="apply(similar)">Offres</button>
+          <button class="subject-similar-btn" type="button" (click)="subject(similar)">Projets</button>
+        </div>
+      </article>
+
       <div *ngIf="!similarLoading && similarList.length === 0" class="modal-empty">
-        No similar companies found.
+        <mat-icon>search_off</mat-icon>
+        <span>Aucune entreprise similaire trouvee.</span>
       </div>
-
     </div>
 
-    <!-- Footer -->
-    <div class="modal-actions">
-      <button (click)="closeSimilarModal()">Close</button>
-    </div>
-
-  </div>
+    <footer class="modal-actions">
+      <button type="button" (click)="closeSimilarModal()">Fermer</button>
+    </footer>
+  </section>
 </div>
