@@ -340,3 +340,15 @@ td {
   position: relative;
   height: 300px;
 }
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.add-modal {
+  width: 520px;
+  max-width: 92vw;
+  text-align: left;
+}

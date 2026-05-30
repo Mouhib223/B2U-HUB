@@ -1,0 +1,173 @@
+<div class="management-page">
+
+    <!-- Header -->
+    <div class="page-header">
+      <a [routerLink]="['/app/projects', projetId]" class="back-link">
+        <mat-icon>arrow_back</mat-icon> Retour au projet
+      </a>
+      <h1>🗂️ Gestion du Projet</h1>
+    </div>
+  
+    <!-- Tabs -->
+    <div class="tabs">
+      <button [class.active]="activeTab === 'kanban'" (click)="activeTab = 'kanban'">
+        <mat-icon>view_kanban</mat-icon> Kanban
+      </button>
+      <button [class.active]="activeTab === 'sprints'" (click)="activeTab = 'sprints'">
+        <mat-icon>sprint</mat-icon> Sprints
+      </button>
+      <button [class.active]="activeTab === 'ai'" (click)="activeTab = 'ai'">
+        <mat-icon>psychology</mat-icon> Analyse IA
+      </button>
+    </div>
+  
+    <!-- KANBAN -->
+    <div *ngIf="activeTab === 'kanban'" class="kanban-section">
+      <div class="kanban-actions">
+        <button class="btn-generate" (click)="generateBacklog()">
+          <mat-icon>auto_awesome</mat-icon> Générer le Backlog
+        </button>
+      </div>
+      <div class="kanban-board">
+  
+        <!-- TO DO -->
+        <div class="kanban-column">
+          <div class="column-header todo">
+            <mat-icon>radio_button_unchecked</mat-icon>
+            <span>To Do ({{ getTasksByStatus('todo').length }})</span>
+          </div>
+          <div class="task-card" *ngFor="let task of getTasksByStatus('todo')">
+            <div class="task-priority" [class]="'priority-' + getPriorityLabel(task.priority)">
+              {{ getPriorityLabel(task.priority) }}
+            </div>
+            <h4>{{ task.title }}</h4>
+            <p>{{ task.description }}</p>
+            <div class="task-actions">
+              <button (click)="updateStatus(task, 'in-progress')">→ In Progress</button>
+            </div>
+          </div>
+          <div *ngIf="getTasksByStatus('todo').length === 0" class="empty-column">
+            Aucune tâche
+          </div>
+        </div>
+  
+        <!-- IN PROGRESS -->
+        <div class="kanban-column">
+          <div class="column-header in-progress">
+            <mat-icon>pending</mat-icon>
+            <span>In Progress ({{ getTasksByStatus('in-progress').length }})</span>
+          </div>
+          <div class="task-card" *ngFor="let task of getTasksByStatus('in-progress')">
+            <div class="task-priority" [class]="'priority-' + getPriorityLabel(task.priority)">
+              {{ getPriorityLabel(task.priority) }}
+            </div>
+            <h4>{{ task.title }}</h4>
+            <p>{{ task.description }}</p>
+            <div class="task-actions">
+              <button (click)="updateStatus(task, 'todo')">← To Do</button>
+              <button (click)="updateStatus(task, 'done')">→ Done</button>
+            </div>
+          </div>
+          <div *ngIf="getTasksByStatus('in-progress').length === 0" class="empty-column">
+            Aucune tâche
+          </div>
+        </div>
+  
+        <!-- DONE -->
+        <div class="kanban-column">
+          <div class="column-header done">
+            <mat-icon>check_circle</mat-icon>
+            <span>Done ({{ getTasksByStatus('done').length }})</span>
+          </div>
+          <div class="task-card" *ngFor="let task of getTasksByStatus('done')">
+            <div class="task-priority" [class]="'priority-' + getPriorityLabel(task.priority)">
+              {{ getPriorityLabel(task.priority) }}
+            </div>
+            <h4>{{ task.title }}</h4>
+            <p>{{ task.description }}</p>
+            <div class="task-actions">
+              <button (click)="updateStatus(task, 'in-progress')">← In Progress</button>
+            </div>
+          </div>
+          <div *ngIf="getTasksByStatus('done').length === 0" class="empty-column">
+            Aucune tâche
+          </div>
+        </div>
+  
+      </div>
+    </div>
+  
+    <!-- SPRINTS -->
+    <div *ngIf="activeTab === 'sprints'" class="sprints-section">
+      <div class="sprint-actions">
+        <button class="btn-generate" (click)="generateSprints()">
+          <mat-icon>auto_awesome</mat-icon> Générer les Sprints
+        </button>
+      </div>
+      <div *ngIf="sprints.length === 0" class="empty-state">
+        <mat-icon>sprint</mat-icon>
+        <p>Aucun sprint. Cliquez sur "Générer les Sprints" !</p>
+      </div>
+      <div class="sprint-card" *ngFor="let sprint of sprints">
+        <div class="sprint-header">
+          <h3>{{ sprint.name }}</h3>
+          <span class="sprint-status" [class]="sprint.status">{{ sprint.status }}</span>
+        </div>
+        <div class="sprint-dates">
+          <span><mat-icon>calendar_today</mat-icon> {{ sprint.startDate | date:'dd/MM/yyyy' }}</span>
+          <span>→</span>
+          <span><mat-icon>event</mat-icon> {{ sprint.endDate | date:'dd/MM/yyyy' }}</span>
+        </div>
+      </div>
+    </div>
+  
+    <!-- AI ANALYSIS -->
+    <div *ngIf="activeTab === 'ai'" class="ai-section">
+      <div *ngIf="!aiAnalysis" class="empty-state">
+        <mat-icon>psychology</mat-icon>
+        <p>Chargement de l'analyse IA...</p>
+      </div>
+      <div *ngIf="aiAnalysis" class="ai-card">
+        <h2>🤖 Analyse Intelligente du Projet</h2>
+  
+        <div class="ai-grid">
+          <div class="ai-info">
+            <mat-icon>bar_chart</mat-icon>
+            <div>
+              <label>Difficulté</label>
+              <span class="difficulty" [class]="aiAnalysis.difficulty">
+                {{ aiAnalysis.difficulty }}
+              </span>
+            </div>
+          </div>
+          <div class="ai-info">
+            <mat-icon>schedule</mat-icon>
+            <div>
+              <label>Délai estimé</label>
+              <span>{{ aiAnalysis.estimatedDelay }}</span>
+            </div>
+          </div>
+          <div class="ai-info">
+            <mat-icon>group</mat-icon>
+            <div>
+              <label>Taille d'équipe recommandée</label>
+              <span>{{ aiAnalysis.recommendedTeamSize }} membres</span>
+            </div>
+          </div>
+        </div>
+  
+        <div class="ai-skills">
+          <label><mat-icon>code</mat-icon> Compétences suggérées</label>
+          <div class="skills">
+            <span class="skill-chip" *ngFor="let s of aiAnalysis.suggestedSkills">{{ s }}</span>
+          </div>
+        </div>
+  
+        <div class="ai-summary">
+          <label><mat-icon>summarize</mat-icon> Résumé</label>
+          <pre>{{ aiAnalysis.summary }}</pre>
+        </div>
+      </div>
+    </div>
+  
+  </div>

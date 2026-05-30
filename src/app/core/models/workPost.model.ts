@@ -12,4 +12,5 @@ export interface WorkPost {
   workMode: WorkMode;
 
   projetId?: string;
+  projetTitle?: string;
 }

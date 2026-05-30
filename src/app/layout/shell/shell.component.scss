@@ -66,6 +66,11 @@
     &.active { background: var(--color-primary); color: white; }
   }
 }
+.page-content{            // or whatever class wraps router-outlet
+  flex: 1;
+  overflow-y: auto;   // THIS is the key fix
+  padding: 2rem;
+}
 
 .main-area {
   flex: 1;

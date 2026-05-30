@@ -27,10 +27,18 @@ import { AuthService } from '../../core/services/auth.service';
             <mat-icon>description</mat-icon>
             <span *ngIf="!collapsed">Mes Candidatures</span>
           </a>
+<a routerLink="/student/scoring" routerLinkActive="active">
+  <mat-icon>analytics</mat-icon>
+  <span *ngIf="!collapsed">AI Scoring</span>
+</a>
+          <a routerLink="/student/new-candidature" routerLinkActive="active">
+            <mat-icon>add_circle</mat-icon>
+            <span *ngIf="!collapsed">Nouvelle candidature</span>
+          </a>
 
-          <a routerLink="/app/my-company" routerLinkActive="active">
-            <mat-icon>work</mat-icon>
-            <span *ngIf="!collapsed">Entreprises / Offres</span>
+          <a routerLink="/student/my-company" routerLinkActive="active">
+            <mat-icon>business</mat-icon>
+            <span *ngIf="!collapsed">Entreprises</span>
           </a>
 
           <!-- ✅ Lien Equipes corrigé -->

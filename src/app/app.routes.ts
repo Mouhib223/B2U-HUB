@@ -140,7 +140,12 @@ export const routes: Routes = [
           import('./backoffice/student-workpost/student-workpost')
             .then(m => m.StudentWorkpost)
       },
-
+{
+  path: 'scoring',
+  loadComponent: () =>
+    import('./features/ai-scoring/scoring-dashboard/scoring-dashboard')
+      .then(m => m.ScoringDashboardComponent)
+},
       // ✅ ROUTE ÉQUIPES POUR ÉTUDIANT
 
 
@@ -292,6 +297,11 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./backoffice/equipe-crud/equipe-crud')
             .then(m => m.EquipeCrudComponent)
+      },
+      {
+      path: 'evaluations',
+      loadComponent: () => import('./backoffice/evaluations-crud/evaluations-crud.component')
+        .then(m => m.EvaluationsCrudComponent)
       },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
