@@ -1,13 +1,14 @@
 <div class="dashboard">
-  <div class="dashboard-header">
-    <div>
-      <h1>Welcome back, {{ user?.firstName || 'Student' }} 👋</h1>
-      <p>Here's what's happening with your projects today.</p>
+  <section class="hero">
+    <div class="hero-copy">
+      <span class="eyebrow">Espace etudiant</span>
+      <h1>Bonjour, {{ user?.firstName || 'Student' }}</h1>
+      <p>Retrouvez vos projets, candidatures et indicateurs de matching dans une vue claire.</p>
     </div>
-    <button class="btn-primary" routerLink="/student/projects">
-      <mat-icon>search</mat-icon> Find Projects
+    <button class="btn-primary" routerLink="/app/my-company">
+      <mat-icon>search</mat-icon> Voir les offres
     </button>
-    <button class="btn-primary" routerLink="/student/candidatures" style="margin-left:.75rem; background:#0E9F6E">
+    <button class="btn-primary" routerLink="/app/candidatures" style="margin-left:.75rem; background:#0E9F6E">
       <mat-icon>description</mat-icon> Mes Candidatures
     </button>
   </div>
@@ -22,11 +23,32 @@
       [iconBg]="s.iconBg"
       [iconColor]="s.iconColor">
     </b2u-stats-card>
-  </div>
+  </section>
 
-  <div class="dashboard-body">
-    <div class="card activity-card">
-      <h3>Recent Activity</h3>
+  <section class="quick-grid">
+    <a routerLink="/app/projects" class="quick-card">
+      <mat-icon>folder_open</mat-icon>
+      <span>Explorer les projets</span>
+    </a>
+    <a routerLink="/app/scoring" class="quick-card">
+      <mat-icon>analytics</mat-icon>
+      <span>Ameliorer mon score</span>
+    </a>
+    <a routerLink="/app/profile" class="quick-card">
+      <mat-icon>person</mat-icon>
+      <span>Completer mon profil</span>
+    </a>
+  </section>
+
+  <section class="dashboard-body">
+    <article class="panel activity-card">
+      <header class="panel-head">
+        <div>
+          <h2>Activite recente</h2>
+          <p>Les derniers mouvements sur votre espace.</p>
+        </div>
+      </header>
+
       <div class="activity-list">
         <div class="activity-item" *ngFor="let item of recentActivity">
           <div class="activity-icon">
@@ -38,21 +60,22 @@
           </div>
         </div>
       </div>
-    </div>
+    </article>
 
-    <div class="card score-card">
-      <h3>Your AI Score</h3>
-      <div class="score-ring">
-        <svg viewBox="0 0 120 120" width="120" height="120">
-          <circle cx="60" cy="60" r="50" fill="none" stroke="#E5E7EB" stroke-width="10"/>
-          <circle cx="60" cy="60" r="50" fill="none" stroke="#1A56DB" stroke-width="10"
-            stroke-dasharray="314" stroke-dashoffset="69"
-            stroke-linecap="round" transform="rotate(-90 60 60)"/>
-        </svg>
-        <div class="score-value">78</div>
+    <article class="panel score-card">
+      <header class="panel-head centered">
+        <div>
+          <h2>AI Score</h2>
+          <p>Votre compatibilite globale.</p>
+        </div>
+      </header>
+
+      <div class="score-ring" [style.--pct]="(aiScore || 0) + '%'">
+        <span>{{ aiScore | number:'1.0-0' }}</span>
       </div>
-      <p class="score-rank">🥇 Gold Tier</p>
-      <a routerLink="/student/candidatures" class="score-link">Voir mes candidatures →</a>
-    </div>
-  </div>
+
+      <p class="score-rank">{{ aiRank || 'N/A' }}</p>
+      <a routerLink="/app/scoring" class="score-link">Voir le detail du score</a>
+    </article>
+  </section>
 </div>

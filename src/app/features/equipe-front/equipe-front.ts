@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { MatIconModule } from '@angular/material/icon';
+import { Router } from '@angular/router';
 import { EquipeService, Equipe, Task } from '../../core/services/equipe.service';
 import { EquipeAiService } from '../../core/services/equipe-ai.service';
-import { Router } from '@angular/router';
 
 interface ChatMessage {
   role: 'user' | 'ai';
@@ -13,29 +14,25 @@ interface ChatMessage {
 @Component({
   selector: 'b2u-equipe-front',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, MatIconModule],
   templateUrl: './equipe-front.html',
   styleUrls: ['./equipe-front.scss'],
 })
 export class EquipeFront implements OnInit {
-
   equipes: Equipe[] = [];
   searchQuery = '';
   selectedEquipe: Equipe | null = null;
-  
-  // ID de l'étudiant connecté (à remplacer par l'ID réel)
-  currentStudentId = 'student-123'; // TODO: Récupérer depuis le service d'authentification
+  currentStudentId = 'student-123';
 
-  // Chat IA
   messages: ChatMessage[] = [];
   userInput = '';
   aiLoading = false;
 
   readonly suggestions = [
-    'Quelle équipe me correspond ?',
-    'Quelles équipes sont disponibles ?',
-    'Quelles sont mes tâches ?',
-    'Comment changer le statut d\'une tâche ?',
+    'Quelle equipe me correspond ?',
+    'Quelles equipes sont disponibles ?',
+    'Quelles sont mes taches ?',
+    'Comment changer le statut d une tache ?',
     'Afficher ma progression'
   ];
 
@@ -47,51 +44,47 @@ export class EquipeFront implements OnInit {
 
   ngOnInit() {
     this.loadEquipes();
-    
-    // Récupérer l'ID de l'étudiant connecté (à adapter)
+
     const storedStudentId = localStorage.getItem('userId');
     if (storedStudentId) {
       this.currentStudentId = storedStudentId;
     }
-    
+
     this.messages = [{
       role: 'ai',
-      text: 'Bonjour ! Je peux t\'aider à trouver l\'équipe idéale et gérer tes tâches Jira. Les tâches sont créées par ton entreprise, tu peux uniquement changer leur statut (TODO → IN_PROGRESS → DONE).'
+      text: 'Bonjour ! Je peux vous aider a trouver une equipe et suivre vos taches Jira. Vous pouvez changer vos taches de TODO vers IN_PROGRESS puis DONE.'
     }];
   }
 
   loadEquipes() {
     this.equipeService.getAll().subscribe({
-      next: (data) => this.equipes = data,
-      error: (err) => console.error('Erreur chargement équipes:', err)
+      next: data => this.equipes = data,
+      error: err => console.error('Erreur chargement equipes:', err)
     });
   }
 
   get filteredEquipes(): Equipe[] {
-    return this.equipes.filter(e =>
-      e.nomMembresEquipe?.toLowerCase().includes(this.searchQuery.toLowerCase())
-    );
+    const query = this.searchQuery.toLowerCase();
+    return this.equipes.filter(e => e.nomMembresEquipe?.toLowerCase().includes(query));
   }
 
-  // ── Chat IA ─────────────────────────────────────────
   sendMessage(text?: string) {
     const msg = text || this.userInput.trim();
     if (!msg) return;
-    
+
     this.messages.push({ role: 'user', text: msg });
     this.userInput = '';
     this.aiLoading = true;
 
     const lowerMsg = msg.toLowerCase();
-    
-    // Vérifier si la question concerne les tâches
-    if (lowerMsg.includes('tâche') || lowerMsg.includes('task') || lowerMsg.includes('jira')) {
+
+    if (lowerMsg.includes('tache') || lowerMsg.includes('tâche') || lowerMsg.includes('task') || lowerMsg.includes('jira')) {
       if (this.selectedEquipe) {
         this.handleTaskQuery(lowerMsg);
       } else {
-        this.messages.push({ 
-          role: 'ai', 
-          text: 'Veuillez d\'abord ouvrir le tableau Jira d\'une équipe pour voir vos tâches. Cliquez sur le bouton "Board" sur une équipe.' 
+        this.messages.push({
+          role: 'ai',
+          text: 'Ouvrez d abord le tableau Jira d une equipe pour voir vos taches.'
         });
         this.aiLoading = false;
       }
@@ -102,7 +95,7 @@ export class EquipeFront implements OnInit {
           this.aiLoading = false;
         },
         error: () => {
-          this.messages.push({ role: 'ai', text: 'Erreur, réessaie dans un moment.' });
+          this.messages.push({ role: 'ai', text: 'Erreur, reessayez dans un moment.' });
           this.aiLoading = false;
         }
       });
@@ -115,42 +108,35 @@ export class EquipeFront implements OnInit {
     const myTodoTasks = myTasks.filter(t => t.status === 'TODO');
     const myInProgressTasks = myTasks.filter(t => t.status === 'IN_PROGRESS');
     const myDoneTasks = myTasks.filter(t => t.status === 'DONE');
-    
-    if (query.includes('mes tâches') || query.includes('mes taches') || query.includes('mes missions')) {
+
+    if (query.includes('mes taches') || query.includes('mes tâches') || query.includes('mes missions')) {
       if (myTasks.length > 0) {
-        response = `📋 **Vos tâches assignées :**\n\n` +
-                  `• À faire (TODO): ${myTodoTasks.length} tâche(s)\n` +
-                  `• En cours (IN_PROGRESS): ${myInProgressTasks.length} tâche(s)\n` +
-                  `• Terminé (DONE): ${myDoneTasks.length} tâche(s)\n\n` +
-                  `Pour changer le statut d'une tâche, utilisez les boutons dans le tableau Kanban.`;
+        response = `**Vos taches assignees :**\n\n` +
+          `A faire (TODO): ${myTodoTasks.length} tache(s)\n` +
+          `En cours (IN_PROGRESS): ${myInProgressTasks.length} tache(s)\n` +
+          `Termine (DONE): ${myDoneTasks.length} tache(s)\n\n` +
+          `Pour changer le statut d une tache, utilisez les boutons dans le tableau Kanban.`;
       } else {
-        response = 'Vous n\'avez aucune tâche assignée pour le moment. Les tâches sont créées et assignées par votre entreprise.';
+        response = 'Vous n avez aucune tache assignee pour le moment. Les taches sont creees et assignees par votre entreprise.';
       }
-    }
-    else if (query.includes('progression') || query.includes('avancement') || query.includes('stats')) {
+    } else if (query.includes('progression') || query.includes('avancement') || query.includes('stats')) {
       const completionRate = myTasks.length > 0 ? Math.round(myDoneTasks.length / myTasks.length * 100) : 0;
-      response = `📊 **Votre progression :**\n\n` +
-                `• Tâches totales: ${myTasks.length}\n` +
-                `• Terminées: ${myDoneTasks.length}\n` +
-                `• En cours: ${myInProgressTasks.length}\n` +
-                `• À faire: ${myTodoTasks.length}\n` +
-                `• Taux d'avancement: ${completionRate}%`;
+      response = `**Votre progression :**\n\n` +
+        `Taches totales: ${myTasks.length}\n` +
+        `Terminees: ${myDoneTasks.length}\n` +
+        `En cours: ${myInProgressTasks.length}\n` +
+        `A faire: ${myTodoTasks.length}\n` +
+        `Taux d avancement: ${completionRate}%`;
+    } else if (query.includes('comment') || query.includes('modifier') || query.includes('changer')) {
+      response = 'Pour changer le statut d une tache :\n\n' +
+        '1. Cliquez sur "En cours" pour passer une tache de TODO a IN_PROGRESS\n' +
+        '2. Cliquez sur "Termine" pour passer une tache de IN_PROGRESS a DONE\n' +
+        '3. Cliquez sur "Retour" ou "Reouvrir" pour revenir en arriere\n\n' +
+        'Seules les taches qui vous sont assignees peuvent etre modifiees.';
+    } else {
+      response = 'Vous pouvez gerer vos taches assignees dans le tableau Kanban. Utilisez les boutons pour changer le statut de vos taches.';
     }
-    else if (query.includes('comment') || query.includes('modifier') || query.includes('changer')) {
-      response = 'Pour changer le statut d\'une tâche :\n\n' +
-                '1. Cliquez sur "→ En cours" pour passer une tâche de TODO à IN_PROGRESS\n' +
-                '2. Cliquez sur "✓ Terminé" pour passer une tâche de IN_PROGRESS à DONE\n' +
-                '3. Cliquez sur "← Retour" ou "← Réouvrir" pour revenir en arrière\n\n' +
-                'Seules les tâches qui vous sont assignées peuvent être modifiées.';
-    }
-    else {
-      response = 'Vous pouvez gérer vos tâches assignées dans le tableau Kanban.\n\n' +
-                '• Les tâches rouges sont à faire (TODO)\n' +
-                '• Les tâches jaunes sont en cours (IN_PROGRESS)\n' +
-                '• Les tâches vertes sont terminées (DONE)\n\n' +
-                'Utilisez les boutons pour changer le statut de vos tâches.';
-    }
-    
+
     this.messages.push({ role: 'ai', text: response });
     this.aiLoading = false;
   }
@@ -163,33 +149,23 @@ export class EquipeFront implements OnInit {
     return text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
   }
 
-  // ── Navigation ───────────────────────────────────────
   joinTeam(equipe: Equipe) {
     this.router.navigate(['/student/chat', equipe.idEquipe]);
   }
 
-  // ── Board Jira ───────────────────────────────────────
   openBoard(equipe: Equipe): void {
-    // Charger les détails complets de l'équipe avec ses tâches
     this.equipeService.getEquipeById(equipe.idEquipe).subscribe({
       next: (data: Equipe) => {
         this.selectedEquipe = data;
-        
-        // Vérifier si l'étudiant a des tâches assignées
         const myTasks = this.getMyTasks();
-        if (myTasks.length === 0) {
-          this.messages.push({
-            role: 'ai',
-            text: `📋 Vous n'avez aucune tâche assignée dans l'équipe **${data.nomMembresEquipe}**.\n\nLes tâches apparaîtront ici une fois que l'entreprise vous les aura assignées.`
-          });
-        } else {
-          this.messages.push({
-            role: 'ai',
-            text: `✅ Vous avez **${myTasks.length} tâche(s) assignée(s)** dans l'équipe **${data.nomMembresEquipe}**.\n\nUtilisez le tableau ci-dessous pour changer leur statut.`
-          });
-        }
+        this.messages.push({
+          role: 'ai',
+          text: myTasks.length === 0
+            ? `Vous n avez aucune tache assignee dans l equipe **${data.nomMembresEquipe}**.`
+            : `Vous avez **${myTasks.length} tache(s) assignee(s)** dans l equipe **${data.nomMembresEquipe}**.`
+        });
       },
-      error: (err) => console.error('Erreur chargement équipe:', err)
+      error: err => console.error('Erreur chargement equipe:', err)
     });
   }
 
@@ -198,7 +174,6 @@ export class EquipeFront implements OnInit {
     this.loadEquipes();
   }
 
-  // Récupérer uniquement les tâches assignées à l'étudiant courant
   getMyTasks(): Task[] {
     return (this.selectedEquipe?.tasks || []).filter(t => t.assignedTo === this.currentStudentId);
   }
@@ -220,37 +195,25 @@ export class EquipeFront implements OnInit {
 
   moveTask(task: Task, newStatus: 'TODO' | 'IN_PROGRESS' | 'DONE'): void {
     if (!this.selectedEquipe) return;
-    
-    // Vérifier que la tâche est bien assignée à l'étudiant
+
     if (task.assignedTo !== this.currentStudentId) {
-      console.error('Vous ne pouvez modifier que vos propres tâches');
+      console.error('Vous ne pouvez modifier que vos propres taches');
       return;
     }
-    
-    // Trouver l'index réel dans la liste complète des tâches
+
     const realIndex = this.selectedEquipe.tasks!.findIndex(t => t === task);
     const oldStatus = task.status;
     task.status = newStatus;
 
-    this.equipeService.updateTaskStatus(
-      this.selectedEquipe.idEquipe, realIndex, newStatus
-    ).subscribe({
+    this.equipeService.updateTaskStatus(this.selectedEquipe.idEquipe, realIndex, newStatus).subscribe({
       next: () => {
-        // Message de confirmation
-        const statusText = newStatus === 'TODO' ? 'À faire' : 
-                          newStatus === 'IN_PROGRESS' ? 'En cours' : 'Terminé';
-        this.messages.push({
-          role: 'ai',
-          text: `✅ Tâche "${task.title}" déplacée vers **${statusText}** !`
-        });
+        const statusText = newStatus === 'TODO' ? 'A faire' : newStatus === 'IN_PROGRESS' ? 'En cours' : 'Termine';
+        this.messages.push({ role: 'ai', text: `Tache "${task.title}" deplacee vers **${statusText}**.` });
       },
-      error: (err) => {
-        console.error('Erreur mise à jour tâche:', err);
-        task.status = oldStatus; // Revert en cas d'erreur
-        this.messages.push({
-          role: 'ai',
-          text: `❌ Erreur lors de la mise à jour de la tâche. Veuillez réessayer.`
-        });
+      error: err => {
+        console.error('Erreur mise a jour tache:', err);
+        task.status = oldStatus;
+        this.messages.push({ role: 'ai', text: 'Erreur lors de la mise a jour de la tache. Veuillez reessayer.' });
       }
     });
   }

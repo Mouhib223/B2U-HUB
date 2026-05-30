@@ -1,211 +1,232 @@
-<div class="users-page">
+<div class="companies-page">
+  <section class="page-hero">
+    <div>
+      <span class="eyebrow">Administration</span>
+      <h1>Gestion des entreprises</h1>
+      <p>Suivez les entreprises, leurs secteurs et les equipes qui leur sont associees.</p>
+    </div>
+    <button class="add-btn" (click)="openAddModal()">
+      <mat-icon>add_business</mat-icon>
+      Ajouter une entreprise
+    </button>
+  </section>
 
-  <!-- HEADER -->
-  <div class="page-header">
-    <h1>Manage Companies</h1>
-  </div>
-
-  <!-- STATS -->
-  <div class="stats-grid">
-    <div class="stat-card" *ngFor="let s of stats">
+  <section class="overview-grid">
+    <article class="stat-card" *ngFor="let s of stats">
       <div class="stat-icon" [style.background]="s.bg">
         <mat-icon [style.color]="s.color">{{ s.icon }}</mat-icon>
       </div>
-      <div class="stat-body">
-        <div class="stat-value">{{ s.value }}</div>
-        <div class="stat-label">{{ s.label }}</div>
+      <div>
+        <strong>{{ s.value }}</strong>
+        <span>{{ s.label }}</span>
       </div>
-    </div>
-  </div>
+    </article>
 
-  <br>
+    <article class="sector-card">
+      <div class="sector-header">
+        <h2>Repartition par secteur</h2>
+        <span>{{ sectorBreakdown.length }} secteur(s)</span>
+      </div>
+      <div class="chart-container" *ngIf="sectorBreakdown.length; else noSectorData">
+        <canvas id="sectorChart"></canvas>
+      </div>
+      <ng-template #noSectorData>
+        <p class="empty-chart">Aucune donnee de secteur.</p>
+      </ng-template>
+    </article>
+  </section>
 
-  <!-- SEARCH + ADD -->
-  <div class="page-header">
+  <section class="toolbar">
     <div class="search-box">
       <mat-icon>search</mat-icon>
-      <input [(ngModel)]="searchQuery" placeholder="Search by name or email..." />
+      <input [(ngModel)]="searchQuery" placeholder="Rechercher par nom ou email...">
     </div>
-    <button class="add-btn" (click)="openAddModal()">
-      <mat-icon>add_business</mat-icon> Add Company
-    </button>
-  </div>
+  </section>
 
-  <!-- COMPANIES TABLE -->
-  <div class="table-card">
-    <table>
-      <thead>
-        <tr>
-          <th>Company</th>
-          <th>Email</th>
-          <th>Phone</th>
-          <th>Address</th>
-          <th>Sector</th>
-          <th>Teams</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <ng-container *ngFor="let company of filteredCompanies">
-
+  <section class="table-card">
+    <div class="table-wrap">
+      <table>
+        <thead>
           <tr>
-            <td class="user-cell">
-              <div class="avatar">{{ company.name.charAt(0) }}</div>
-              <div>
-                <div class="user-name">{{ company.name }}</div>
-                <div class="user-email">{{ company.email }}</div>
-              </div>
-            </td>
-            <td>{{ company.email }}</td>
-            <td>{{ company.phone }}</td>
-            <td>{{ company.address }}</td>
-            <td>{{ company.sector }}</td>
-            <td>
-              <button (click)="toggleEquipes(company.id)">
-                <mat-icon>{{ expandedCompanyId === company.id ? 'expand_less' : 'expand_more' }}</mat-icon>
-              </button>
-            </td>
-            <td class="actions-cell">
-              <button class="action-btn edit" (click)="openEditModal(company)">
-                <mat-icon>edit</mat-icon>
-              </button>
-              <button class="action-btn delete" (click)="confirmDelete(company)">
-                <mat-icon>delete</mat-icon>
-              </button>
+            <th>Entreprise</th>
+            <th>Telephone</th>
+            <th>Adresse</th>
+            <th>Secteur</th>
+            <th>Equipes</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <ng-container *ngFor="let company of filteredCompanies">
+            <tr>
+              <td>
+                <div class="company-cell">
+                  <div class="avatar">{{ company.name.charAt(0) }}</div>
+                  <div>
+                    <strong>{{ company.name }}</strong>
+                    <span>{{ company.email }}</span>
+                  </div>
+                </div>
+              </td>
+              <td>{{ company.phone || '-' }}</td>
+              <td>{{ company.address || '-' }}</td>
+              <td>
+                <span class="sector-badge">{{ company.sector || 'Non renseigne' }}</span>
+              </td>
+              <td>
+                <button class="expand-btn" (click)="toggleEquipes(company.id)">
+                  <mat-icon>{{ expandedCompanyId === company.id ? 'expand_less' : 'expand_more' }}</mat-icon>
+                  Voir
+                </button>
+              </td>
+              <td>
+                <div class="actions-cell">
+                  <button class="action-btn edit" (click)="openEditModal(company)" title="Modifier">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button class="action-btn delete" (click)="confirmDelete(company)" title="Supprimer">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              </td>
+            </tr>
+
+            <tr class="expanded-row" *ngIf="expandedCompanyId === company.id">
+              <td colspan="6">
+                <div class="equipes-panel">
+                  <h3>Equipes associees a {{ company.name }}</h3>
+                  <div class="linked-team" *ngFor="let eq of equipesByCompany[company.id]">
+                    <mat-icon>groups</mat-icon>
+                    <div>
+                      <strong>{{ eq.nomMembresEquipe }}</strong>
+                      <span>{{ eq.descriptionProfil || 'Sans description' }}</span>
+                    </div>
+                  </div>
+                  <p class="empty-linked" *ngIf="!equipesByCompany[company.id]?.length">
+                    Aucune equipe associee.
+                  </p>
+                </div>
+              </td>
+            </tr>
+          </ng-container>
+
+          <tr *ngIf="filteredCompanies.length === 0">
+            <td colspan="6" class="empty-state">
+              <mat-icon>business_off</mat-icon>
+              Aucune entreprise trouvee.
             </td>
           </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
 
-          <tr *ngIf="expandedCompanyId === company.id">
-            <td colspan="7">
-              <div class="equipes-container">
-                <table class="inner-table">
-                  <thead>
-                    <tr>
-                      <th>Team Name</th>
-                      <th>Description</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr *ngFor="let eq of equipesByCompany[company.id]">
-                      <td>{{ eq.nomMembresEquipe }}</td>
-                      <td>{{ eq.descriptionProfil }}</td>
-                    </tr>
-                    <tr *ngIf="!equipesByCompany[company.id]?.length">
-                      <td colspan="2">No teams found</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </td>
-          </tr>
-
-        </ng-container>
-
-        <tr *ngIf="filteredCompanies.length === 0">
-          <td colspan="7" class="empty-state">
-            <mat-icon>business_off</mat-icon>
-            No companies found
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <!-- DELETE MODAL -->
   <div class="modal-overlay" *ngIf="showDeleteConfirm" (click)="cancelDelete()">
-    <div class="modal" (click)="$event.stopPropagation()">
-      <mat-icon class="modal-icon">warning</mat-icon>
-      <h3>Delete Company</h3>
-      <p>Are you sure you want to delete <strong>{{ selectedCompany?.name }}</strong>?</p>
+    <div class="modal small" (click)="$event.stopPropagation()">
+      <header class="modal-header danger">
+        <mat-icon>warning</mat-icon>
+        <div>
+          <h3>Supprimer l'entreprise</h3>
+          <p>Cette action est irreversible.</p>
+        </div>
+      </header>
+      <p class="confirm-text">Voulez-vous supprimer <strong>{{ selectedCompany?.name }}</strong> ?</p>
       <div class="modal-actions">
-        <button class="btn-cancel" (click)="cancelDelete()">Cancel</button>
-        <button class="btn-delete" (click)="deleteCompany()">Delete</button>
+        <button class="btn-cancel" (click)="cancelDelete()">Annuler</button>
+        <button class="btn-delete" (click)="deleteCompany()">Supprimer</button>
       </div>
     </div>
   </div>
 
-  <!-- ADD MODAL -->
   <div class="modal-overlay" *ngIf="showAddModal" (click)="closeAddModal()">
-    <div class="modal add-modal" (click)="$event.stopPropagation()">
-      <h3>Add Company</h3>
+    <div class="modal" (click)="$event.stopPropagation()">
+      <header class="modal-header">
+        <mat-icon>add_business</mat-icon>
+        <div>
+          <h3>Ajouter une entreprise</h3>
+          <p>Completez les informations principales.</p>
+        </div>
+      </header>
+
       <form #addForm="ngForm" (ngSubmit)="addCompany()">
+        <div class="form-row">
+          <label>
+            Nom
+            <input type="text" [(ngModel)]="newCompany.name" name="name" placeholder="Nom de l'entreprise" required>
+          </label>
+          <label>
+            Email
+            <input type="email" [(ngModel)]="newCompany.email" name="email" placeholder="contact@entreprise.com" required>
+          </label>
+        </div>
 
         <div class="form-row">
-          <div class="form-group">
-            <label>Name</label>
-            <input type="text" [(ngModel)]="newCompany.name" name="name" placeholder="Name" required />
-          </div>
-          <div class="form-group">
-            <label>Email</label>
-            <input type="email" [(ngModel)]="newCompany.email" name="email" placeholder="Email" required />
-          </div>
+          <label>
+            Telephone
+            <input type="text" [(ngModel)]="newCompany.phone" name="phone" placeholder="+216 ..." required>
+          </label>
+          <label>
+            Adresse
+            <input type="text" [(ngModel)]="newCompany.address" name="address" placeholder="Adresse">
+          </label>
         </div>
 
-        <div class="form-row">
-          <div class="form-group">
-            <label>Phone</label>
-            <input type="text" [(ngModel)]="newCompany.phone" name="phone" placeholder="Phone" required />
-          </div>
-          <div class="form-group">
-            <label>Address</label>
-            <input type="text" [(ngModel)]="newCompany.address" name="address" placeholder="Address" />
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label>Sector</label>
-          <input type="text" [(ngModel)]="newCompany.sector" name="sector" placeholder="Sector" />
-        </div>
+        <label>
+          Secteur
+          <input type="text" [(ngModel)]="newCompany.sector" name="sector" placeholder="Ex: Fintech">
+        </label>
 
         <div class="modal-actions">
-          <button type="button" class="btn-cancel" (click)="closeAddModal()">Cancel</button>
-          <button type="submit" class="btn-add" [disabled]="addForm.invalid">Add</button>
+          <button type="button" class="btn-cancel" (click)="closeAddModal()">Annuler</button>
+          <button type="submit" class="btn-submit" [disabled]="addForm.invalid">Ajouter</button>
         </div>
-
       </form>
     </div>
   </div>
 
-  <!-- EDIT MODAL -->
   <div class="modal-overlay" *ngIf="showEditModal" (click)="closeEditModal()">
-    <div class="modal add-modal" (click)="$event.stopPropagation()" *ngIf="editingCompany">
-      <h3>Edit Company</h3>
+    <div class="modal" (click)="$event.stopPropagation()" *ngIf="editingCompany">
+      <header class="modal-header">
+        <mat-icon>edit</mat-icon>
+        <div>
+          <h3>Modifier l'entreprise</h3>
+          <p>Mettez a jour les informations.</p>
+        </div>
+      </header>
+
       <form #editForm="ngForm" (ngSubmit)="updateCompany()">
+        <div class="form-row">
+          <label>
+            Nom
+            <input type="text" [(ngModel)]="editingCompany.name" name="name" placeholder="Nom" required>
+          </label>
+          <label>
+            Email
+            <input type="email" [(ngModel)]="editingCompany.email" name="email" placeholder="Email" required>
+          </label>
+        </div>
 
         <div class="form-row">
-          <div class="form-group">
-            <label>Name</label>
-            <input type="text" [(ngModel)]="editingCompany.name" name="name" placeholder="Name" required />
-          </div>
-          <div class="form-group">
-            <label>Email</label>
-            <input type="email" [(ngModel)]="editingCompany.email" name="email" placeholder="Email" required />
-          </div>
+          <label>
+            Telephone
+            <input type="text" [(ngModel)]="editingCompany.phone" name="phone" placeholder="Telephone" required>
+          </label>
+          <label>
+            Adresse
+            <input type="text" [(ngModel)]="editingCompany.address" name="address" placeholder="Adresse">
+          </label>
         </div>
 
-        <div class="form-row">
-          <div class="form-group">
-            <label>Phone</label>
-            <input type="text" [(ngModel)]="editingCompany.phone" name="phone" placeholder="Phone" required />
-          </div>
-          <div class="form-group">
-            <label>Address</label>
-            <input type="text" [(ngModel)]="editingCompany.address" name="address" placeholder="Address" />
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label>Sector</label>
-          <input type="text" [(ngModel)]="editingCompany.sector" name="sector" placeholder="Sector" />
-        </div>
+        <label>
+          Secteur
+          <input type="text" [(ngModel)]="editingCompany.sector" name="sector" placeholder="Secteur">
+        </label>
 
         <div class="modal-actions">
-          <button type="button" class="btn-cancel" (click)="closeEditModal()">Cancel</button>
-          <button type="submit" class="btn-add" [disabled]="editForm.invalid">Save</button>
+          <button type="button" class="btn-cancel" (click)="closeEditModal()">Annuler</button>
+          <button type="submit" class="btn-submit" [disabled]="editForm.invalid">Enregistrer</button>
         </div>
-
       </form>
     </div>
   </div>
-
 </div>

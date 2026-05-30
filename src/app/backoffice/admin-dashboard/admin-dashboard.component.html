@@ -3,9 +3,9 @@
     <div>
       <span class="eyebrow">Administration</span>
       <h1><mat-icon>dashboard</mat-icon> Dashboard</h1>
-      <p>Vue globale des candidatures, projets, companies et performances du matching AI.</p>
-      <small>Dernière mise à jour : {{ lastUpdate | date:'HH:mm:ss' }}</small>
+      <p>Vue globale des candidatures, projets, entreprises et performances du matching AI.</p>
     </div>
+    <small>Derniere mise a jour : {{ lastUpdate | date:'HH:mm:ss' }}</small>
   </section>
 
   <section class="loading-card" *ngIf="loading">
@@ -35,7 +35,7 @@
       </a>
       <a routerLink="/admin/companies" class="action-card">
         <mat-icon>corporate_fare</mat-icon>
-        <span>Companies</span>
+        <span>Entreprises</span>
       </a>
       <a routerLink="/admin/users" class="action-card">
         <mat-icon>people</mat-icon>
@@ -46,7 +46,7 @@
     <section class="dashboard-grid">
       <article class="panel">
         <header>
-          <h2>Dernières candidatures</h2>
+          <h2>Dernieres candidatures</h2>
           <a routerLink="/admin/candidatures">Voir tout</a>
         </header>
         <div class="candidate-list" *ngIf="recentCandidatures.length > 0; else noRecent">
@@ -54,7 +54,7 @@
             <div class="avatar">{{ c.prenomCandidat[0] + c.nomCandidat[0] }}</div>
             <div class="candidate-main">
               <strong>{{ c.prenomCandidat }} {{ c.nomCandidat }}</strong>
-              <span>{{ c.projectTitle || c.projectId || 'Projet non défini' }}</span>
+              <span>{{ c.projectTitle || c.projectId || 'Projet non defini' }}</span>
             </div>
             <div class="candidate-score">{{ c.scoreMatching || 0 }}%</div>
             <span class="status-pill" [ngClass]="getStatusClass(c.statutCandidature)">
@@ -69,14 +69,14 @@
 
       <article class="panel">
         <header>
-          <h2>Projets les plus demandés</h2>
-          <a routerLink="/admin/projects">Gérer</a>
+          <h2>Projets les plus demandes</h2>
+          <a routerLink="/admin/projects">Gerer</a>
         </header>
         <div class="project-list" *ngIf="topProjects.length > 0; else noProjects">
           <div class="project-row" *ngFor="let project of topProjects">
             <div>
               <strong>{{ project.title }}</strong>
-              <span>{{ project.companyName || project.companyId || 'Company non définie' }}</span>
+              <span>{{ project.companyName || project.companyId || 'Entreprise non definie' }}</span>
             </div>
             <span class="type-chip">{{ project.type || 'PROJET' }}</span>
             <strong class="count">{{ project.applicantsCount || 0 }}</strong>
@@ -87,14 +87,15 @@
         </ng-template>
       </article>
     </section>
-    <section class="panel" style="margin-top: 1.5rem;">
+
+    <section class="panel sector-panel">
       <header>
-        <h2>Companies par secteur</h2>
+        <h2>Entreprises par secteur</h2>
         <a routerLink="/admin/companies">Voir tout</a>
       </header>
-      <div style="height: 300px; position: relative;">
+      <div class="chart-wrap">
         <canvas id="sectorChart"></canvas>
       </div>
-</section>
+    </section>
   </ng-container>
 </div>

@@ -46,7 +46,7 @@ export class ProjectFormComponent implements OnInit {
   ) {}
 
   get projectListRoute(): string {
-    return this.router.url.startsWith('/company') ? '/company/projects' : '/student/projects';
+    return this.router.url.startsWith('/company') ? '/company/projects' : '/app/projects';
   }
 
   ngOnInit(): void {

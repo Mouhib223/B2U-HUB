@@ -1,0 +1,191 @@
+<div class="page">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-left">
+      <div class="header-icon">🏢</div>
+      <div>
+        <h1>Équipes & Entreprises</h1>
+        <p>Associez vos équipes à des entreprises et gérez les tâches Jira</p>
+      </div>
+    </div>
+    
+  </div>
+
+  <!-- Message feedback -->
+  <div *ngIf="message" class="alert"
+       [class.success]="message.includes('✅')"
+       [class.error]="message.includes('❌')"
+       [class.warning]="message.includes('⚠️')">
+    {{ message }}
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Chargement des données...</p>
+  </div>
+
+  <!-- Tableau principal -->
+  <div class="table-card" *ngIf="!isLoading">
+    <table>
+      <thead>
+        <tr>
+          <th>Équipe</th>
+          <th>Description</th>
+          <th>Entreprise associée</th>
+          <th>Associer entreprise</th>
+          <th>Jira</th>
+          <th>Tâches</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let eq of equipes; let i = index">
+
+          <td>
+            <div class="team-cell">
+<div class="team-avatar">{{ eq.nomMembresEquipe.charAt(0).toUpperCase() }}</div>
+              <span class="team-name">{{ eq.nomMembresEquipe }}</span>
+            </div>
+          </td>
+
+          <td>
+            <span class="description">{{ eq.descriptionProfil }}</span>
+          </td>
+
+          <td>
+            <span *ngIf="eq.entrepriseId" class="badge badge-entreprise">
+              🏢 {{ getNomEntreprise(eq.entrepriseId) }}
+            </span>
+            <span *ngIf="!eq.entrepriseId" class="badge badge-none">
+              Non associée
+            </span>
+          </td>
+
+          <td>
+            <div class="action-group">
+              <select #selectEnt class="select-entreprise">
+                <option value="">-- Choisir --</option>
+                <option *ngFor="let ent of entreprises" [value]="ent.id">
+                  {{ ent.name }}
+                </option>
+              </select>
+              <button class="btn-associer"
+                      (click)="associer(eq.idEquipe, selectEnt.value)"
+                      [disabled]="!selectEnt.value">
+                Associer
+              </button>
+            </div>
+          </td>
+
+          <td>
+            <span *ngIf="eq.jiraProjectKey" class="badge badge-jira">
+              🔗 {{ eq.jiraProjectKey }}
+            </span>
+            <button *ngIf="!eq.jiraProjectKey"
+                    class="btn-jira"
+                    (click)="creerProjetJira(eq.idEquipe)">
+              ➕ Créer projet
+            </button>
+          </td>
+
+          <td>
+            <button class="btn-tasks" 
+                    (click)="openTaskModal(eq, i)"
+                    [disabled]="!eq.jiraProjectKey">
+              📋 Gérer les tâches
+            </button>
+          </td>
+
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- MODALE GESTION DES TÂCHES -->
+  <div class="modal-overlay" *ngIf="showTaskModal" (click)="closeTaskModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>📋 Tâches Jira - {{ selectedEquipe?.nomMembresEquipe }}</h2>
+        <button class="close-modal" (click)="closeTaskModal()">✖</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Formulaire création tâche -->
+        <div class="create-task-section">
+          <h3>➕ Nouvelle tâche</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Titre *</label>
+              <input type="text" [(ngModel)]="newTask.title" placeholder="Ex: Développer l'API">
+            </div>
+            <div class="form-group">
+              <label>Assigner à *</label>
+              <select [(ngModel)]="newTask.assignedTo">
+                <option value="">-- Sélectionner --</option>
+                <option *ngFor="let s of students" [value]="s.id">{{ s.name }}</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Description</label>
+            <textarea [(ngModel)]="newTask.description" placeholder="Description..."></textarea>
+          </div>
+          <button class="create-btn" (click)="createTask()" [disabled]="!canCreateTask()">
+            ✅ Créer
+          </button>
+        </div>
+
+        <!-- Liste des tâches -->
+        <div class="tasks-section">
+          <h3>📝 Tâches existantes</h3>
+          
+          <div class="task-stats">
+            <div class="stat"><span class="stat-value">{{ getTaskCount('TODO') }}</span><span class="stat-label">TODO</span></div>
+            <div class="stat"><span class="stat-value">{{ getTaskCount('IN_PROGRESS') }}</span><span class="stat-label">En cours</span></div>
+            <div class="stat"><span class="stat-value">{{ getTaskCount('DONE') }}</span><span class="stat-label">Terminé</span></div>
+          </div>
+
+          <table class="tasks-table">
+            <thead>
+              <tr>
+                <th>Titre</th>
+                <th>Statut</th>
+                <th>Assigné à</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let task of selectedEquipe?.tasks; let j = index">
+                <td>
+                  <strong>{{ task.title }}</strong><br>
+                  <small>{{ task.description }}</small>
+                </td>
+                <td>
+                  <select [value]="task.status" (change)="updateTaskStatus(task, $event, j)">
+                    <option value="TODO">🔴 TODO</option>
+                    <option value="IN_PROGRESS">🟡 IN_PROGRESS</option>
+                    <option value="DONE">🟢 DONE</option>
+                  </select>
+                </td>
+                <td>
+                  <select [value]="task.assignedTo" (change)="assignTask(task, $event, j)">
+                    <option value="">Non assigné</option>
+                    <option *ngFor="let s of students" [value]="s.id">{{ s.name }}</option>
+                  </select>
+                </td>
+                <td>
+                  <button class="delete-btn" (click)="deleteTask(j)">🗑</button>
+                </td>
+              </tr>
+              <tr *ngIf="!selectedEquipe?.tasks?.length">
+                <td colspan="4" class="empty-row">Aucune tâche</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

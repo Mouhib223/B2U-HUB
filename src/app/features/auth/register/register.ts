@@ -45,7 +45,11 @@ export class RegisterComponent {
     this.error = '';
     this.auth.register(this.form.value).subscribe({
       next: () => this.router.navigate(['/auth/login']),
-      error: (err) => { this.error = err.error?.message || 'Inscription impossible. Verifiez les informations.'; this.loading = false; }
+      error: (err) => {
+        const validationErrors = err.error?.errors ? Object.values(err.error.errors).join(' ') : '';
+        this.error = validationErrors || err.error?.message || err.error || 'Inscription impossible. Verifiez les informations.';
+        this.loading = false;
+      }
     });
   }
 }

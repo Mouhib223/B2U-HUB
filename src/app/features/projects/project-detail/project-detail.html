@@ -1,73 +1,73 @@
 <div class="project-detail-page">
-    <div *ngIf="loading" class="loading">
-      <mat-icon>hourglass_empty</mat-icon>
-      <p>Chargement...</p>
-    </div>
-  
-    <div *ngIf="error" class="error">
-      <mat-icon>error</mat-icon>
-      <p>{{ error }}</p>
-      <a routerLink="../">Retour aux projets</a>
-    </div>
-  
-    <div *ngIf="project && !loading">
-      <div class="detail-header">
-        <a routerLink="../" class="back-link">
-          <mat-icon>arrow_back</mat-icon>
-          Retour aux projets
-        </a>
-  
-        <div class="header-top">
-          <div class="company-avatar">{{ project.companyName ? project.companyName[0] : '?' }}</div>
-          <div class="header-info">
-            <h1>{{ project.title }}</h1>
-            <p class="company">{{ project.companyName }}</p>
-            <span class="status-badge" [class.open]="project.status === 'open'">
-              {{ project.status }}
-            </span>
-            <a class="apply-btn"
-              [routerLink]="['/student/new-candidature']"
-              [queryParams]="{ projectId: project.id }">
-              <mat-icon>send</mat-icon>
-              Postuler a ce projet
-            </a>
-          </div>
-        </div>
-      </div>
-  
-      <div class="detail-section">
-        <h2><mat-icon>description</mat-icon> Description</h2>
-        <p>{{ project.description }}</p>
-      </div>
-  
-      <div class="detail-section">
-        <h2><mat-icon>code</mat-icon> Competences requises</h2>
-        <div class="skills">
-          <span class="skill-chip" *ngFor="let s of projectSkills(project)">{{ s }}</span>
-        </div>
-      </div>
-  
-      <div class="detail-section info-grid">
-        <div class="info-card">
-          <mat-icon>group</mat-icon>
-          <span>{{ project.teamSize }} membres</span>
-        </div>
-        <div class="info-card">
-          <mat-icon>people</mat-icon>
-          <span>{{ project.applicantsCount }} candidats</span>
-        </div>
-        <div class="info-card">
-          <mat-icon>calendar_today</mat-icon>
-          <span>{{ project.deadline | date:'dd/MM/yyyy' }}</span>
-        </div>
-      </div>
-  
-      <!-- Bouton Gérer le projet -->
-      <div class="manage-btn-container">
-        <button class="btn-manage" (click)="goToManage()">
-          <mat-icon>dashboard</mat-icon> Gérer le projet (Kanban & Sprints)
-        </button>
-      </div>
-  
-    </div>
+  <div *ngIf="loading" class="loading">
+    <mat-icon>hourglass_empty</mat-icon>
+    <p>Chargement...</p>
   </div>
+
+  <div *ngIf="error" class="error">
+    <mat-icon>error</mat-icon>
+    <p>{{ error }}</p>
+    <a routerLink="../">Retour aux projets</a>
+  </div>
+
+  <div *ngIf="project && !loading">
+    <div class="detail-header">
+      <a routerLink="../" class="back-link">
+        <mat-icon>arrow_back</mat-icon>
+        Retour aux projets
+      </a>
+
+      <div class="header-top">
+        <div class="company-avatar">{{ project.companyName ? project.companyName[0] : '?' }}</div>
+        <div class="header-info">
+          <h1>{{ project.title }}</h1>
+          <p class="company">{{ project.companyName }}</p>
+          <span class="status-badge" [class.open]="project.status === 'open'">
+            {{ project.status }}
+          </span>
+          <a class="apply-btn"
+            [routerLink]="['/student/new-candidature']"
+            [queryParams]="{ projectId: project.id }">
+            <mat-icon>send</mat-icon>
+            Postuler a ce projet
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <h2><mat-icon>description</mat-icon> Description</h2>
+      <p>{{ project.description }}</p>
+    </div>
+
+    <div class="detail-section">
+      <h2><mat-icon>code</mat-icon> Competences requises</h2>
+      <div class="skills">
+        <span class="skill-chip" *ngFor="let s of projectSkills(project)">{{ s }}</span>
+      </div>
+    </div>
+
+    <div class="detail-section info-grid">
+      <div class="info-card">
+        <mat-icon>group</mat-icon>
+        <span>{{ project.teamSize }} membres</span>
+      </div>
+      <div class="info-card">
+        <mat-icon>people</mat-icon>
+        <span>{{ project.applicantsCount }} candidats</span>
+      </div>
+      <div class="info-card">
+        <mat-icon>calendar_today</mat-icon>
+        <span>{{ project.deadline | date:'dd/MM/yyyy' }}</span>
+      </div>
+    </div>
+
+    <!-- Bouton Gérer le projet -->
+    <div class="manage-btn-container">
+      <button class="btn-manage" (click)="goToManage()">
+        <mat-icon>dashboard</mat-icon> Gérer le projet (Kanban & Sprints)
+      </button>
+    </div>
+
+  </div>
+</div>

@@ -1,0 +1,53 @@
+<div class="admin-shell">
+
+  <!-- SIDEBAR -->
+  <aside class="admin-sidebar" [class.collapsed]="sidebarCollapsed">
+    <div class="sidebar-header">
+      <div class="admin-logo">
+        <span class="logo-badge">B2U</span>
+        <span class="logo-label" *ngIf="!sidebarCollapsed">ADMIN</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+  <a
+    *ngFor="let item of menuItems"
+    [routerLink]="item.route"
+    routerLinkActive="active"
+    class="nav-item"
+  >
+    <mat-icon>{{ item.icon }}</mat-icon>
+    <span *ngIf="!sidebarCollapsed">{{ item.label }}</span>
+  </a>
+</nav>
+
+    <div class="sidebar-footer">
+      <a routerLink="/app/dashboard" class="nav-item switch-link">
+        <mat-icon>swap_horiz</mat-icon>
+        <span *ngIf="!sidebarCollapsed">Front Office</span>
+      </a>
+      <button class="nav-item logout-btn" (click)="logout()">
+        <mat-icon>logout</mat-icon>
+        <span *ngIf="!sidebarCollapsed">Logout</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN AREA -->
+  <div class="admin-main" [class.expanded]="sidebarCollapsed">
+    <header class="admin-topbar">
+      <button class="toggle-btn" (click)="sidebarCollapsed = !sidebarCollapsed">
+        <mat-icon>menu</mat-icon>
+      </button>
+      <span class="topbar-title">Back Office — Administration</span>
+      <div class="topbar-right">
+        <div class="admin-badge">ADMIN</div>
+      </div>
+    </header>
+
+    <main class="admin-content">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+
+</div>

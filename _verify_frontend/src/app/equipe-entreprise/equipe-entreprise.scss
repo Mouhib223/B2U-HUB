@@ -1,0 +1,634 @@
+// Variables
+$primary-color: #1D9E75;
+$primary-dark: #0F6E56;
+$danger-color: #ff4757;
+$warning-color: #ff9800;
+$info-color: #2196f3;
+$success-color: #4caf50;
+$border-color: #e0e0e0;
+$bg-light: #f8f9fa;
+$text-dark: #1a1a2e;
+$text-gray: #666;
+
+.page {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+  background: #f0f2f5;
+  min-height: calc(100vh - 60px);
+}
+
+// Header
+.page-header {
+  margin-bottom: 24px;
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .header-icon {
+    font-size: 32px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    width: 60px;
+    height: 60px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 30px;
+  }
+
+  h1 {
+    font-size: 24px;
+    font-weight: 600;
+    margin: 0 0 4px 0;
+    color: $text-dark;
+  }
+
+  p {
+    margin: 0;
+    color: $text-gray;
+    font-size: 14px;
+  }
+}
+
+// Alert messages
+.alert {
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-size: 14px;
+
+  &.success {
+    background: #e8f5e9;
+    color: $success-color;
+    border-left: 4px solid $success-color;
+  }
+
+  &.error {
+    background: #ffebee;
+    color: $danger-color;
+    border-left: 4px solid $danger-color;
+  }
+
+  &.warning {
+    background: #fff3e0;
+    color: $warning-color;
+    border-left: 4px solid $warning-color;
+  }
+}
+
+// Loading
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px;
+  background: white;
+  border-radius: 16px;
+
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid $primary-color;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  p {
+    margin-top: 16px;
+    color: $text-gray;
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+// Tableau principal
+.table-card {
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th {
+    background: $bg-light;
+    padding: 14px 16px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 13px;
+    color: $text-dark;
+    border-bottom: 1px solid $border-color;
+  }
+
+  td {
+    padding: 14px 16px;
+    border-bottom: 1px solid #f0f0f0;
+    vertical-align: middle;
+  }
+
+  tr:hover {
+    background: #fafafa;
+  }
+}
+
+// Team cell
+.team-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  .team-avatar {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 16px;
+  }
+
+  .team-name {
+    font-weight: 500;
+    color: $text-dark;
+  }
+}
+
+.description {
+  font-size: 13px;
+  color: $text-gray;
+}
+
+// Badges
+.badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+
+  &.badge-entreprise {
+    background: #e3f2fd;
+    color: $info-color;
+  }
+
+  &.badge-none {
+    background: #f5f5f5;
+    color: #999;
+  }
+
+  &.badge-jira {
+    background: #e8f5e9;
+    color: $success-color;
+  }
+}
+
+// Action group
+.action-group {
+  display: flex;
+  gap: 8px;
+
+  .select-entreprise {
+    padding: 6px 10px;
+    border: 1px solid $border-color;
+    border-radius: 6px;
+    font-size: 12px;
+    background: white;
+  }
+
+  .btn-associer {
+    padding: 6px 12px;
+    background: $info-color;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: background 0.2s;
+
+    &:hover {
+      background: darken($info-color, 10%);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+}
+
+// Button Jira
+.btn-jira {
+  padding: 6px 12px;
+  background: $primary-color;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background 0.2s;
+
+  &:hover {
+    background: $primary-dark;
+  }
+}
+
+// Button tasks
+.btn-tasks {
+  background: #667eea;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background 0.2s;
+
+  &:hover {
+    background: #5a67d8;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+// Modal
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal-content {
+  background: white;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 900px;
+  max-height: 85vh;
+  overflow-y: auto;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #eee;
+  position: sticky;
+  top: 0;
+  background: white;
+  z-index: 10;
+
+  h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+    color: $text-dark;
+  }
+
+  .close-modal {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #999;
+    transition: color 0.2s;
+
+    &:hover {
+      color: $danger-color;
+    }
+  }
+}
+
+.modal-body {
+  padding: 24px;
+}
+
+// Create task section
+.create-task-section {
+  background: $bg-light;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+
+  h3 {
+    margin: 0 0 16px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: $text-dark;
+  }
+}
+
+.form-row {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 16px;
+
+  @media (max-width: 640px) {
+    flex-direction: column;
+    gap: 12px;
+  }
+}
+
+.form-group {
+  flex: 1;
+
+  label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+    font-size: 13px;
+    color: $text-dark;
+  }
+
+  input, select, textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid $border-color;
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: inherit;
+    transition: all 0.2s;
+
+    &:focus {
+      outline: none;
+      border-color: $primary-color;
+      box-shadow: 0 0 0 3px rgba(29, 158, 117, 0.1);
+    }
+  }
+
+  textarea {
+    min-height: 80px;
+    resize: vertical;
+  }
+}
+
+.create-btn {
+  background: $primary-color;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 13px;
+  transition: all 0.2s;
+  margin-top: 8px;
+
+  &:hover {
+    background: $primary-dark;
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+}
+
+// Tasks section
+.tasks-section {
+  h3 {
+    margin: 0 0 16px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: $text-dark;
+  }
+}
+
+.task-stats {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+
+  .stat {
+    flex: 1;
+    background: $bg-light;
+    padding: 16px;
+    text-align: center;
+    border-radius: 12px;
+    transition: transform 0.2s;
+
+    &:hover {
+      transform: translateY(-2px);
+    }
+
+    .stat-value {
+      display: block;
+      font-size: 28px;
+      font-weight: bold;
+      color: $primary-color;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: $text-gray;
+      margin-top: 4px;
+    }
+  }
+}
+
+.tasks-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th, td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  th {
+    background: $bg-light;
+    font-weight: 600;
+    font-size: 13px;
+    color: $text-dark;
+  }
+
+  td {
+    font-size: 13px;
+    vertical-align: middle;
+  }
+
+  select {
+    padding: 6px 10px;
+    border: 1px solid $border-color;
+    border-radius: 6px;
+    font-size: 12px;
+    background: white;
+    cursor: pointer;
+
+    &:focus {
+      outline: none;
+      border-color: $primary-color;
+    }
+  }
+}
+
+.delete-btn {
+  background: $danger-color;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background 0.2s;
+
+  &:hover {
+    background: darken($danger-color, 10%);
+  }
+}
+
+.empty-row {
+  text-align: center;
+  color: #999;
+  padding: 40px;
+}
+
+// Jira result card
+.jira-card {
+  margin-top: 24px;
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  border-left: 4px solid $primary-color;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+
+  .jira-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+
+    .jira-logo {
+      width: 32px;
+      height: 32px;
+      background: $primary-color;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 18px;
+    }
+
+    h3 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 600;
+      flex: 1;
+    }
+
+    .close-jira {
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      color: #999;
+
+      &:hover {
+        color: $danger-color;
+      }
+    }
+  }
+
+  .jira-info {
+    .info-row {
+      display: flex;
+      padding: 8px 0;
+      border-bottom: 1px solid #f0f0f0;
+
+      .info-label {
+        width: 100px;
+        font-weight: 500;
+        color: $text-dark;
+      }
+
+      .info-value {
+        flex: 1;
+        color: $text-gray;
+      }
+
+      .jira-link {
+        color: $primary-color;
+        text-decoration: none;
+
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
+  }
+}
+
+// Responsive
+@media (max-width: 1024px) {
+  .page {
+    padding: 16px;
+  }
+
+  table {
+    display: block;
+    overflow-x: auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .action-group {
+    flex-direction: column;
+  }
+
+  .task-stats {
+    flex-direction: column;
+  }
+
+  .modal-content {
+    width: 95%;
+  }
+}

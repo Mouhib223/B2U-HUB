@@ -79,6 +79,11 @@ export class StudentCandidaturesComponent implements OnInit, OnDestroy {
     low: false
   };
 
+  cvFile: File | null = null;
+  lettreFile: File | null = null;
+  cvError: string | null = null;
+  lettreError: string | null = null;
+
   readonly formations = ['Licence', 'Master', 'Ingénieur', 'Doctorat', 'BTS'];
   readonly maxFileSize = 5 * 1024 * 1024;
   cvFile?: File;
@@ -304,64 +309,7 @@ export class StudentCandidaturesComponent implements OnInit, OnDestroy {
     this.selectedProjectForApply = project;
     this.form.reset({ anneeExperience: 0, projetId: project?.id ?? '' });
     this.submitted = false;
-    this.errorMessage = '';
-    this.cvFile = undefined;
-    this.lettreFile = undefined;
-    this.cvError = '';
-    this.lettreError = '';
     this.showModal = true;
-  }
-
-  openDetail(candidature: Candidature) {
-    this.detailSelected = candidature;
-    this.detailMatchingParts = this.parseMatchingDetails(candidature.matchingDetails);
-    this.cdr.detectChanges();
-  }
-
-  closeDetail() {
-    this.detailSelected = undefined;
-    this.detailMatchingParts = [];
-  }
-
-  getInterviewPreparationLines(candidature?: Candidature): string[] {
-    return candidature?.interviewPreparation
-      ? candidature.interviewPreparation.split('\n').map(line => line.trim()).filter(Boolean)
-      : [];
-  }
-
-  isPreparationHeading(line: string): boolean {
-    return !line.match(/^[0-9]+\./) && !line.startsWith('-') && !line.toLowerCase().startsWith('reponse modele');
-  }
-
-  isPreparationAnswer(line: string): boolean {
-    return line.toLowerCase().startsWith('reponse modele');
-  }
-
-  onCvSelected(event: Event) {
-    const file = (event.target as HTMLInputElement).files?.[0];
-    this.cvError = '';
-    this.cvFile = undefined;
-    const error = this.validatePdf(file);
-    if (error) this.cvError = error;
-    else this.cvFile = file;
-  }
-
-  onLettreSelected(event: Event) {
-    const file = (event.target as HTMLInputElement).files?.[0];
-    this.lettreError = '';
-    this.lettreFile = undefined;
-    const error = this.validatePdf(file);
-    if (error) this.lettreError = error;
-    else this.lettreFile = file;
-  }
-
-  validatePdf(file?: File): string | null {
-    if (!file) return 'Fichier requis';
-    const name = file.name.toLowerCase();
-    const type = (file.type || '').toLowerCase();
-    if (!type.includes('pdf') && !name.endsWith('.pdf')) return 'Le fichier doit être un PDF';
-    if (file.size > this.maxFileSize) return 'Taille maximale 5 MB';
-    return null;
   }
 
   save() {
@@ -388,272 +336,20 @@ export class StudentCandidaturesComponent implements OnInit, OnDestroy {
       telephone: val.telephone ?? '',
       adresse: val.adresse ?? '',
       formationActuelle: val.formationActuelle ?? '',
-      specialite: val.specialite ?? '',
-      anneeExperience: val.anneeExperience ?? 0,
-      dateCandidature: new Date().toISOString().split('T')[0],
-      projectId: val.projetId ?? '',
-      statutCandidature: 'En cours'
+      specialite:        val.specialite ?? '',
+      anneeExperience:   val.anneeExperience ?? 0,
+      dateCandidature:   new Date().toISOString().split('T')[0],
+      statutCandidature: 'En cours',
+      competences:       val.competences ? val.competences.split(',').map((s: string) => s.trim()) : [],
+      cvLien:            val.cvLien ?? '',
+      lettreMotivation:  val.lettreMotivation ?? ''
     };
 
-    this.saving = true;
-    this.service.createWithFiles(dto, this.cvFile!, this.lettreFile!).subscribe({
-      next: () => {
-        this.saving = false;
+    this.service.create(dto).subscribe({
+      next: (created) => {
+        this.candidatures = [...this.candidatures, created];
         this.showModal = false;
         this.submitted = false;
-        this.cvFile = undefined;
-        this.lettreFile = undefined;
-        this.load();
-      },
-      error: err => {
-        this.saving = false;
-        this.errorMessage = `Candidature non sauvegardée (${err.status || 'erreur réseau'}).`;
-        this.cdr.detectChanges();
-      }
-    });
-  }
-
-  getProjectTitle(projectId?: string): string {
-    if (!projectId) return 'Projet non défini';
-    return this.projects.find(project => project.id === projectId)?.title ?? projectId;
-  }
-
-  getSelectedProjectTitle(): string {
-    const projectId = this.form.get('projetId')?.value || this.selectedProjectForApply?.id;
-    return this.selectedProjectForApply?.title || this.getProjectTitle(projectId ?? undefined);
-  }
-
-  displayStatus(status?: string): string {
-    const normalized = this.normalizeStatus(status);
-    return normalized || 'Statut inconnu';
-  }
-
-  statusClass(status?: string): string {
-    const map: Record<string, string> = {
-      'Acceptée': 'accepted',
-      'Refusée': 'rejected',
-      'En cours': 'pending',
-      Recommandé: 'recommended',
-      Présélectionné: 'preselected',
-      'En attente': 'waiting',
-      'Non retenu': 'rejected'
-    };
-    return map[this.normalizeStatus(status)] ?? 'unknown';
-  }
-
-  getStatusIcon(status?: string): string {
-    const map: Record<string, string> = {
-      'Acceptée': 'check_circle',
-      'Refusée': 'cancel',
-      'En cours': 'schedule',
-      Recommandé: 'star',
-      Présélectionné: 'bookmark',
-      'En attente': 'hourglass_empty',
-      'Non retenu': 'block'
-    };
-    return map[this.normalizeStatus(status)] ?? 'help';
-  }
-
-  getScoreColor(score?: number): string {
-    const value = score ?? 0;
-    if (value >= 80) return '#0E9F6E';
-    if (value >= 65) return '#1A56DB';
-    if (value >= 50) return '#D97706';
-    if (value >= 35) return '#EA580C';
-    return '#DC2626';
-  }
-
-  getScoreLabel(score?: number): string {
-    const value = score ?? 0;
-    if (value >= 80) return 'Excellent';
-    if (value >= 65) return 'Très bon';
-    if (value >= 50) return 'Bon';
-    if (value >= 35) return 'Moyen';
-    return 'Faible';
-  }
-
-  getRecoClass(score?: number): string {
-    const value = score ?? 0;
-    if (value >= 80) return 'reco-excellent';
-    if (value >= 65) return 'reco-good';
-    if (value >= 50) return 'reco-average';
-    if (value >= 35) return 'reco-low';
-    return 'reco-none';
-  }
-
-  getRecoIcon(score?: number): string {
-    const value = score ?? 0;
-    if (value >= 80) return 'verified';
-    if (value >= 65) return 'thumb_up';
-    if (value >= 50) return 'rule';
-    if (value >= 35) return 'warning';
-    return 'block';
-  }
-
-  getRecoLabel(score?: number): string {
-    const value = score ?? 0;
-    if (value >= 80) return 'Très forte compatibilité';
-    if (value >= 65) return 'Bonne compatibilité';
-    if (value >= 50) return 'Compatibilité correcte';
-    if (value >= 35) return 'Compatibilité limitée';
-    return 'Peu compatible';
-  }
-
-  getRecoDescription(score?: number): string {
-    const value = score ?? 0;
-    if (value >= 80) return 'Votre profil correspond très bien aux attentes du projet.';
-    if (value >= 65) return 'Votre candidature est solide, avec quelques points à renforcer.';
-    if (value >= 50) return 'Le profil est intéressant mais plusieurs compétences peuvent manquer.';
-    if (value >= 35) return 'La candidature reste recevable, mais le matching est partiel.';
-    return 'Le projet semble peu aligné avec votre profil actuel.';
-  }
-
-  parseMatchingDetails(details?: string): { label: string; skillList: string[]; type: string }[] {
-    if (!details) return [];
-    return details.split('|').map(part => {
-      const trimmed = part.trim();
-      const colonIdx = trimmed.indexOf(':');
-      const label = colonIdx > -1 ? trimmed.substring(0, colonIdx).trim() : trimmed;
-      const raw = colonIdx > -1 ? trimmed.substring(colonIdx + 1).trim() : '';
-      const skillList = raw
-        ? raw
-            .split(',')
-            .map(skill => skill.trim())
-            .filter(Boolean)
-        : [];
-      const type = /matched|compatibles|acquises/i.test(label) ? 'matched' : 'missing';
-      return { label, skillList, type };
-    });
-  }
-
-  isRefused(status?: string): boolean {
-    const s = this.normalizeStatus(status);
-    return s === 'Refusée' || s === 'Non retenu';
-  }
-
-  generateFeedback(c: Candidature): void {
-    const id = c.idCandidature!;
-    this.feedbackMap[id] = { loading: true };
-    this.cdr.detectChanges();
-    this.aiService.generateCandidatureFeedback(id).subscribe({
-      next: (res) => {
-        this.feedbackMap[id] = { loading: false, text: res.feedback };
-        this.cdr.detectChanges();
-      },
-      error: () => {
-        this.feedbackMap[id] = { loading: false, text: 'Erreur lors de la génération. Réessayez.' };
-        this.cdr.detectChanges();
-      }
-    });
-  }
-
-  trackById(index: number, item: Candidature): string {
-    return item.idCandidature || String(index);
-  }
-
-  getInitials(candidature: Candidature): string {
-    return `${candidature.prenomCandidat?.charAt(0) || ''}${candidature.nomCandidat?.charAt(0) || ''}`.toUpperCase();
-  }
-
-  private setCandidatures(items: Candidature[]) {
-    this.allCandidatures = this.enrich(items).sort((a, b) => {
-      const dateA = new Date(a.dateCandidature || 0).getTime();
-      const dateB = new Date(b.dateCandidature || 0).getTime();
-      return dateB - dateA;
-    });
-    this.applyFilters();
-  }
-
-  private enrich(items: Candidature[]): Candidature[] {
-    return items.map(item => ({
-      ...item,
-      statutCandidature: this.normalizeStatus(item.statutCandidature),
-      _projectTitle: item.projectTitle || this.getProjectTitle(item.projectId),
-      _initials: this.getInitials(item)
-    }));
-  }
-
-  private applyPage() {
-    let filtered = [...this.allCandidatures];
-    const search = this.searchTerm.trim().toLowerCase();
-
-    if (search) {
-      filtered = filtered.filter(candidature =>
-        [
-          candidature.nomCandidat,
-          candidature.prenomCandidat,
-          candidature.email,
-          candidature.specialite,
-          candidature._projectTitle
-        ]
-          .filter(Boolean)
-          .some(value => String(value).toLowerCase().includes(search))
-      );
-    }
-
-    const activeStatus = this.activeStatusFilters;
-    if (activeStatus.length) {
-      filtered = filtered.filter(candidature =>
-        activeStatus.includes(this.normalizeStatus(candidature.statutCandidature))
-      );
-    }
-
-    const activeScore = this.activeScoreFilters;
-    if (activeScore.length) {
-      filtered = filtered.filter(candidature => activeScore.some(band => this.isScoreInBand(candidature.scoreMatching, band)));
-    }
-
-    filtered = filtered.filter(candidature => {
-      const score = candidature.scoreMatching ?? 0;
-      return score >= this.scoreMin && score <= this.scoreMax;
-    });
-
-    this.totalItems = filtered.length;
-    const start = this.pageIndex * this.pageSize;
-    this.displayed = filtered.slice(start, start + this.pageSize);
-    this.cdr.detectChanges();
-  }
-
-  private isScoreInBand(score = 0, band: ScoreBand): boolean {
-    if (band === 'excellent') return score >= 80;
-    if (band === 'good') return score >= 65 && score < 80;
-    if (band === 'average') return score >= 50 && score < 65;
-    return score < 50;
-  }
-
-  private countByStatus(status: string): number {
-    return this.allCandidatures.filter(c => this.normalizeStatus(c.statutCandidature) === status).length;
-  }
-
-  private normalizeStatus(status?: string): string {
-    const raw = (status || '').trim().replaceAll('\u00c3\u00a9', 'é');
-    const upper = raw.toUpperCase();
-    const map: Record<string, string> = {
-      'ACCEPTÉE': 'Acceptée',
-      ACCEPTEE: 'Acceptée',
-      REFUSEE: 'Refusée',
-      'REFUSÉE': 'Refusée',
-      RECOMMANDE: 'Recommandé',
-      'RECOMMANDÉ': 'Recommandé',
-      PRESELECTIONNE: 'Présélectionné',
-      'PRÉSÉLECTIONNÉ': 'Présélectionné',
-      EN_ATTENTE: 'En attente',
-      NON_RETENU: 'Non retenu'
-    };
-    return map[upper] ?? raw;
-  }
-
-  private loadProjects(): void {
-    this.projectService.getProjects({ status: 'open' }).subscribe({
-      next: projects => {
-        this.projects = projects?.length ? projects : this.fallbackProjects();
-        this.setCandidatures(this.allCandidatures);
-        this.openProjectApplicationFromRoute();
-      },
-      error: () => {
-        this.projects = this.fallbackProjects();
-        this.setCandidatures(this.allCandidatures);
-        this.openProjectApplicationFromRoute();
       }
     });
   }
