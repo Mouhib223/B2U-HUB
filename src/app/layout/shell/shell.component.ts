@@ -21,6 +21,15 @@ export class ShellComponent {
   get user() { return this.auth.getCurrentUser(); }
   get isStudent() { return this.user?.role === 'student'; }
   get isCompany() { return this.user?.role === 'company'; }
+  get roleClass() { return `role-${this.user?.role ?? 'student'}`; }
+  get roleLabel() { return this.isCompany ? 'Entreprise' : 'Student'; }
+  get sectionTitle() {
+    return this.isCompany ? 'Espace Entreprise' : 'Espace Etudiant / Freelancer';
+  }
+
+  initials(firstName?: string, lastName?: string): string {
+    return `${firstName?.[0] ?? ''}${lastName?.[0] ?? ''}`.toUpperCase() || 'B2U';
+  }
 
   logout() { this.auth.logout(); }
 }

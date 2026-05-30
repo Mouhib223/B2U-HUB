@@ -183,8 +183,8 @@ export const routes: Routes = [
   {
     path: 'company',
     loadComponent: () =>
-      import('./layout/company-shell/company-shell.component')
-        .then(m => m.CompanyShellComponent),
+      import('./layout/shell/shell.component')
+        .then(m => m.ShellComponent),
     canActivate: [AuthGuard],
     children: [
       {

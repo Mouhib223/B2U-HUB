@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
+import { MatIconModule } from '@angular/material/icon';
 import { WorkPostService } from '../../core/services/workpost.service';
 import { WorkPost } from '../../core/models/workPost.model';
 
@@ -8,7 +9,7 @@ import { WorkPost } from '../../core/models/workPost.model';
 @Component({
   selector: 'b2u-student-workpost',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, MatIconModule],
   templateUrl: './student-workpost.html',
   styleUrls: ['./student-workpost.scss']
 })

@@ -1,12 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { MatIconModule } from '@angular/material/icon';
 import { EntrepriseService, Entreprise } from '../../core/services/entreprise.service';
 
 @Component({
   selector: 'b2u-student-company',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, MatIconModule],
   templateUrl: './student-company.component.html',
   styleUrls: ['./student-company.component.scss']
 })

@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { MatIconModule } from '@angular/material/icon';
 import { forkJoin } from 'rxjs';
 import { EquipeEntrepriseService } from '../core/services/equipe-entreprise';
 import { EquipeService, Equipe, Task } from '../core/services/equipe.service';
@@ -8,25 +9,24 @@ import { EquipeService, Equipe, Task } from '../core/services/equipe.service';
 @Component({
   selector: 'b2u-equipe-entreprise',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, MatIconModule],
   templateUrl: './equipe-entreprise.html',
   styleUrls: ['./equipe-entreprise.scss'],
 })
 export class EquipeEntreprise implements OnInit {
-
   equipes: Equipe[] = [];
   entreprises: any[] = [];
   jiraResult: any = null;
   message = '';
   isLoading = false;
+  selectedEntrepriseId: { [key: number]: string } = {};
 
-  // Gestion des tâches
   showTaskModal = false;
   selectedEquipe: Equipe | null = null;
   selectedEquipeIndex = -1;
-  
+
   students: any[] = [];
-  
+
   newTask = {
     title: '',
     description: '',
@@ -43,7 +43,22 @@ export class EquipeEntreprise implements OnInit {
     this.loadStudents();
   }
 
-  // ── Charger équipes + entreprises ─────────────────────────
+  get associatedCount(): number {
+    return this.equipes.filter(e => !!e.entrepriseId).length;
+  }
+
+  get jiraCount(): number {
+    return this.equipes.filter(e => !!e.jiraProjectKey).length;
+  }
+
+  get waitingAssociationCount(): number {
+    return this.equipes.length - this.associatedCount;
+  }
+
+  get selectedTaskTotal(): number {
+    return this.selectedEquipe?.tasks?.length || 0;
+  }
+
   chargerDonnees(): void {
     this.isLoading = true;
     forkJoin({
@@ -56,15 +71,13 @@ export class EquipeEntreprise implements OnInit {
         this.isLoading = false;
       },
       error: () => {
-        this.message = '❌ Erreur de chargement des données';
+        this.message = 'Erreur: chargement des donnees impossible';
         this.isLoading = false;
       }
     });
   }
 
-  // ── Charger la liste des étudiants ────────────────────────
   loadStudents(): void {
-    // À remplacer par votre API réelle
     this.students = [
       { id: 'student-123', name: 'Saoussen Ben Soltane', email: 'saoussen@example.com' },
       { id: 'student-456', name: 'Ahmed Ben Ali', email: 'ahmed@example.com' },
@@ -72,44 +85,43 @@ export class EquipeEntreprise implements OnInit {
     ];
   }
 
-  // ── Associer une entreprise ───────────────────────────────
   associer(equipeId: string, entrepriseId: string): void {
     if (!entrepriseId) {
-      this.message = '⚠️ Veuillez choisir une entreprise';
+      this.message = 'Attention: veuillez choisir une entreprise';
       return;
     }
+
     this.service.associerEntreprise(equipeId, entrepriseId).subscribe({
       next: () => {
-        this.message = '✅ Entreprise associée avec succès !';
+        this.message = 'Succes: entreprise associee avec succes';
+        this.selectedEntrepriseId = {};
         this.chargerDonnees();
       },
-      error: () => this.message = '❌ Erreur lors de l\'association'
+      error: () => this.message = 'Erreur: association impossible'
     });
   }
 
-  // ── Créer projet Jira ─────────────────────────────────────
   creerProjetJira(equipeId: string): void {
     this.service.createJiraProject(equipeId).subscribe({
       next: (res) => {
         this.jiraResult = res;
-        this.message = `✅ Projet Jira créé : ${res.projectKey}`;
+        this.message = `Succes: projet Jira cree (${res.projectKey})`;
         this.chargerDonnees();
       },
-      error: () => this.message = '❌ Erreur création projet Jira'
+      error: () => this.message = 'Erreur: creation du projet Jira impossible'
     });
   }
 
-  // ── Nom de l'entreprise ───────────────────────────────────
   getNomEntreprise(entrepriseId: string): string {
     const ent = this.entreprises.find(e => e.id === entrepriseId);
-    return ent ? ent.name : '—';
+    return ent ? ent.name : 'Non associee';
   }
 
-  // ─────────────────────────────────────────────────────────
-  // GESTION DES TÂCHES
-  // ─────────────────────────────────────────────────────────
+  getStudentName(studentId?: string): string {
+    const student = this.students.find(s => s.id === studentId);
+    return student ? student.name : 'Non assignee';
+  }
 
-  // Ouvrir la modale de gestion des tâches
   openTaskModal(equipe: Equipe, index: number): void {
     this.equipeService.getEquipeById(equipe.idEquipe).subscribe({
       next: (updatedEquipe) => {
@@ -120,34 +132,31 @@ export class EquipeEntreprise implements OnInit {
       },
       error: (err) => {
         console.error('Erreur:', err);
-        this.message = '❌ Erreur lors du chargement des tâches';
+        this.message = 'Erreur: chargement des taches impossible';
       }
     });
   }
 
-  // Fermer la modale
   closeTaskModal(): void {
     this.showTaskModal = false;
     this.selectedEquipe = null;
     this.chargerDonnees();
   }
 
-  // Vérifier si on peut créer une tâche
   canCreateTask(): boolean {
     return this.newTask.title.trim() !== '' && this.newTask.assignedTo !== '';
   }
 
-  // Créer une nouvelle tâche
   createTask(): void {
     if (!this.canCreateTask() || !this.selectedEquipe) return;
-    
+
     this.service.createTask(this.selectedEquipe.idEquipe, this.newTask).subscribe({
       next: () => {
         this.equipeService.getEquipeById(this.selectedEquipe!.idEquipe).subscribe({
           next: (updatedEquipe) => {
             this.selectedEquipe = updatedEquipe;
             this.newTask = { title: '', description: '', assignedTo: '' };
-            this.message = '✅ Tâche créée et assignée avec succès !';
+            this.message = 'Succes: tache creee et assignee';
             if (this.selectedEquipeIndex >= 0) {
               this.equipes[this.selectedEquipeIndex] = updatedEquipe;
             }
@@ -155,50 +164,47 @@ export class EquipeEntreprise implements OnInit {
         });
       },
       error: (err) => {
-        console.error('Erreur création:', err);
-        this.message = '❌ Erreur lors de la création de la tâche';
+        console.error('Erreur creation:', err);
+        this.message = 'Erreur: creation de la tache impossible';
       }
     });
   }
 
-  // Mettre à jour le statut d'une tâche
   updateTaskStatus(task: Task, event: Event, taskIndex: number): void {
     const newStatus = (event.target as HTMLSelectElement).value;
     if (!this.selectedEquipe) return;
-    
+
     this.service.updateTaskStatus(this.selectedEquipe.idEquipe, taskIndex, newStatus).subscribe({
       next: () => {
         task.status = newStatus as any;
-        this.message = '✅ Statut mis à jour';
+        this.message = 'Succes: statut mis a jour';
       },
       error: (err) => console.error('Erreur:', err)
     });
   }
 
-  // Assigner une tâche à un étudiant
   assignTask(task: Task, event: Event, taskIndex: number): void {
     const studentId = (event.target as HTMLSelectElement).value;
     if (!this.selectedEquipe) return;
-    
+
     this.service.assignTask(this.selectedEquipe.idEquipe, taskIndex, studentId).subscribe({
       next: () => {
         task.assignedTo = studentId;
-        this.message = '✅ Tâche assignée avec succès';
+        this.message = 'Succes: tache assignee';
       },
       error: (err) => console.error('Erreur:', err)
     });
   }
 
-  // Supprimer une tâche
   deleteTask(taskIndex: number): void {
     if (!this.selectedEquipe) return;
-    if (confirm('Supprimer cette tâche ?')) {
+    if (confirm('Supprimer cette tache ?')) {
       this.service.deleteTask(this.selectedEquipe.idEquipe, taskIndex).subscribe({
         next: () => {
           this.equipeService.getEquipeById(this.selectedEquipe!.idEquipe).subscribe({
             next: (updatedEquipe) => {
               this.selectedEquipe = updatedEquipe;
-              this.message = '✅ Tâche supprimée';
+              this.message = 'Succes: tache supprimee';
             }
           });
         },
@@ -207,7 +213,6 @@ export class EquipeEntreprise implements OnInit {
     }
   }
 
-  // Compter les tâches par statut
   getTaskCount(status: string): number {
     return (this.selectedEquipe?.tasks || []).filter(t => t.status === status).length;
   }

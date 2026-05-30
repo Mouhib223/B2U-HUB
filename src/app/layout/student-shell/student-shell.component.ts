@@ -11,7 +11,6 @@ import { AuthService } from '../../core/services/auth.service';
   template: `
     <div class="shell">
       <aside class="sidebar" [class.collapsed]="collapsed">
-        
         <div class="logo">
           <span class="badge">B2U</span>
           <span *ngIf="!collapsed" class="label">STUDENT</span>
@@ -25,15 +24,7 @@ import { AuthService } from '../../core/services/auth.service';
 
           <a routerLink="/app/candidatures" routerLinkActive="active">
             <mat-icon>description</mat-icon>
-            <span *ngIf="!collapsed">Mes Candidatures</span>
-          </a>
-<a routerLink="/student/scoring" routerLinkActive="active">
-  <mat-icon>analytics</mat-icon>
-  <span *ngIf="!collapsed">AI Scoring</span>
-</a>
-          <a routerLink="/student/new-candidature" routerLinkActive="active">
-            <mat-icon>add_circle</mat-icon>
-            <span *ngIf="!collapsed">Nouvelle candidature</span>
+            <span *ngIf="!collapsed">Mes candidatures</span>
           </a>
 
           <a routerLink="/student/my-company" routerLinkActive="active">
@@ -58,143 +49,39 @@ import { AuthService } from '../../core/services/auth.service';
             <span *ngIf="!collapsed">Deconnexion</span>
           </button>
         </div>
-
       </aside>
 
-      <div class="main" [class.expanded]="collapsed">
-        
+      <div class="main">
         <header>
-          <button (click)="collapsed=!collapsed">
-            <mat-icon>menu</mat-icon>
-          </button>
-          <span>Espace Étudiant / Freelancer</span>
+          <button (click)="collapsed = !collapsed"><mat-icon>menu</mat-icon></button>
+          <span>Espace Etudiant / Freelancer</span>
         </header>
-
-        <main>
-          <router-outlet></router-outlet>
-        </main>
-
+        <main><router-outlet></router-outlet></main>
       </div>
     </div>
   `,
   styles: [`
     .shell { display:flex; height:100vh; }
-
-    .sidebar {
-      width:220px;
-      background:#1E293B;
-      color:#fff;
-      display:flex;
-      flex-direction:column;
-      padding:1rem 0;
-      transition:width .2s;
-    }
-
+    .sidebar { width:220px; background:#1E293B; color:#fff; display:flex; flex-direction:column; padding:1rem 0; transition:width .2s; }
     .sidebar.collapsed { width:60px; }
-
-    .logo {
-      display:flex;
-      align-items:center;
-      gap:.5rem;
-      padding:.5rem 1rem 1.5rem;
-    }
-
-    .badge {
-      background:#1A56DB;
-      border-radius:6px;
-      padding:2px 8px;
-      font-weight:700;
-      font-size:.85rem;
-    }
-
-    .label {
-      font-weight:700;
-      font-size:.9rem;
-    }
-
-    nav {
-      display:flex;
-      flex-direction:column;
-      gap:4px;
-      padding:0 .5rem;
-      flex:1;
-    }
-
-    nav a,
-    .logout-btn {
-      display:flex;
-      align-items:center;
-      gap:.6rem;
-      padding:.6rem .75rem;
-      border-radius:8px;
-      color:#94A3B8;
-      text-decoration:none;
-      font-size:.875rem;
-      transition:background .15s;
-    }
-
-    nav a:hover,
-    nav a.active,
-    .logout-btn:hover {
-      background:#334155;
-      color:#fff;
-    }
-
-    .sidebar-footer {
-      padding:.75rem .5rem;
-      border-top:1px solid rgba(255,255,255,.1);
-    }
-
-    .logout-btn {
-      width:100%;
-      border:none;
-      background:transparent;
-      cursor:pointer;
-    }
-
-    .main {
-      flex:1;
-      display:flex;
-      flex-direction:column;
-      background:#F9FAFB;
-      overflow:hidden;
-    }
-
-    header {
-      display:flex;
-      align-items:center;
-      gap:1rem;
-      padding:.75rem 1.5rem;
-      background:#fff;
-      border-bottom:1px solid #E2E8F0;
-      font-weight:600;
-      color:#1E293B;
-    }
-
-    header button {
-      border:none;
-      background:transparent;
-      cursor:pointer;
-      display:flex;
-      align-items:center;
-      color:#64748B;
-    }
-
-    main {
-      flex:1;
-      overflow-y:auto;
-      padding:1.5rem;
-    }
-
-    .expanded {
-      margin-left:0;
-    }
+    .logo { display:flex; align-items:center; gap:.5rem; padding:.5rem 1rem 1.5rem; }
+    .badge { background:#1A56DB; border-radius:6px; padding:2px 8px; font-weight:700; font-size:.85rem; }
+    .label { font-weight:700; font-size:.9rem; }
+    nav { display:flex; flex-direction:column; gap:4px; padding:0 .5rem; flex:1; }
+    nav a, .logout-btn { display:flex; align-items:center; gap:.6rem; padding:.6rem .75rem; border-radius:8px; color:#94A3B8; text-decoration:none; font-size:.875rem; transition:background .15s; }
+    nav a:hover, nav a.active, .logout-btn:hover { background:#334155; color:#fff; }
+    .sidebar-footer { padding:.75rem .5rem; border-top:1px solid rgba(255,255,255,.1); }
+    .logout-btn { width:100%; border:none; background:transparent; cursor:pointer; }
+    .main { flex:1; display:flex; flex-direction:column; background:#F9FAFB; overflow:hidden; }
+    header { display:flex; align-items:center; gap:1rem; padding:.75rem 1.5rem; background:#fff; border-bottom:1px solid #E2E8F0; font-weight:600; color:#1E293B; }
+    header button { border:none; background:transparent; cursor:pointer; display:flex; align-items:center; color:#64748B; }
+    main { flex:1; overflow-y:auto; padding:1.5rem; }
   `]
 })
 export class StudentShellComponent {
-  constructor(private auth: AuthService) {}
-
   collapsed = false;
+
+  constructor(private auth: AuthService) {}
 
   logout(): void {
     this.auth.logout();

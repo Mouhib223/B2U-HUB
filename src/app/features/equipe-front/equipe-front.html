@@ -1,52 +1,73 @@
 <div class="equipe-page">
-
-  <!-- ── VUE PRINCIPALE : liste + IA ── -->
   <ng-container *ngIf="!selectedEquipe">
+    <section class="workspace-main">
+      <div class="page-hero">
+        <div>
+          <span class="eyebrow">Espace equipes</span>
+          <h1>Rejoindre une equipe et suivre le travail</h1>
+          <p>Consultez les equipes disponibles, ouvrez leur board Jira et suivez uniquement les taches qui vous sont assignees.</p>
+        </div>
+        <div class="hero-stat">
+          <strong>{{ equipes.length }}</strong>
+          <span>equipes</span>
+        </div>
+      </div>
 
-    <!-- GAUCHE : liste équipes -->
-    <div class="equipe-list">
-      <h2>Teams</h2>
-      <input [(ngModel)]="searchQuery" placeholder="Search team..." class="search-input"/>
+      <div class="toolbar">
+        <div class="search-box">
+          <mat-icon>search</mat-icon>
+          <input [(ngModel)]="searchQuery" placeholder="Rechercher une equipe...">
+        </div>
+      </div>
 
       <div class="team-grid">
-        <div class="team-card" *ngFor="let equipe of filteredEquipes">
-
+        <article class="team-card" *ngFor="let equipe of filteredEquipes">
           <div class="card-top">
-<div class="team-avatar">{{ equipe.nomMembresEquipe[0].toUpperCase() }}</div>
-            <span class="jira-badge" *ngIf="equipe.jiraProjectKey">
-              🔗 {{ equipe.jiraProjectKey }}
+            <div class="team-avatar">{{ equipe.nomMembresEquipe[0].toUpperCase() }}</div>
+            <span class="status" [class.open]="equipe.status === 'OPEN'" [class.full]="equipe.status === 'FULL'">
+              {{ equipe.status || 'OPEN' }}
             </span>
           </div>
 
-          <h3>{{ equipe.nomMembresEquipe }}</h3>
-          <p>{{ equipe.descriptionProfil }}</p>
+          <h2>{{ equipe.nomMembresEquipe }}</h2>
+          <p>{{ equipe.descriptionProfil || 'Aucune description disponible.' }}</p>
 
-          <span class="status"
-                [class.open]="equipe.status === 'OPEN'"
-                [class.full]="equipe.status === 'FULL'">
-            {{ equipe.status || 'OPEN' }}
-          </span>
-
-          <div class="card-footer">
-            <button class="join-btn" (click)="joinTeam(equipe)">
-              💬 Join Team
-            </button>
-            <button class="board-btn" (click)="openBoard(equipe)">
-              📋 Board
-            </button>
+          <div class="meta-row">
+            <span class="jira-badge" *ngIf="equipe.jiraProjectKey">
+              <mat-icon>integration_instructions</mat-icon>
+              {{ equipe.jiraProjectKey }}
+            </span>
+            <span class="jira-badge muted" *ngIf="!equipe.jiraProjectKey">
+              <mat-icon>hourglass_empty</mat-icon>
+              Jira non cree
+            </span>
           </div>
 
-        </div>
+          <div class="card-actions">
+            <button class="btn secondary" (click)="joinTeam(equipe)">
+              <mat-icon>chat</mat-icon>
+              Discussion
+            </button>
+            <button class="btn primary" (click)="openBoard(equipe)">
+              <mat-icon>view_kanban</mat-icon>
+              Board
+            </button>
+          </div>
+        </article>
       </div>
-    </div>
 
-    <!-- DROITE : panneau IA -->
-    <div class="ai-panel">
+      <div class="empty-state" *ngIf="filteredEquipes.length === 0">
+        <mat-icon>groups_3</mat-icon>
+        <p>Aucune equipe ne correspond a votre recherche.</p>
+      </div>
+    </section>
+
+    <aside class="ai-panel">
       <div class="ai-header">
-        <div class="ai-dot"></div>
+        <span class="ai-dot"></span>
         <div>
-          <p class="ai-title">Assistant IA</p>
-          <p class="ai-sub">Suggestions d'équipes & Jira</p>
+          <h2>Assistant IA</h2>
+          <p>Suggestions d'equipes et aide Jira</p>
         </div>
       </div>
 
@@ -62,149 +83,130 @@
       </div>
 
       <div class="quick-suggestions" *ngIf="messages.length <= 1">
-        <button class="suggest-btn" *ngFor="let s of suggestions"
-                (click)="sendMessage(s)">{{ s }}</button>
+        <button *ngFor="let s of suggestions" (click)="sendMessage(s)">{{ s }}</button>
       </div>
 
       <div class="input-row">
-        <input type="text" placeholder="Pose une question..."
+        <input type="text"
+               placeholder="Posez une question..."
                [(ngModel)]="userInput"
                (keydown)="onKeyDown($event)"
-               [disabled]="aiLoading"/>
-        <button class="send-btn" (click)="sendMessage()" [disabled]="aiLoading">➤</button>
+               [disabled]="aiLoading">
+        <button class="send-btn" (click)="sendMessage()" [disabled]="aiLoading">
+          <mat-icon>send</mat-icon>
+        </button>
       </div>
-    </div>
-
+    </aside>
   </ng-container>
 
-  <!-- ── VUE BOARD JIRA (étudiant) ── -->
-  <div class="board-view" *ngIf="selectedEquipe">
-
-    <!-- Header -->
+  <section class="board-view" *ngIf="selectedEquipe">
     <div class="board-header">
-      <button class="btn-back" (click)="closeBoard()">← Retour</button>
-      <div class="board-title-wrap">
+      <button class="btn-back" (click)="closeBoard()">
+        <mat-icon>arrow_back</mat-icon>
+        Retour
+      </button>
+
+      <div class="board-title">
         <span class="jira-logo">J</span>
         <div>
-          <h2>{{ selectedEquipe.nomMembresEquipe }}</h2>
-          <span class="project-key">{{ selectedEquipe.jiraProjectKey }}</span>
+          <h1>{{ selectedEquipe.nomMembresEquipe }}</h1>
+          <p>{{ selectedEquipe.jiraProjectKey || 'Projet Jira non cree' }}</p>
         </div>
       </div>
-      <div class="student-badge">
-        👤 Mes tâches uniquement
-      </div>
+
+      <span class="student-scope">
+        <mat-icon>person</mat-icon>
+        Mes taches
+      </span>
     </div>
 
-    <!-- Message d'information -->
     <div class="info-message" *ngIf="getMyTasks().length === 0">
-      <span class="info-icon">ℹ️</span>
-      <span>Aucune tâche ne vous est assignée. Les tâches sont créées et assignées par votre entreprise.</span>
+      <mat-icon>info</mat-icon>
+      <span>Aucune tache ne vous est assignee. Les taches sont creees et assignees par l'entreprise.</span>
     </div>
 
-    <!-- Stats (uniquement les tâches de l'étudiant) -->
     <div class="stats-bar">
       <div class="stat-card todo">
-        <div class="stat-value">{{ getTaskCount('TODO') }}</div>
-        <div class="stat-label">À faire</div>
+        <strong>{{ getTaskCount('TODO') }}</strong>
+        <span>A faire</span>
       </div>
-      <div class="stat-card in-progress">
-        <div class="stat-value">{{ getTaskCount('IN_PROGRESS') }}</div>
-        <div class="stat-label">En cours</div>
+      <div class="stat-card progress">
+        <strong>{{ getTaskCount('IN_PROGRESS') }}</strong>
+        <span>En cours</span>
       </div>
       <div class="stat-card done">
-        <div class="stat-value">{{ getTaskCount('DONE') }}</div>
-        <div class="stat-label">Terminé</div>
+        <strong>{{ getTaskCount('DONE') }}</strong>
+        <span>Termine</span>
       </div>
       <div class="stat-card completion">
-        <div class="stat-value">{{ getCompletionRate() }}%</div>
-        <div class="stat-label">Ma progression</div>
+        <strong>{{ getCompletionRate() }}%</strong>
+        <span>Progression</span>
       </div>
     </div>
 
-    <!-- Progress bar -->
-    <div class="progress-bar-container">
+    <div class="progress-panel">
+      <div class="progress-label">
+        <span>Avancement personnel</span>
+        <strong>{{ getCompletionRate() }}%</strong>
+      </div>
       <div class="progress-bar">
         <div class="progress-fill" [style.width]="getCompletionRate() + '%'"></div>
       </div>
-      <span class="progress-text">{{ getCompletionRate() }}% complété</span>
     </div>
 
-    <!-- Kanban (uniquement les tâches de l'étudiant) -->
     <div class="kanban-board">
-
-      <!-- TODO -->
-      <div class="column">
+      <div class="column todo">
         <div class="column-header">
-          <h3>🔴 À faire</h3>
-          <span class="task-count">{{ getTaskCount('TODO') }}</span>
+          <h2><span></span>A faire</h2>
+          <em>{{ getTaskCount('TODO') }}</em>
         </div>
         <div class="tasks-list">
-          <div *ngFor="let task of getTasksByStatus('TODO')" class="task-card">
-            <div class="task-title">{{ task.title }}</div>
-            <div class="task-desc" *ngIf="task.description">{{ task.description }}</div>
+          <article *ngFor="let task of getTasksByStatus('TODO')" class="task-card">
+            <h3>{{ task.title }}</h3>
+            <p *ngIf="task.description">{{ task.description }}</p>
             <div class="task-actions">
-              <button class="move-btn" (click)="moveTask(task, 'IN_PROGRESS')">
-                → En cours
-              </button>
-              <button class="move-btn done-direct" (click)="moveTask(task, 'DONE')">
-                ✓ Terminé
-              </button>
+              <button (click)="moveTask(task, 'IN_PROGRESS')">En cours</button>
+              <button class="done" (click)="moveTask(task, 'DONE')">Terminer</button>
             </div>
-          </div>
-          <div *ngIf="getTaskCount('TODO') === 0" class="empty-column">
-            Aucune tâche à faire
-          </div>
+          </article>
+          <div *ngIf="getTaskCount('TODO') === 0" class="empty-column">Aucune tache a faire</div>
         </div>
       </div>
 
-      <!-- IN PROGRESS -->
-      <div class="column">
+      <div class="column progress">
         <div class="column-header">
-          <h3>🟡 En cours</h3>
-          <span class="task-count">{{ getTaskCount('IN_PROGRESS') }}</span>
+          <h2><span></span>En cours</h2>
+          <em>{{ getTaskCount('IN_PROGRESS') }}</em>
         </div>
         <div class="tasks-list">
-          <div *ngFor="let task of getTasksByStatus('IN_PROGRESS')" class="task-card">
-            <div class="task-title">{{ task.title }}</div>
-            <div class="task-desc" *ngIf="task.description">{{ task.description }}</div>
+          <article *ngFor="let task of getTasksByStatus('IN_PROGRESS')" class="task-card">
+            <h3>{{ task.title }}</h3>
+            <p *ngIf="task.description">{{ task.description }}</p>
             <div class="task-actions">
-              <button class="move-back-btn" (click)="moveTask(task, 'TODO')">
-                ← Retour
-              </button>
-              <button class="move-btn" (click)="moveTask(task, 'DONE')">
-                ✓ Terminé
-              </button>
+              <button class="light" (click)="moveTask(task, 'TODO')">Retour</button>
+              <button class="done" (click)="moveTask(task, 'DONE')">Terminer</button>
             </div>
-          </div>
-          <div *ngIf="getTaskCount('IN_PROGRESS') === 0" class="empty-column">
-            Aucune tâche en cours
-          </div>
+          </article>
+          <div *ngIf="getTaskCount('IN_PROGRESS') === 0" class="empty-column">Aucune tache en cours</div>
         </div>
       </div>
 
-      <!-- DONE -->
-      <div class="column">
+      <div class="column done">
         <div class="column-header">
-          <h3>🟢 Terminé</h3>
-          <span class="task-count">{{ getTaskCount('DONE') }}</span>
+          <h2><span></span>Termine</h2>
+          <em>{{ getTaskCount('DONE') }}</em>
         </div>
         <div class="tasks-list">
-          <div *ngFor="let task of getTasksByStatus('DONE')" class="task-card done">
-            <div class="task-title">✓ {{ task.title }}</div>
-            <div class="task-desc" *ngIf="task.description">{{ task.description }}</div>
+          <article *ngFor="let task of getTasksByStatus('DONE')" class="task-card completed">
+            <h3>{{ task.title }}</h3>
+            <p *ngIf="task.description">{{ task.description }}</p>
             <div class="task-actions">
-              <button class="move-back-btn" (click)="moveTask(task, 'IN_PROGRESS')">
-                ← Réouvrir
-              </button>
+              <button class="light" (click)="moveTask(task, 'IN_PROGRESS')">Reouvrir</button>
             </div>
-          </div>
-          <div *ngIf="getTaskCount('DONE') === 0" class="empty-column">
-            Aucune tâche terminée
-          </div>
+          </article>
+          <div *ngIf="getTaskCount('DONE') === 0" class="empty-column">Aucune tache terminee</div>
         </div>
       </div>
-
     </div>
-  </div>
-
+  </section>
 </div>

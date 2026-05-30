@@ -1,11 +1,10 @@
-<div class="app-shell">
+<div class="app-shell" [ngClass]="roleClass">
   <aside class="sidebar" [class.collapsed]="sidebarCollapsed">
     <div class="sidebar-logo">
       <span class="logo-icon">B2U</span>
-      <span class="logo-text" *ngIf="!sidebarCollapsed">HUB</span>
+      <span class="logo-text" *ngIf="!sidebarCollapsed">{{ roleLabel }}</span>
     </div>
 
-    <!-- Menu Student -->
     <nav class="sidebar-nav" *ngIf="isStudent">
       <a routerLink="/app/dashboard" routerLinkActive="active">
         <mat-icon>dashboard</mat-icon>
@@ -21,24 +20,22 @@
       </a>
       <a routerLink="/app/candidatures" routerLinkActive="active">
         <mat-icon>description</mat-icon>
-        <span *ngIf="!sidebarCollapsed">Mes Candidatures</span>
+        <span *ngIf="!sidebarCollapsed">Mes candidatures</span>
       </a>
       <a routerLink="/app/scoring" routerLinkActive="active">
         <mat-icon>analytics</mat-icon>
         <span *ngIf="!sidebarCollapsed">AI Score</span>
       </a>
-      <!-- ✅ LIEN ÉQUIPES -->
       <a routerLink="/app/equipes" routerLinkActive="active">
         <mat-icon>groups</mat-icon>
-        <span *ngIf="!sidebarCollapsed">Équipes</span>
+        <span *ngIf="!sidebarCollapsed">Equipes</span>
       </a>
       <a routerLink="/app/profile" routerLinkActive="active">
         <mat-icon>person</mat-icon>
-        <span *ngIf="!sidebarCollapsed">Mon Profil</span>
+        <span *ngIf="!sidebarCollapsed">Mon profil</span>
       </a>
     </nav>
 
-    <!-- Menu Company -->
     <nav class="sidebar-nav" *ngIf="isCompany">
       <a routerLink="/company/dashboard" routerLinkActive="active">
         <mat-icon>dashboard</mat-icon>
@@ -46,54 +43,61 @@
       </a>
       <a routerLink="/company/candidatures" routerLinkActive="active">
         <mat-icon>people</mat-icon>
-        <span *ngIf="!sidebarCollapsed">Candidatures reçues</span>
+        <span *ngIf="!sidebarCollapsed">Candidatures recues</span>
       </a>
       <a routerLink="/company/work-post" routerLinkActive="active">
         <mat-icon>work</mat-icon>
         <span *ngIf="!sidebarCollapsed">Offres</span>
       </a>
+      <a routerLink="/company/projects" routerLinkActive="active">
+        <mat-icon>folder_open</mat-icon>
+        <span *ngIf="!sidebarCollapsed">Projets</span>
+      </a>
       <a routerLink="/company/attendance" routerLinkActive="active">
         <mat-icon>event</mat-icon>
-        <span *ngIf="!sidebarCollapsed">Présences</span>
+        <span *ngIf="!sidebarCollapsed">Presences</span>
       </a>
-      <!-- ✅ LIENT ÉQUIPES POUR ENTREPRISE -->
       <a routerLink="/company/equipes" routerLinkActive="active">
         <mat-icon>groups</mat-icon>
-        <span *ngIf="!sidebarCollapsed">Équipes & Tâches</span>
+        <span *ngIf="!sidebarCollapsed">Equipes & taches</span>
       </a>
       <a routerLink="/app/profile" routerLinkActive="active">
         <mat-icon>business</mat-icon>
-        <span *ngIf="!sidebarCollapsed">Mon Profil</span>
+        <span *ngIf="!sidebarCollapsed">Mon profil</span>
       </a>
     </nav>
 
     <div class="sidebar-footer">
       <button class="logout-btn" (click)="logout()">
         <mat-icon>logout</mat-icon>
-        <span *ngIf="!sidebarCollapsed">Déconnexion</span>
+        <span *ngIf="!sidebarCollapsed">Deconnexion</span>
       </button>
     </div>
   </aside>
 
   <div class="main-area" [class.expanded]="sidebarCollapsed">
     <header class="topbar">
-      <button class="menu-btn" (click)="sidebarCollapsed = !sidebarCollapsed">
+      <button class="menu-btn" (click)="sidebarCollapsed = !sidebarCollapsed" title="Menu">
         <mat-icon>menu</mat-icon>
       </button>
-      <span class="topbar-title">B2U-HUB</span>
+      <div class="topbar-heading">
+        <span class="topbar-title">{{ sectionTitle }}</span>
+        <span class="topbar-subtitle">B2U-HUB</span>
+      </div>
       <div class="topbar-right">
         <div class="user-info" *ngIf="user$ | async as u">
+          <span class="avatar">{{ initials(u.firstName, u.lastName) }}</span>
           <span class="user-name">{{ u.firstName }} {{ u.lastName }}</span>
-          <span class="role-badge" [ngClass]="u.role">{{ u.role }}</span>
+          <span class="role-badge" [ngClass]="u.role">{{ roleLabel }}</span>
         </div>
-        <button class="topbar-logout-btn" (click)="logout()" title="Déconnexion">
+        <button class="topbar-logout-btn" (click)="logout()" title="Deconnexion">
           <mat-icon>logout</mat-icon>
-          <span>Déconnexion</span>
+          <span>Deconnexion</span>
         </button>
       </div>
     </header>
+
     <main class="page-content">
-      <!-- ✅ ESSENTIEL : router-outlet pour afficher les pages enfants -->
       <router-outlet></router-outlet>
     </main>
   </div>

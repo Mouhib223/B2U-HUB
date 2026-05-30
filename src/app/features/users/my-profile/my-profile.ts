@@ -13,16 +13,12 @@ import { ProfileService, EtudiantProfile } from '../../../core/services/profile.
   styleUrls: ['./my-profile.scss']
 })
 export class MyProfile implements OnInit {
-  private auth    = inject(AuthService);
+  private auth = inject(AuthService);
   private profile = inject(ProfileService);
 
   user = this.auth.getCurrentUser();
   studentProfile: EtudiantProfile | null = null;
   companyProfile: any = null;
-
-  get currentUser() {
-    return this.user;
-  }
 
   ngOnInit() {
     if (!this.user) return;
@@ -42,25 +38,37 @@ export class MyProfile implements OnInit {
     }
   }
 
-  primaryRoute(user: any): string {
-    if (!user) return '/';
-    if (user.role === 'student') return '/app/projects';
-    if (user.role === 'company') return '/company/work-post';
-    return '/admin/users';
+  primaryRoute(user: { role?: string } | null): string {
+    switch (user?.role) {
+      case 'company':
+        return '/company/work-post';
+      case 'admin':
+        return '/admin/dashboard';
+      default:
+        return '/app/edit-profile';
+    }
   }
 
-  primaryIcon(user: any): string {
-    if (!user) return 'home';
-    if (user.role === 'student') return 'work';
-    if (user.role === 'company') return 'business';
-    return 'admin_panel_settings';
+  primaryIcon(user: { role?: string } | null): string {
+    switch (user?.role) {
+      case 'company':
+        return 'work';
+      case 'admin':
+        return 'dashboard';
+      default:
+        return 'edit';
+    }
   }
 
-  primaryLabel(user: any): string {
-    if (!user) return 'Accueil';
-    if (user.role === 'student') return 'Voir les offres';
-    if (user.role === 'company') return 'Mes offres';
-    return 'Gérer les utilisateurs';
+  primaryLabel(user: { role?: string } | null): string {
+    switch (user?.role) {
+      case 'company':
+        return 'Gerer mes offres';
+      case 'admin':
+        return 'Tableau de bord';
+      default:
+        return 'Modifier mon profil';
+    }
   }
 
   logout(): void {

@@ -7,7 +7,7 @@
     <div class="stats-label">{{ label }}</div>
     <div class="stats-change" [class.up]="change >= 0" [class.down]="change < 0">
       <mat-icon>{{ change >= 0 ? 'trending_up' : 'trending_down' }}</mat-icon>
-      {{ change >= 0 ? '+' : '' }}{{ change }}% this month
+      {{ change >= 0 ? '+' : '' }}{{ change }}% ce mois-ci
     </div>
   </div>
 </div>

@@ -13,15 +13,16 @@
     </div>
 
     <div class="hero-actions">
-      <a [routerLink]="primaryRoute(user)" class="btn-primary" *ngIf="user">
-        <mat-icon>{{ primaryIcon(user) }}</mat-icon>
-        {{ primaryLabel(user) }}
+      <a [routerLink]="primaryRoute(current)" class="btn-primary">
+        <mat-icon>{{ primaryIcon(current) }}</mat-icon>
+        {{ primaryLabel(current) }}
       </a>
       <button type="button" class="btn-logout" (click)="logout()">
         <mat-icon>logout</mat-icon>
         Deconnexion
       </button>
     </div>
+  </section>
 
   <section class="profile-grid" *ngIf="current.role === 'student'">
     <article class="profile-card">
