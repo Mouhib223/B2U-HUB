@@ -19,11 +19,11 @@ import { AuthService } from '../../core/services/auth.service';
 
         <nav>
           <a routerLink="/app/projects" routerLinkActive="active">
-            <mat-icon>work</mat-icon>
-            <span *ngIf="!collapsed">Offres / Projets</span>
+            <mat-icon>business</mat-icon>
+            <span *ngIf="!collapsed">Projets</span>
           </a>
 
-          <a routerLink="/student/candidatures" routerLinkActive="active">
+          <a routerLink="/app/candidatures" routerLinkActive="active">
             <mat-icon>description</mat-icon>
             <span *ngIf="!collapsed">Mes Candidatures</span>
           </a>
@@ -42,11 +42,11 @@ import { AuthService } from '../../core/services/auth.service';
           </a>
 
           <!-- ✅ Lien Equipes corrigé -->
-          <a routerLink="/student/equipes" routerLinkActive="active">
+          <a routerLink="/app/equipes" routerLinkActive="active">
             <mat-icon>groups</mat-icon>
             <span *ngIf="!collapsed">Equipes</span>
           </a>
-          <a routerLink="/student/profile" routerLinkActive="active">
+          <a routerLink="/app/profile" routerLinkActive="active">
             <mat-icon>person</mat-icon>
             <span *ngIf="!collapsed">Profil</span>
           </a>

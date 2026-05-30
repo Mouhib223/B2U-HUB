@@ -58,7 +58,7 @@ export class LoginComponent {
         const user = this.auth.getCurrentUser();
         if (user?.role === 'admin') this.router.navigate(['/admin/dashboard']);
         else if (user?.role === 'company') this.router.navigate(['/company/dashboard']);
-        else this.router.navigate(['/student/dashboard']);
+        else this.router.navigate(['/app/dashboard']);
       },
       error: (err: any) => {
         this.error = err.error?.message || 'Email ou mot de passe incorrect.';

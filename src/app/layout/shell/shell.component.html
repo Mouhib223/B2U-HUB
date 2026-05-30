@@ -7,19 +7,19 @@
 
     <!-- Menu Student -->
     <nav class="sidebar-nav" *ngIf="isStudent">
-      <a routerLink="/student/candidatures" routerLinkActive="active">
+      <a routerLink="/app/dashboard" routerLinkActive="active">
         <mat-icon>dashboard</mat-icon>
         <span *ngIf="!sidebarCollapsed">Dashboard</span>
       </a>
-      <a routerLink="/student/my-company" routerLinkActive="active">
+      <a routerLink="/app/projects" routerLinkActive="active">
         <mat-icon>business</mat-icon>
-        <span *ngIf="!sidebarCollapsed">Mon Entreprise</span>
+        <span *ngIf="!sidebarCollapsed">Projets</span>
       </a>
-      <a routerLink="/student/projects" routerLinkActive="active">
+      <a routerLink="/app/my-company" routerLinkActive="active">
         <mat-icon>work</mat-icon>
-        <span *ngIf="!sidebarCollapsed">Offres / Projets</span>
+        <span *ngIf="!sidebarCollapsed">Entreprises / Offres</span>
       </a>
-      <a routerLink="/student/candidatures" routerLinkActive="active">
+      <a routerLink="/app/candidatures" routerLinkActive="active">
         <mat-icon>description</mat-icon>
         <span *ngIf="!sidebarCollapsed">Mes Candidatures</span>
       </a>

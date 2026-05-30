@@ -12,7 +12,7 @@ export class AdminGuard implements CanActivate {
     if (user?.role === 'admin') return true;
 
     // Not admin → send to front office
-    this.router.navigate(['/student/dashboard']);
+    this.router.navigate(['/app/dashboard']);
     return false;
   }
 }*/
@@ -31,7 +31,7 @@ export class AdminGuard implements CanActivate {
 
     const user = this.auth.getCurrentUser();
     if (user?.role === 'admin') return true;
-    this.router.navigate(['/student/dashboard']);
+    this.router.navigate(['/app/dashboard']);
     return false;
   }
 }

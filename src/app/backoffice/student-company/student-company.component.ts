@@ -105,7 +105,7 @@ export class StudentCompanyComponent implements OnInit {
   }
 
   subject(company: Entreprise) {
-    this.router.navigate(['/student/projects'], {
+    this.router.navigate(['/app/projects'], {
       state: { companyId: company.id, companyName: company.name }
     });
   }

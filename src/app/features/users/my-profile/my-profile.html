@@ -1,12 +1,14 @@
-<div class="profile-page" *ngIf="user">
-  <div class="profile-card">
-
-    <div class="profile-header">
-      <div class="avatar-lg">{{ user.firstName[0] }}{{ user.lastName[0] }}</div>
-      <div class="header-info">
-        <h1>{{ user.firstName }} {{ user.lastName }}</h1>
-        <span class="role-badge" [ngClass]="user.role">{{ user.role }}</span>
-        <p class="email"><mat-icon>email</mat-icon> {{ user.email }}</p>
+<div class="profile-page" *ngIf="user as current">
+  <section class="profile-hero">
+    <div class="identity">
+      <div class="avatar-lg">{{ current.firstName[0] }}{{ current.lastName[0] }}</div>
+      <div>
+        <span class="eyebrow">Mon profil</span>
+        <h1>{{ current.firstName }} {{ current.lastName }}</h1>
+        <div class="meta-line">
+          <span class="role-badge" [ngClass]="current.role">{{ current.role }}</span>
+          <span><mat-icon>email</mat-icon> {{ current.email }}</span>
+        </div>
       </div>
     </div>
 
@@ -21,100 +23,176 @@
       </button>
     </div>
 
-    <!-- ── Student ── -->
-    <ng-container *ngIf="user.role === 'student'">
-      <div class="profile-body" *ngIf="studentProfile">
+  <section class="profile-grid" *ngIf="current.role === 'student'">
+    <article class="profile-card">
+      <div class="card-title">
+        <mat-icon>badge</mat-icon>
+        <h2>Informations etudiant</h2>
+      </div>
 
+      <div class="info-list" *ngIf="studentProfile; else noStudentProfile">
         <div class="info-row" *ngIf="studentProfile.bio">
-          <mat-icon>info</mat-icon><span>{{ studentProfile.bio }}</span>
-        </div>
-        <div class="info-row" *ngIf="studentProfile.university">
-          <mat-icon>school</mat-icon><span>{{ studentProfile.university }}</span>
-        </div>
-        <div class="info-row" *ngIf="studentProfile.graduationYear">
-          <mat-icon>calendar_today</mat-icon><span>Promotion {{ studentProfile.graduationYear }}</span>
-        </div>
-        <div class="info-row" *ngIf="studentProfile.specialite">
-          <mat-icon>biotech</mat-icon><span>{{ studentProfile.specialite }}</span>
-        </div>
-        <div class="info-row" *ngIf="studentProfile.phone">
-          <mat-icon>phone</mat-icon><span>{{ studentProfile.phone }}</span>
-        </div>
-
-        <div class="social-links">
-          <a *ngIf="studentProfile.linkedin" [href]="studentProfile.linkedin" target="_blank" class="social-btn linkedin">
-            <mat-icon>link</mat-icon> LinkedIn
-          </a>
-          <a *ngIf="studentProfile.github" [href]="studentProfile.github" target="_blank" class="social-btn github">
-            <mat-icon>code</mat-icon> GitHub
-          </a>
-        </div>
-
-        <div class="skills-section" *ngIf="studentProfile.skills?.length">
-          <p class="section-label">Compétences</p>
-          <div class="tags">
-            <span class="tag" *ngFor="let s of studentProfile.skills">{{ s }}</span>
+          <mat-icon>info</mat-icon>
+          <div>
+            <label>Bio</label>
+            <span>{{ studentProfile.bio }}</span>
           </div>
         </div>
-
-        <div class="empty-profile" *ngIf="!studentProfile.bio && !studentProfile.university">
-          <mat-icon>person_add</mat-icon>
-          <p>Complétez votre profil pour augmenter vos chances !</p>
-          <a routerLink="/app/edit-profile" class="btn-fill">Compléter maintenant</a>
+        <div class="info-row" *ngIf="studentProfile.university">
+          <mat-icon>school</mat-icon>
+          <div>
+            <label>Universite</label>
+            <span>{{ studentProfile.university }}</span>
+          </div>
+        </div>
+        <div class="info-row" *ngIf="studentProfile.specialite">
+          <mat-icon>biotech</mat-icon>
+          <div>
+            <label>Specialite</label>
+            <span>{{ studentProfile.specialite }}</span>
+          </div>
+        </div>
+        <div class="info-row" *ngIf="studentProfile.graduationYear">
+          <mat-icon>calendar_today</mat-icon>
+          <div>
+            <label>Promotion</label>
+            <span>{{ studentProfile.graduationYear }}</span>
+          </div>
+        </div>
+        <div class="info-row" *ngIf="studentProfile.phone">
+          <mat-icon>phone</mat-icon>
+          <div>
+            <label>Telephone</label>
+            <span>{{ studentProfile.phone }}</span>
+          </div>
         </div>
       </div>
+    </article>
 
+    <article class="profile-card">
+      <div class="card-title">
+        <mat-icon>psychology</mat-icon>
+        <h2>Competences</h2>
+      </div>
+      <div class="tags" *ngIf="studentProfile?.skills?.length; else noSkills">
+        <span class="tag" *ngFor="let skill of studentProfile?.skills">{{ skill }}</span>
+      </div>
+    </article>
+
+    <article class="profile-card wide-card">
+      <div class="card-title">
+        <mat-icon>bolt</mat-icon>
+        <h2>Actions rapides</h2>
+      </div>
       <div class="quick-links">
         <a routerLink="/app/candidatures" class="link-card">
-          <mat-icon>description</mat-icon> Mes Candidatures
+          <mat-icon>description</mat-icon>
+          Mes candidatures
         </a>
-        <a routerLink="/app/projects" class="link-card">
-          <mat-icon>work</mat-icon> Voir les offres
+        <a routerLink="/app/my-company" class="link-card">
+          <mat-icon>work</mat-icon>
+          Voir les offres
+        </a>
+        <a routerLink="/app/edit-profile" class="link-card">
+          <mat-icon>edit</mat-icon>
+          Modifier le profil
+        </a>
+        <a routerLink="/app/equipes" class="link-card">
+          <mat-icon>groups</mat-icon>
+          Mes equipes
         </a>
       </div>
-    </ng-container>
+    </article>
+  </section>
 
-    <!-- ── Company ── -->
-    <ng-container *ngIf="user.role === 'company'">
-      <div class="profile-body" *ngIf="companyProfile">
+  <section class="profile-grid" *ngIf="current.role === 'company'">
+    <article class="profile-card">
+      <div class="card-title">
+        <mat-icon>business</mat-icon>
+        <h2>Informations entreprise</h2>
+      </div>
+      <div class="info-list" *ngIf="companyProfile; else noCompanyProfile">
         <div class="info-row" *ngIf="companyProfile.description">
-          <mat-icon>info</mat-icon><span>{{ companyProfile.description }}</span>
+          <mat-icon>info</mat-icon>
+          <div>
+            <label>Description</label>
+            <span>{{ companyProfile.description }}</span>
+          </div>
         </div>
         <div class="info-row" *ngIf="companyProfile.sector">
-          <mat-icon>category</mat-icon><span>{{ companyProfile.sector }}</span>
+          <mat-icon>category</mat-icon>
+          <div>
+            <label>Secteur</label>
+            <span>{{ companyProfile.sector }}</span>
+          </div>
         </div>
         <div class="info-row" *ngIf="companyProfile.address">
-          <mat-icon>location_on</mat-icon><span>{{ companyProfile.address }}</span>
+          <mat-icon>location_on</mat-icon>
+          <div>
+            <label>Adresse</label>
+            <span>{{ companyProfile.address }}</span>
+          </div>
         </div>
         <div class="info-row" *ngIf="companyProfile.phone">
-          <mat-icon>phone</mat-icon><span>{{ companyProfile.phone }}</span>
+          <mat-icon>phone</mat-icon>
+          <div>
+            <label>Telephone</label>
+            <span>{{ companyProfile.phone }}</span>
+          </div>
         </div>
       </div>
+    </article>
 
+    <article class="profile-card">
+      <div class="card-title">
+        <mat-icon>bolt</mat-icon>
+        <h2>Actions rapides</h2>
+      </div>
       <div class="quick-links">
         <a routerLink="/company/candidatures" class="link-card">
-          <mat-icon>people</mat-icon> Candidatures reçues
+          <mat-icon>people</mat-icon>
+          Candidatures recues
         </a>
         <a routerLink="/company/work-post" class="link-card">
-          <mat-icon>work</mat-icon> Mes offres
+          <mat-icon>work</mat-icon>
+          Mes offres
         </a>
       </div>
-    </ng-container>
+    </article>
+  </section>
 
-    <!-- ── Admin ── -->
-    <ng-container *ngIf="user.role === 'admin'">
+  <section class="profile-grid" *ngIf="current.role === 'admin'">
+    <article class="profile-card wide-card">
+      <div class="card-title">
+        <mat-icon>admin_panel_settings</mat-icon>
+        <h2>Administration</h2>
+      </div>
       <div class="quick-links">
         <a routerLink="/admin/users" class="link-card">
-          <mat-icon>people</mat-icon> Gérer les utilisateurs
+          <mat-icon>people</mat-icon>
+          Gerer les utilisateurs
         </a>
         <a routerLink="/admin/companies" class="link-card">
-          <mat-icon>business</mat-icon> Gérer les entreprises
+          <mat-icon>business</mat-icon>
+          Gerer les entreprises
         </a>
         <a routerLink="/admin/candidatures" class="link-card">
-          <mat-icon>description</mat-icon> Toutes les candidatures
+          <mat-icon>description</mat-icon>
+          Toutes les candidatures
         </a>
       </div>
-    </ng-container>
-
-  </div>
+    </article>
+  </section>
 </div>
+
+<ng-template #noStudentProfile>
+  <p class="empty-text">Completez votre profil pour ameliorer vos candidatures et votre score de matching.</p>
+</ng-template>
+
+<ng-template #noCompanyProfile>
+  <p class="empty-text">Les informations de votre entreprise ne sont pas encore renseignees.</p>
+</ng-template>
+
+<ng-template #noSkills>
+  <p class="empty-text">Aucune competence renseignee pour le moment.</p>
+</ng-template>

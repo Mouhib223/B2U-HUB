@@ -40,17 +40,8 @@ export class CandidatureService {
     return this.http.post<Candidature>(this.url, dto);
   }
 
-  /**
-   * Envoie la candidature avec CV et lettre de motivation.
-   * Le backend attend: data (JSON string), cv (file), lettre (file), projectId (string)
-   */
-  createWithFiles(dto: Omit<Candidature, 'idCandidature'>, cv: File, lettre: File): Observable<Candidature> {
-    const fd = new FormData();
-    fd.append('data', JSON.stringify(dto));
-    fd.append('cv', cv);
-    fd.append('lettre', lettre);
-    fd.append('projectId', dto.projectId ?? '');
-    return this.http.post<Candidature>(`${this.url}/upload`, fd);
+  createWithFiles(formData: FormData): Observable<Candidature> {
+    return this.http.post<Candidature>(`${this.url}/upload`, formData);
   }
 
   update(id: string, dto: Candidature): Observable<Candidature> {

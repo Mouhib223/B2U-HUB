@@ -40,6 +40,16 @@ export class ProjectListComponent implements OnInit {
     return this.auth.getCurrentUser()?.role === 'student';
   }
 
+  projectDetailLink(project: Project): string[] {
+    const role = this.auth.getCurrentUser()?.role;
+    const base = role === 'student'
+      ? '/app/projects'
+      : role === 'company'
+        ? '/company/projects'
+        : '/app/projects';
+    return [base, project.id!];
+  }
+
   ngOnInit(): void {
     this.projetService.getAllProjets().subscribe({
       next: (data) => { this.projects = data; this.loading = false; },

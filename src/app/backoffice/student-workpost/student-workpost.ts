@@ -55,7 +55,7 @@ export class StudentWorkpost implements OnInit {
 
 
   goBack(): void {
-    this.router.navigate(['/student/my-company']);
+    this.router.navigate(['/app/my-company']);
   }
 
   applyForPost(post: WorkPost): void {
