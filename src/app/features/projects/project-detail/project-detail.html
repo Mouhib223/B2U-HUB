@@ -25,8 +25,7 @@
             <span class="status-badge" [class.open]="project.status === 'open'">
               {{ project.status }}
             </span>
-            
-              class="apply-btn"
+            <a class="apply-btn"
               [routerLink]="['/student/new-candidature']"
               [queryParams]="{ projectId: project.id }">
               <mat-icon>send</mat-icon>
@@ -65,4 +64,10 @@
   
       <!-- Bouton Gérer le projet -->
       <div class="manage-btn-container">
-        <button class="btn-manage" (click)="goToManag
+        <button class="btn-manage" (click)="goToManage()">
+          <mat-icon>dashboard</mat-icon> Gérer le projet (Kanban & Sprints)
+        </button>
+      </div>
+  
+    </div>
+  </div>
