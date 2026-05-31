@@ -9,44 +9,44 @@ pipeline {
             }
         }
 
-        stage('Node Version Check') {
-            steps {
-                sh 'node -v || true'
-                sh 'npm -v || true'
+        stage('Frontend - Install & Build') {
+            agent {
+                docker { image 'node:18' }
             }
-        }
-
-        stage('Install Frontend Dependencies') {
             steps {
-                sh 'npm install || true'
-            }
-        }
-
-        stage('Build Frontend') {
-            steps {
-                sh 'npm run build -- --configuration production || true'
+                sh 'node -v'
+                sh 'npm -v'
+                sh 'npm install'
+                sh 'npm run build -- --configuration production'
             }
         }
 
         stage('Frontend Tests') {
+            agent {
+                docker { image 'node:18' }
+            }
             steps {
                 sh 'npm test -- --watch=false || true'
             }
         }
 
-        stage('Backend Build (optional)') {
+        stage('Backend - Build Spring Boot') {
+            agent {
+                docker { image 'maven:3.9.6-eclipse-temurin-17' }
+            }
             steps {
-                sh 'mvn clean install -DskipTests || true'
+                sh 'mvn clean install -DskipTests'
             }
         }
     }
 
     post {
         success {
-            echo '✅ PI PIPELINE SUCCESS'
+            echo '✅ PI PIPELINE SUCCESS (Angular + Spring Boot)'
         }
+
         failure {
-            echo '❌ Pipeline failed (ignored for PI)'
+            echo '❌ Pipeline failed'
         }
     }
 }
