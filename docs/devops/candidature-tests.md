@@ -30,6 +30,23 @@ Back Spring Boot:
 mvn -Dtest=CandidatureControllerFunctionalTest test
 ```
 
+## Tests d'integration
+
+Le test d'integration backend traverse le controller HTTP et le service candidature avec un stockage simule en memoire.
+Il verifie le scenario complet: creer une candidature, enrichir les informations projet, puis relire la candidature par email.
+
+```bash
+cd B2U_backend
+mvn -Dtest=CandidatureControllerServiceIntegrationTest test
+```
+
+Pour lancer unitaires, fonctionnels et integration ensemble:
+
+```bash
+cd B2U_backend
+mvn -Dtest=CandidatureServiceTest,CandidatureControllerFunctionalTest,CandidatureControllerServiceIntegrationTest test
+```
+
 ## Test statique SonarQube
 
 Les fichiers de configuration sont:
@@ -100,3 +117,35 @@ docker compose -f docker-compose.zap-candidature.yml --profile zap run --rm zap-
 ```
 
 Les rapports a joindre dans le rendu DevOps sont: resultats unitaires, resultats fonctionnels, rapport SonarQube, rapport OWASP Dependency-Check et rapport OWASP ZAP.
+
+## Test de charge et latence au pic
+
+Le script k6 mesure la latence des endpoints candidature pendant une montee en charge jusqu'a 50 utilisateurs virtuels.
+
+Fichier:
+
+```bash
+B2U_backend/tests/load/candidature-peak-latency.k6.js
+```
+
+Lancer avec k6 installe localement:
+
+```bash
+k6 run -e BASE_URL=http://localhost:8080 B2U_backend/tests/load/candidature-peak-latency.k6.js
+```
+
+Lancer avec Docker:
+
+```bash
+docker run --rm -i -e BASE_URL=http://host.docker.internal:8080 -v "${PWD}/B2U_backend/tests/load:/scripts" grafana/k6 run /scripts/candidature-peak-latency.k6.js
+```
+
+Seuils valides pour le rendu:
+
+```text
+Erreurs HTTP < 1%
+Latence globale p95 < 1000 ms
+Latence globale p99 < 2000 ms
+Creation candidature p95 < 1200 ms
+Lecture mes candidatures p95 < 700 ms
+```
