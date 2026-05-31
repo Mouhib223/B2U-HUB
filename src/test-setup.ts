@@ -29,3 +29,14 @@ TestBed.configureTestingModule = (moduleDef: any = {}) =>
       ...(moduleDef.providers ?? [])
     ]
   });
+
+beforeEach(() => {
+  TestBed.configureTestingModule({
+    providers: [
+      provideHttpClient(),
+      provideHttpClientTesting(),
+      provideRouter([]),
+      { provide: ActivatedRoute, useValue: defaultActivatedRoute }
+    ]
+  });
+});
