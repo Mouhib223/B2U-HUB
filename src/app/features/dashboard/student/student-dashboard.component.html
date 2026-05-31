@@ -5,13 +5,15 @@
       <h1>Bonjour, {{ user?.firstName || 'Student' }}</h1>
       <p>Retrouvez vos projets, candidatures et indicateurs de matching dans une vue claire.</p>
     </div>
+
     <button class="btn-primary" routerLink="/app/my-company">
       <mat-icon>search</mat-icon> Voir les offres
     </button>
+
     <button class="btn-primary" routerLink="/app/candidatures" style="margin-left:.75rem; background:#0E9F6E">
       <mat-icon>description</mat-icon> Mes Candidatures
     </button>
-  </div>
+  </section>
 
   <div class="stats-grid">
     <b2u-stats-card
@@ -23,17 +25,19 @@
       [iconBg]="s.iconBg"
       [iconColor]="s.iconColor">
     </b2u-stats-card>
-  </section>
+  </div>
 
   <section class="quick-grid">
     <a routerLink="/app/projects" class="quick-card">
       <mat-icon>folder_open</mat-icon>
       <span>Explorer les projets</span>
     </a>
+
     <a routerLink="/app/scoring" class="quick-card">
       <mat-icon>analytics</mat-icon>
       <span>Ameliorer mon score</span>
     </a>
+
     <a routerLink="/app/profile" class="quick-card">
       <mat-icon>person</mat-icon>
       <span>Completer mon profil</span>
@@ -75,7 +79,10 @@
       </div>
 
       <p class="score-rank">{{ aiRank || 'N/A' }}</p>
-      <a routerLink="/app/scoring" class="score-link">Voir le detail du score</a>
+
+      <a routerLink="/app/scoring" class="score-link">
+        Voir le detail du score
+      </a>
     </article>
   </section>
 </div>
