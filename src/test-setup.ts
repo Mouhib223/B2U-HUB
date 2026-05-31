@@ -17,10 +17,9 @@ const defaultActivatedRoute = {
   data: of({})
 };
 
-TestBed.configureTestingModule = (moduleDef: any = {}) =>
-  originalConfigureTestingModule({
+TestBed.configureTestingModule = (moduleDef: any = {}) => {
+  const patchedModuleDef: any = {
     ...moduleDef,
-    imports: [...(moduleDef.imports ?? [])],
     providers: [
       provideHttpClient(),
       provideHttpClientTesting(),
@@ -28,5 +27,12 @@ TestBed.configureTestingModule = (moduleDef: any = {}) =>
       provideNoopAnimations(),
       { provide: ActivatedRoute, useValue: defaultActivatedRoute },
       ...(moduleDef.providers ?? [])
-    ]
-  });
+    ].filter(Boolean)
+  };
+
+  if (moduleDef.imports) {
+    patchedModuleDef.imports = moduleDef.imports.filter(Boolean);
+  }
+
+  return originalConfigureTestingModule(patchedModuleDef);
+};
