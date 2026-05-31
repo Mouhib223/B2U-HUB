@@ -21,7 +21,7 @@ pipeline {
             }
         }
 
-        stage('Build') {
+        stage('Build Angular') {
             steps {
                 bat 'npm run build -- --configuration production'
             }
@@ -38,9 +38,7 @@ pipeline {
                 bat '''
                     docker stop b2u-frontend || exit 0
                     docker rm b2u-frontend || exit 0
-                    docker run -d --name b2u-frontend ^
-                      -p 4200:80 ^
-                      b2u-frontend:latest
+                    docker run -d -p 4200:80 --name b2u-frontend b2u-frontend:latest
                 '''
             }
         }
@@ -48,10 +46,10 @@ pipeline {
 
     post {
         success {
-            echo '✅ Frontend Pipeline succeeded!'
+            echo '✅ Pipeline SUCCESS'
         }
         failure {
-            echo '❌ Frontend Pipeline failed!'
+            echo '❌ Pipeline FAILED'
         }
     }
 }
