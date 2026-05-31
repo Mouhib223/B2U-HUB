@@ -79,7 +79,8 @@
             "karmaConfig": "karma.conf.js",
             "polyfills": [
               "zone.js",
-              "zone.js/testing"
+              "zone.js/testing",
+              "src/test-setup.ts"
             ],
             "inlineStyleLanguage": "scss",
             "assets": [
