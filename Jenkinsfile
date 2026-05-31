@@ -1,51 +1,51 @@
 pipeline {
     agent any
-    
+
     stages {
+
         stage('Checkout') {
             steps {
                 checkout scm
             }
         }
-        
+
         stage('Install Dependencies') {
             steps {
-                sh 'npm install'
+                bat 'npm install'
             }
         }
-        
+
         stage('Lint') {
             steps {
-                sh 'npm run lint || true'
+                bat 'npm run lint || exit 0'
             }
         }
-        
+
         stage('Build') {
             steps {
-                sh 'npm run build -- --configuration production'
+                bat 'npm run build -- --configuration production'
             }
         }
-        
+
         stage('Docker Build') {
             steps {
-                sh 'docker build -t b2u-frontend:latest .'
+                bat 'docker build -t b2u-frontend:latest .'
             }
         }
-        
+
         stage('Docker Run') {
             steps {
-                sh '''
-                    docker stop b2u-frontend || true
-                    docker rm b2u-frontend || true
-                    docker run -d --name b2u-frontend \
-                      --network b2u-network \
-                      -p 4200:80 \
+                bat '''
+                    docker stop b2u-frontend || exit 0
+                    docker rm b2u-frontend || exit 0
+                    docker run -d --name b2u-frontend ^
+                      -p 4200:80 ^
                       b2u-frontend:latest
                 '''
             }
         }
     }
-    
+
     post {
         success {
             echo '✅ Frontend Pipeline succeeded!'
