@@ -1,6 +1,11 @@
 pipeline {
     agent any
 
+    tools {
+        nodejs 'NodeJS 22'
+        maven 'Maven'
+    }
+
     stages {
 
         stage('Checkout') {
@@ -9,31 +14,33 @@ pipeline {
             }
         }
 
-        stage('Frontend - Install & Build') {
-            agent {
-                docker { image 'node:18' }
-            }
+        stage('Check Versions') {
             steps {
                 sh 'node -v'
                 sh 'npm -v'
+                sh 'mvn -v'
+            }
+        }
+
+        stage('Frontend Install') {
+            steps {
                 sh 'npm install'
+            }
+        }
+
+        stage('Frontend Build') {
+            steps {
                 sh 'npm run build -- --configuration production'
             }
         }
 
         stage('Frontend Tests') {
-            agent {
-                docker { image 'node:18' }
-            }
             steps {
                 sh 'npm test -- --watch=false || true'
             }
         }
 
-        stage('Backend - Build Spring Boot') {
-            agent {
-                docker { image 'maven:3.9.6-eclipse-temurin-17' }
-            }
+        stage('Backend Build') {
             steps {
                 sh 'mvn clean install -DskipTests'
             }
@@ -42,9 +49,8 @@ pipeline {
 
     post {
         success {
-            echo '✅ PI PIPELINE SUCCESS (Angular + Spring Boot)'
+            echo '✅ PI PIPELINE SUCCESS (Tools configured)'
         }
-
         failure {
             echo '❌ Pipeline failed'
         }
