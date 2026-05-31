@@ -9,39 +9,48 @@ pipeline {
             }
         }
 
-        stage('Install Frontend Dependencies') {
+        stage('Install + Build Frontend') {
+            agent {
+                docker {
+                    image 'node:18'
+                }
+            }
             steps {
-                sh 'npm install || true'
+                sh 'node -v'
+                sh 'npm install'
+                sh 'npm run build -- --configuration production'
             }
         }
 
-        stage('Frontend Tests') {
+        stage('Tests') {
+            agent {
+                docker {
+                    image 'node:18'
+                }
+            }
             steps {
                 sh 'npm test -- --watch=false || true'
             }
         }
 
-        stage('Frontend Build') {
-            steps {
-                sh 'npm run build -- --configuration production || true'
+        stage('Backend Build (optional)') {
+            agent {
+                docker {
+                    image 'maven:3.9.6-eclipse-temurin-17'
+                }
             }
-        }
-
-        stage('Backend Build (Spring Boot)') {
             steps {
                 sh 'mvn clean install -DskipTests || true'
             }
         }
-
     }
 
     post {
         success {
-            echo '✅ PI PIPELINE SUCCESS (Frontend + Backend)'
+            echo '✅ PI PIPELINE SUCCESS'
         }
-
         failure {
-            echo '❌ Pipeline failed (ignored for PI demo mode)'
+            echo '❌ Pipeline failed'
         }
     }
 }
