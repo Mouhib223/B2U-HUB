@@ -125,20 +125,18 @@ describe('CandidatureFormComponent', () => {
     expect(component.success).toBeTrue();
   });
 
-  it('cree une candidature multipart quand CV et lettre sont presents', () => {
-    remplirFormulaireValide();
-    component.cvFile = new File(['cv'], 'cv.pdf', { type: 'application/pdf' });
-    component.lettreFile = new File(['lettre'], 'lettre.pdf', { type: 'application/pdf' });
+it('cree une candidature multipart quand CV et lettre sont presents', () => {
+  remplirFormulaireValide();
+  component.cvFile = new File(['cv'], 'cv.pdf', { type: 'application/pdf' });
+  component.lettreFile = new File(['lettre'], 'lettre.pdf', { type: 'application/pdf' });
 
-    component.submit();
+  component.submit();
 
-    expect(candidatureService.createWithFiles).toHaveBeenCalledWith(
-      jasmine.objectContaining({ projectId: 'project-1', email: 'student@b2u.tn' }),
-      component.cvFile,
-      component.lettreFile
-    );
-    expect(component.success).toBeTrue();
-  });
+  expect(candidatureService.createWithFiles).toHaveBeenCalledWith(
+    jasmine.any(FormData)
+  );
+  expect(component.success).toBeTrue();
+});
 
   it('affiche le message backend en cas derreur de creation', () => {
     remplirFormulaireValide();

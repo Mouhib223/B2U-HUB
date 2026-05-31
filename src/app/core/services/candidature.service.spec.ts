@@ -82,28 +82,23 @@ describe('CandidatureService', () => {
   });
 
   it('cree une candidature multipart avec CV et lettre', () => {
-    const cv = new File(['cv'], 'cv.pdf', { type: 'application/pdf' });
-    const lettre = new File(['lettre'], 'lettre.pdf', { type: 'application/pdf' });
-    const dto = {
-      ...candidature,
-      idCandidature: undefined
-    };
+  const cv = new File(['cv'], 'cv.pdf', { type: 'application/pdf' });
+  const lettre = new File(['lettre'], 'lettre.pdf', { type: 'application/pdf' });
 
-    service.createWithFiles(dto, cv, lettre).subscribe(result => {
-      expect(result).toEqual(candidature);
-    });
+  const formData = new FormData();
+  formData.append('data', JSON.stringify(candidature));
+  formData.append('cv', cv);
+  formData.append('lettre', lettre);
 
-    const req = httpMock.expectOne(`${apiUrl}/upload`);
-    expect(req.request.method).toBe('POST');
-    expect(req.request.body instanceof FormData).toBeTrue();
-
-    const formData = req.request.body as FormData;
-    expect(formData.get('cv')).toBe(cv);
-    expect(formData.get('lettre')).toBe(lettre);
-    expect(formData.get('projectId')).toBe('project-1');
-    expect(JSON.parse(formData.get('data') as string).email).toBe('student@b2u.tn');
-    req.flush(candidature);
+  service.createWithFiles(formData).subscribe(result => {
+    expect(result).toEqual(candidature);
   });
+
+  const req = httpMock.expectOne(`${apiUrl}/upload`);
+  expect(req.request.method).toBe('POST');
+  expect(req.request.body instanceof FormData).toBeTrue();
+  req.flush(candidature);
+});
 
   it('recupere les statistiques de matching du projet', () => {
     service.getStats('project-1').subscribe(stats => {

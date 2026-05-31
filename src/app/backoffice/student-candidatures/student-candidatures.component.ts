@@ -62,6 +62,11 @@ export class StudentCandidaturesComponent implements OnInit, OnDestroy {
   scoreMin = 0;
   scoreMax = 100;
 
+  cvFile?: File;
+  lettreFile?: File;
+  cvError = '';
+  lettreError = '';
+
   statusChecks: Record<string, boolean> = {
     'En cours': false,
     'Acceptée': false,
@@ -81,10 +86,6 @@ export class StudentCandidaturesComponent implements OnInit, OnDestroy {
 
   readonly formations = ['Licence', 'Master', 'Ingénieur', 'Doctorat', 'BTS'];
   readonly maxFileSize = 5 * 1024 * 1024;
-  cvFile?: File;
-  lettreFile?: File;
-  cvError = '';
-  lettreError = '';
 
   form = this.fb.group({
     nomCandidat: ['', Validators.required],
@@ -100,9 +101,7 @@ export class StudentCandidaturesComponent implements OnInit, OnDestroy {
   private sub?: Subscription;
   private readonly componentId = 'student-candidatures';
 
-  get f() {
-    return this.form.controls;
-  }
+  get f() { return this.form.controls; }
 
   get totalPages(): number {
     return Math.max(1, Math.ceil(this.totalItems / this.pageSize));
@@ -137,21 +136,10 @@ export class StudentCandidaturesComponent implements OnInit, OnDestroy {
     );
   }
 
-  get totalCount(): number {
-    return this.allCandidatures.length;
-  }
-
-  get countEnCours(): number {
-    return this.countByStatus('En cours');
-  }
-
-  get countAccepted(): number {
-    return this.countByStatus('Acceptée');
-  }
-
-  get countRefused(): number {
-    return this.countByStatus('Refusée');
-  }
+  get totalCount(): number { return this.allCandidatures.length; }
+  get countEnCours(): number { return this.countByStatus('En cours'); }
+  get countAccepted(): number { return this.countByStatus('Acceptée'); }
+  get countRefused(): number { return this.countByStatus('Refusée'); }
 
   get countRecommended(): number {
     return this.allCandidatures.filter(c => (c.scoreMatching ?? 0) >= 65).length;
@@ -168,7 +156,7 @@ export class StudentCandidaturesComponent implements OnInit, OnDestroy {
   }
 
   get unreadNotifications(): StudentNotification[] {
-    return this.notifications.filter(notification => !notification.read);
+    return this.notifications.filter(n => !n.read);
   }
 
   ngOnInit() {
@@ -204,7 +192,6 @@ export class StudentCandidaturesComponent implements OnInit, OnDestroy {
       this.cdr.detectChanges();
       return;
     }
-
     this.loading = true;
     this.errorMessage = '';
     this.service.getByEmail(email).subscribe({
@@ -235,7 +222,6 @@ export class StudentCandidaturesComponent implements OnInit, OnDestroy {
   loadNotifications() {
     const email = this.auth.getCurrentUser()?.email;
     if (!email) return;
-
     this.notificationService.getByStudent(email).subscribe({
       next: notifications => {
         this.notifications = notifications || [];
@@ -259,7 +245,6 @@ export class StudentCandidaturesComponent implements OnInit, OnDestroy {
   toggleFilters() {
     this.showFilters = !this.showFilters;
     this.cdr.detectChanges();
-
     if (this.showFilters) {
       setTimeout(() => {
         document.querySelector('.filter-panel')?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
@@ -373,15 +358,17 @@ export class StudentCandidaturesComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.cvError = this.validatePdf(this.cvFile) ?? '';
-    this.lettreError = this.validatePdf(this.lettreFile) ?? '';
-    if (this.cvError || this.lettreError) {
+    const cvErr = this.validatePdf(this.cvFile);
+    const lettreErr = this.validatePdf(this.lettreFile);
+    this.cvError = cvErr ?? '';
+    this.lettreError = lettreErr ?? '';
+    if (cvErr || lettreErr) {
       this.errorMessage = 'Ajoutez un CV et une lettre de motivation au format PDF.';
       return;
     }
 
     const val = this.form.getRawValue();
-    const dto = {
+    const dto: any = {
       nomCandidat: val.nomCandidat ?? '',
       prenomCandidat: val.prenomCandidat ?? '',
       email: this.auth.getCurrentUser()?.email ?? '',
@@ -391,14 +378,13 @@ export class StudentCandidaturesComponent implements OnInit, OnDestroy {
       specialite: val.specialite ?? '',
       anneeExperience: val.anneeExperience ?? 0,
       dateCandidature: new Date().toISOString().split('T')[0],
-      projectId: val.projetId ?? '',
       statutCandidature: 'En cours'
     };
 
-    this.saving = true;
-    this.service.createWithFiles(dto, this.cvFile!, this.lettreFile!).subscribe({
-      next: () => {
-        this.saving = false;
+    this.service.create(dto).subscribe({
+      next: created => {
+        this.allCandidatures = [...this.allCandidatures, created];
+        this.applyPage();
         this.showModal = false;
         this.submitted = false;
         this.cvFile = undefined;
@@ -430,26 +416,18 @@ export class StudentCandidaturesComponent implements OnInit, OnDestroy {
 
   statusClass(status?: string): string {
     const map: Record<string, string> = {
-      'Acceptée': 'accepted',
-      'Refusée': 'rejected',
-      'En cours': 'pending',
-      Recommandé: 'recommended',
-      Présélectionné: 'preselected',
-      'En attente': 'waiting',
-      'Non retenu': 'rejected'
+      'Acceptée': 'accepted', 'Refusée': 'rejected', 'En cours': 'pending',
+      Recommandé: 'recommended', Présélectionné: 'preselected',
+      'En attente': 'waiting', 'Non retenu': 'rejected'
     };
     return map[this.normalizeStatus(status)] ?? 'unknown';
   }
 
   getStatusIcon(status?: string): string {
     const map: Record<string, string> = {
-      'Acceptée': 'check_circle',
-      'Refusée': 'cancel',
-      'En cours': 'schedule',
-      Recommandé: 'star',
-      Présélectionné: 'bookmark',
-      'En attente': 'hourglass_empty',
-      'Non retenu': 'block'
+      'Acceptée': 'check_circle', 'Refusée': 'cancel', 'En cours': 'schedule',
+      Recommandé: 'star', Présélectionné: 'bookmark',
+      'En attente': 'hourglass_empty', 'Non retenu': 'block'
     };
     return map[this.normalizeStatus(status)] ?? 'help';
   }
@@ -515,12 +493,7 @@ export class StudentCandidaturesComponent implements OnInit, OnDestroy {
       const colonIdx = trimmed.indexOf(':');
       const label = colonIdx > -1 ? trimmed.substring(0, colonIdx).trim() : trimmed;
       const raw = colonIdx > -1 ? trimmed.substring(colonIdx + 1).trim() : '';
-      const skillList = raw
-        ? raw
-            .split(',')
-            .map(skill => skill.trim())
-            .filter(Boolean)
-        : [];
+      const skillList = raw ? raw.split(',').map(skill => skill.trim()).filter(Boolean) : [];
       const type = /matched|compatibles|acquises/i.test(label) ? 'matched' : 'missing';
       return { label, skillList, type };
     });
@@ -536,7 +509,7 @@ export class StudentCandidaturesComponent implements OnInit, OnDestroy {
     this.feedbackMap[id] = { loading: true };
     this.cdr.detectChanges();
     this.aiService.generateCandidatureFeedback(id).subscribe({
-      next: (res) => {
+      next: res => {
         this.feedbackMap[id] = { loading: false, text: res.feedback };
         this.cdr.detectChanges();
       },
@@ -579,13 +552,8 @@ export class StudentCandidaturesComponent implements OnInit, OnDestroy {
 
     if (search) {
       filtered = filtered.filter(candidature =>
-        [
-          candidature.nomCandidat,
-          candidature.prenomCandidat,
-          candidature.email,
-          candidature.specialite,
-          candidature._projectTitle
-        ]
+        [candidature.nomCandidat, candidature.prenomCandidat, candidature.email,
+         candidature.specialite, candidature._projectTitle]
           .filter(Boolean)
           .some(value => String(value).toLowerCase().includes(search))
       );
@@ -600,7 +568,9 @@ export class StudentCandidaturesComponent implements OnInit, OnDestroy {
 
     const activeScore = this.activeScoreFilters;
     if (activeScore.length) {
-      filtered = filtered.filter(candidature => activeScore.some(band => this.isScoreInBand(candidature.scoreMatching, band)));
+      filtered = filtered.filter(candidature =>
+        activeScore.some(band => this.isScoreInBand(candidature.scoreMatching, band))
+      );
     }
 
     filtered = filtered.filter(candidature => {
@@ -629,16 +599,11 @@ export class StudentCandidaturesComponent implements OnInit, OnDestroy {
     const raw = (status || '').trim().replaceAll('\u00c3\u00a9', 'é');
     const upper = raw.toUpperCase();
     const map: Record<string, string> = {
-      'ACCEPTÉE': 'Acceptée',
-      ACCEPTEE: 'Acceptée',
-      REFUSEE: 'Refusée',
-      'REFUSÉE': 'Refusée',
-      RECOMMANDE: 'Recommandé',
-      'RECOMMANDÉ': 'Recommandé',
-      PRESELECTIONNE: 'Présélectionné',
-      'PRÉSÉLECTIONNÉ': 'Présélectionné',
-      EN_ATTENTE: 'En attente',
-      NON_RETENU: 'Non retenu'
+      'ACCEPTÉE': 'Acceptée', ACCEPTEE: 'Acceptée',
+      REFUSEE: 'Refusée', 'REFUSÉE': 'Refusée',
+      RECOMMANDE: 'Recommandé', 'RECOMMANDÉ': 'Recommandé',
+      PRESELECTIONNE: 'Présélectionné', 'PRÉSÉLECTIONNÉ': 'Présélectionné',
+      EN_ATTENTE: 'En attente', NON_RETENU: 'Non retenu'
     };
     return map[upper] ?? raw;
   }
@@ -661,7 +626,6 @@ export class StudentCandidaturesComponent implements OnInit, OnDestroy {
   private openProjectApplicationFromRoute(): void {
     const projectId = this.route.snapshot.queryParamMap.get('projectId') || history.state?.projectId;
     if (!projectId || this.showModal) return;
-
     const project = this.projects.find(item => item.id === projectId) ?? ({
       id: projectId,
       title: history.state?.workPostTitle || 'Projet selectionne',
@@ -675,52 +639,15 @@ export class StudentCandidaturesComponent implements OnInit, OnDestroy {
       applicantsCount: 0,
       createdAt: new Date()
     } as Project);
-
     this.openCreate(project);
     this.cdr.detectChanges();
   }
 
   private fallbackProjects(): Project[] {
     return [
-      {
-        id: '1',
-        title: 'Projet Développement Web',
-        description: '',
-        companyId: 'comp1',
-        companyName: 'TechCorp',
-        requiredSkills: ['Angular', 'TypeScript', 'Node.js'],
-        teamSize: 5,
-        deadline: new Date('2026-12-31'),
-        status: 'open',
-        applicantsCount: 12,
-        createdAt: new Date('2026-01-01')
-      },
-      {
-        id: '2',
-        title: 'Projet IA & Machine Learning',
-        description: '',
-        companyId: 'comp2',
-        companyName: 'AI Solutions',
-        requiredSkills: ['Python', 'TensorFlow'],
-        teamSize: 3,
-        deadline: new Date('2026-11-30'),
-        status: 'open',
-        applicantsCount: 8,
-        createdAt: new Date('2026-02-01')
-      },
-      {
-        id: '3',
-        title: 'Projet Mobile',
-        description: '',
-        companyId: 'comp3',
-        companyName: 'MobileDev Inc',
-        requiredSkills: ['React Native', 'Flutter'],
-        teamSize: 4,
-        deadline: new Date('2026-10-31'),
-        status: 'open',
-        applicantsCount: 15,
-        createdAt: new Date('2026-03-01')
-      }
+      { id: '1', title: 'Projet Développement Web', description: '', companyId: 'comp1', companyName: 'TechCorp', requiredSkills: ['Angular', 'TypeScript', 'Node.js'], teamSize: 5, deadline: new Date('2026-12-31'), status: 'open', applicantsCount: 12, createdAt: new Date('2026-01-01') },
+      { id: '2', title: 'Projet IA & Machine Learning', description: '', companyId: 'comp2', companyName: 'AI Solutions', requiredSkills: ['Python', 'TensorFlow'], teamSize: 3, deadline: new Date('2026-11-30'), status: 'open', applicantsCount: 8, createdAt: new Date('2026-02-01') },
+      { id: '3', title: 'Projet Mobile', description: '', companyId: 'comp3', companyName: 'MobileDev Inc', requiredSkills: ['React Native', 'Flutter'], teamSize: 4, deadline: new Date('2026-10-31'), status: 'open', applicantsCount: 15, createdAt: new Date('2026-03-01') }
     ];
   }
 }

@@ -165,8 +165,11 @@ export class CandidatureFormComponent implements OnInit {
     };
 
     if (this.cvFile || this.lettreFile) {
-      this.service.createWithFiles(dto, this.cvFile!, this.lettreFile!).subscribe({
-        next: () => { this.success = true; this.submitted = false; },
+const formData = new FormData();
+formData.append('data', JSON.stringify(dto));
+if (this.cvFile) formData.append('cv', this.cvFile);
+if (this.lettreFile) formData.append('lettre', this.lettreFile);
+this.service.createWithFiles(formData).subscribe({        next: () => { this.success = true; this.submitted = false; },
         error: err => { this.errorMessage = `Erreur (${err.status}): ${err.error?.message ?? 'Veuillez reessayer.'}`; }
       });
     } else {
