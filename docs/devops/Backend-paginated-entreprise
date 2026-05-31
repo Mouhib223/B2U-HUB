@@ -1,0 +1,95 @@
+# Backend: Paginated Entreprise Endpoint (Spring Boot)
+
+This snippet shows how to implement a paginated endpoint for `Entreprise` using Spring Data `Pageable`.
+
+Add to your Spring Boot backend (Java):
+
+1) Repository
+
+```java
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.mongodb.repository.MongoRepository;
+
+public interface EntrepriseRepo extends MongoRepository<Entreprise, String> {
+    Page<Entreprise> findBySector(String sector, Pageable pageable);
+}
+```
+
+2) Service
+
+```java
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
+
+@Service
+public class EntrepriseService {
+    private final EntrepriseRepo repo;
+
+    public EntrepriseService(EntrepriseRepo repo) { this.repo = repo; }
+
+    public Page<Entreprise> getPaged(int page, int size, String sector) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "name"));
+        if (sector != null && !sector.isEmpty()) {
+            return repo.findBySector(sector, pageable);
+        }
+        return repo.findAll(pageable);
+    }
+}
+```
+
+3) Controller
+
+```java
+import org.springframework.data.domain.Page;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.HashMap;
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api/enterprises")
+public class EntrepriseController {
+    private final EntrepriseService service;
+
+    public EntrepriseController(EntrepriseService service) { this.service = service; }
+
+    @GetMapping("/paged")
+    public Map<String, Object> getPaged(
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size,
+        @RequestParam(required = false) String sector
+    ) {
+        Page<Entreprise> p = service.getPaged(page, size, sector);
+        Map<String, Object> resp = new HashMap<>();
+        resp.put("items", p.getContent());
+        resp.put("total", p.getTotalElements());
+        resp.put("page", p.getNumber());
+        resp.put("size", p.getSize());
+        return resp;
+    }
+}
+```
+
+Notes
+- This example uses MongoDB repository but the Pageable approach is the same for JPA.
+- Ensure `name` is stored in a sortable format (alphabetical sort by company name).
+- The controller returns a simple JSON object with `items` and `total` to match the frontend `getPaged` expectation.
+
+Frontend
+- The frontend `EntrepriseService.getPaged(page, size, sector)` expects this shape:
+  `{ items: Entreprise[], total: number }`.
+- Query params are 0-based for `page` in this example.
+- Filter by `sector` is optional: omit it to get all enterprises paginated.
+
+Security
+- Add authentication/authorization as needed (e.g., only ADMIN can list all enterprises).
+
+Testing
+- Use `curl "http://localhost:8080/api/enterprises/paged?page=0&size=10&sector=IT"` to test.
