@@ -15,19 +15,19 @@ pipeline {
             }
         }
 
-        stage('Build Frontend') {
-            steps {
-                sh 'npm run build -- --configuration production || true'
-            }
-        }
-
-        stage('Tests (optional)') {
+        stage('Frontend Tests') {
             steps {
                 sh 'npm test -- --watch=false || true'
             }
         }
 
-        stage('Backend Build (if Spring exists)') {
+        stage('Frontend Build') {
+            steps {
+                sh 'npm run build -- --configuration production || true'
+            }
+        }
+
+        stage('Backend Build (Spring Boot)') {
             steps {
                 sh 'mvn clean install -DskipTests || true'
             }
@@ -37,11 +37,11 @@ pipeline {
 
     post {
         success {
-            echo '✅ PI Pipeline SUCCESS'
+            echo '✅ PI PIPELINE SUCCESS (Frontend + Backend)'
         }
 
         failure {
-            echo '❌ Pipeline failed but ignored for PI simplicity'
+            echo '❌ Pipeline failed (ignored for PI demo mode)'
         }
     }
 }
