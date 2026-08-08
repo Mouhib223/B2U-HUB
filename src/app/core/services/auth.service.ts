@@ -16,7 +16,7 @@ export class AuthService {
   }
 
   login(email: string, password: string): Observable<any> {
-    return this.http.post<any>(`${environment.apiUrl}/auth/login`, { email, password }).pipe(
+    return this.http.post<any>(`${environment.apiUrl}/api/auth/login`, { email, password }).pipe(
       tap(res => {
         // res = { token, id, firstName, lastName, email, role }
         localStorage.setItem('b2u_token', res.token);
@@ -35,7 +35,7 @@ export class AuthService {
   }
 
   register(data: any): Observable<any> {
-    return this.http.post(`${environment.apiUrl}/auth/register`, {
+    return this.http.post(`${environment.apiUrl}/api/auth/register`, {
       firstName: data.firstName,
       lastName:  data.lastName,
       email:     data.email,

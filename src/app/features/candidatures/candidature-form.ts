@@ -15,11 +15,11 @@ import { Project } from '../../core/models/project.model';
   styleUrls: ['./candidature-form.scss']
 })
 export class CandidatureFormComponent implements OnInit {
-  private fb = inject(FormBuilder);
-  private service = inject(CandidatureService);
-  private projectService = inject(ProjectService);
-  private auth = inject(AuthService);
-  private route = inject(ActivatedRoute);
+  private readonly fb = inject(FormBuilder);
+  private readonly service = inject(CandidatureService);
+  private readonly projectService = inject(ProjectService);
+  private readonly auth = inject(AuthService);
+  private readonly route = inject(ActivatedRoute);
 
   submitted = false;
   success = false;
@@ -164,19 +164,14 @@ export class CandidatureFormComponent implements OnInit {
       statutCandidature: 'En cours'
     };
 
-    if (this.cvFile || this.lettreFile) {
-const formData = new FormData();
-formData.append('data', JSON.stringify(dto));
-if (this.cvFile) formData.append('cv', this.cvFile);
-if (this.lettreFile) formData.append('lettre', this.lettreFile);
-this.service.createWithFiles(formData).subscribe({        next: () => { this.success = true; this.submitted = false; },
-        error: err => { this.errorMessage = `Erreur (${err.status}): ${err.error?.message ?? 'Veuillez reessayer.'}`; }
-      });
-    } else {
-      this.service.create(dto).subscribe({
-        next: () => { this.success = true; this.submitted = false; },
-        error: err => { this.errorMessage = `Erreur (${err.status}): ${err.error?.message ?? 'Veuillez reessayer.'}`; }
-      });
-    }
-  }
-}
+   if (this.cvFile || this.lettreFile) {
+  this.service.createWithFiles(dto, this.cvFile!, this.lettreFile!).subscribe({
+    next: () => { this.success = true; this.submitted = false; },
+    error: err => { this.errorMessage = `Erreur (${err.status}): ${err.error?.message ?? 'Veuillez reessayer.'}`; }
+  });
+} else {
+  this.service.create(dto).subscribe({
+    next: () => { this.success = true; this.submitted = false; },
+    error: err => { this.errorMessage = `Erreur (${err.status}): ${err.error?.message ?? 'Veuillez reessayer.'}`; }
+  });
+}}}
